@@ -219,7 +219,7 @@ if not current_team:
             st.write("Distribute these specific links to your teams for direct access:")
             
             # The full URL to your live Streamlit Community Cloud app
-            base_url = "https://cyberattacksim-ksb113.streamlit.app/?team=" 
+            base_url = "https://cyberattacksim-ksb113.streamlit.app?team=" 
             
             # Generates the complete, ready-to-copy URL for each role
             st.code(f"Hackers URL:   {base_url}{state['team_codes']['hackers']}")
