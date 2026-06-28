@@ -216,12 +216,16 @@ if not current_team:
         
         if gm_password == "admin123":
             st.success("Authentication successful.")
-            st.write("Distribute these specific links to your teams.")
-            base_url = "?team=" 
-            st.code(f"Hackers URL ends with:   {base_url}{state['team_codes']['hackers']}")
-            st.code(f"IT URL ends with:        {base_url}{state['team_codes']['it']}")
-            st.code(f"Executive URL ends with: {base_url}{state['team_codes']['executive']}")
-            st.code(f"Media URL ends with:     {base_url}{state['team_codes']['media']}")
+            st.write("Distribute these specific links to your teams for direct access:")
+            
+            # The full URL to your live Streamlit Community Cloud app
+            base_url = "https://cyberattacksim-ksb113.streamlit.app/?team=" 
+            
+            # Generates the complete, ready-to-copy URL for each role
+            st.code(f"Hackers URL:   {base_url}{state['team_codes']['hackers']}")
+            st.code(f"IT URL:        {base_url}{state['team_codes']['it']}")
+            st.code(f"Executive URL: {base_url}{state['team_codes']['executive']}")
+            st.code(f"Media URL:     {base_url}{state['team_codes']['media']}")
 
 # ==========================================
 # VIEW 2: HACKER TERMINAL
