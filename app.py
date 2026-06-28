@@ -263,6 +263,11 @@ elif current_team == state["team_codes"]["hackers"]:
                 
     elif not state["hacker_turn_complete"]:
         st.markdown(f"### 🎯 Target: CloudStore (Round {state['round']})")
+        
+        # --- ADDED SUBHEADER FOR ROUND 1 ---
+        if state["round"] == 1:
+            st.subheader("🕵️ Infiltration Choice")
+            
         attack_choice = st.selectbox("Select Attack Payload:", options=list(ATTACKS.keys()))
         st.info(f"**Description:** {ATTACKS[attack_choice]['desc']}")
         st.warning(f"**Expected Impact:** {ATTACKS[attack_choice]['impact']}")
