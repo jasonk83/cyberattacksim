@@ -1,0 +1,2 @@
+### 🎣 Spear-Phishing (The Human Vulnerability)
+This attack bypasses expensive firewalls by targeting the most unpredictable element of any security system: the human being[cite: 2]. Hackers spend weeks conducting open-source intelligence to research targets, ultimately sending a spoofed email that directs a victim to a credential harvesting site[cite: 2]. Once valid credentials are stolen, hackers gain an initial foothold to perform lateral movement across the internal network[cite: 2]. A single moment of employee fatigue can jeopardize the entire enterprise's fiscal health.
