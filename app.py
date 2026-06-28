@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import os
 
 # --- APP CONFIGURATION ---
 st.set_page_config(
@@ -22,7 +23,7 @@ def get_game_state():
         "it_choice": None,
         "exec_choice": None,
         "latest_headline": None,
-        "finale_result": None, # Tracks the Hacker's final press-your-luck choice
+        "finale_result": None,
         "team_codes": {
             "hackers": f"hackers{random.randint(100, 999)}",
             "it": f"it{random.randint(100, 999)}",
@@ -33,45 +34,33 @@ def get_game_state():
 
 state = get_game_state()
 
-# --- DICTIONARIES & GAME DATA ---
-ATTACKS = {
-    "Spear-Phishing (Finance Dept)": {
-        "desc": "Send highly targeted emails mimicking the CEO to Finance.",
-        "impact": "Stealthy initial access. High probability of acquiring CFO credentials."
-    },
-    "Ransomware Deployment": {
-        "desc": "Inject an encryption worm into the primary customer database.",
-        "impact": "Maximum visibility. Will drastically cripple Operational Efficiency."
-    },
-    "Zero-Day Server Exploit": {
-        "desc": "Utilize an unpatched vulnerability in cloud hosting architecture.",
-        "impact": "Silent system control. Allows for prolonged data exfiltration."
-    },
-    "Distributed Denial of Service (DDoS)": {
-        "desc": "Command a botnet to flood the storefront with junk traffic.",
-        "impact": "Immediate disruption of services. Excellent smokescreen."
+# --- DYNAMIC MARKDOWN LOADER ---
+def load_briefing(role, attack_name):
+    """Maps the UI attack name to the Markdown file slug and loads the text."""
+    slugs = {
+        "Spear-Phishing (Finance Dept)": "phishing",
+        "Software Vulnerability Exploit": "exploit",
+        "Ransomware Deployment": "ransomware",
+        "Data Exfiltration": "exfiltration"
     }
-}
+    slug = slugs.get(attack_name, "phishing")
+    filepath = os.path.join("content", role, f"{slug}.md")
+    
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return f"*(Error: Briefing document missing at {filepath})*"
 
-ATTACK_IMPACTS = {
-    "Spear-Phishing (Finance Dept)": {
-        "it": "⚠️ **UNAUTHORIZED ACCESS:** An internal Finance account is authenticating from an unrecognized IP. Risk of Active Directory compromise.",
-        "exec": "📉 **FINANCIAL RISK:** Immediate risk of wire fraud, stock price volatility if leaked, and moderate reputational damage."
-    },
-    "Ransomware Deployment": {
-        "it": "🚨 **ENCRYPTION WORMS DETECTED:** Database nodes unresponsive. File extensions altered. Immediate isolation required.",
-        "exec": "📉 **CRITICAL INTERRUPTION:** Customer services offline. $5M ransom demand issued. Extreme risk to stock valuation."
-    },
-    "Zero-Day Server Exploit": {
-        "it": "⚠️ **ANOMALOUS TRAFFIC:** Unrecognized root-level processes executing on core servers. Possible data exfiltration in progress.",
-        "exec": "📉 **MASSIVE DATA BREACH:** High probability of customer data loss. Anticipate severe regulatory fines and brand degradation."
-    },
-    "Distributed Denial of Service (DDoS)": {
-        "it": "🚨 **TRAFFIC SPIKE:** Inbound HTTP requests exceeding 500,000 req/sec. Main storefront returning '503 Service Unavailable'.",
-        "exec": "📉 **REVENUE LOSS ACTIVE:** E-commerce platform is completely inaccessible. Direct loss of sales revenue."
-    }
-}
+# --- ATTACK CHOICES ---
+ATTACK_LIST = [
+    "Spear-Phishing (Finance Dept)",
+    "Software Vulnerability Exploit",
+    "Ransomware Deployment",
+    "Data Exfiltration"
+]
 
+# --- MITIGATION DICTIONARIES & SCORING ---
 MITIGATION_STRATEGIES = {
     "Isolate network, reset credentials, deploy backups": "1",
     "Monitor traffic and selectively disable accounts": "2",
@@ -189,7 +178,6 @@ if not current_team:
             elif state["current_phase"] == "complete":
                 st.header("🏁 FINAL SIMULATION REPORT")
                 
-                # Render the Hacker's finale decision
                 if state["finale_result"] == "caught":
                     st.success("🚓 **FINAL EVENT:** The hackers pushed their luck with a third attack and were apprehended by the FBI! No further damage sustained.")
                 elif state["finale_result"] == "success":
@@ -218,10 +206,8 @@ if not current_team:
             st.success("Authentication successful.")
             st.write("Distribute these specific links to your teams for direct access:")
             
-            # The full URL to your live Streamlit Community Cloud app
-            base_url = "https://cyberattacksim-ksb113.streamlit.app?team=" 
+            base_url = "https://cyberattacksim-ksb113.streamlit.app/?team=" 
             
-            # Generates the complete, ready-to-copy URL for each role
             st.code(f"Hackers URL:   {base_url}{state['team_codes']['hackers']}")
             st.code(f"IT URL:        {base_url}{state['team_codes']['it']}")
             st.code(f"Executive URL: {base_url}{state['team_codes']['executive']}")
@@ -250,27 +236,25 @@ elif current_team == state["team_codes"]["hackers"]:
                 st.rerun()
         with c2:
             if st.button("💥 Press the Attack", type="primary", use_container_width=True):
-                # 25% chance to get caught, 75% chance of success
                 roll = random.random()
                 if roll < 0.25:
                     state["finale_result"] = "caught"
                 else:
                     state["finale_result"] = "success"
-                    state["scores"]["Trust"] -= 15 # Reputation penalty
+                    state["scores"]["Trust"] -= 15
                     
                 state["current_phase"] = "complete"
                 st.rerun()
                 
     elif not state["hacker_turn_complete"]:
         st.markdown(f"### 🎯 Target: CloudStore (Round {state['round']})")
-        
-        # --- ADDED SUBHEADER FOR ROUND 1 ---
         if state["round"] == 1:
             st.subheader("🕵️ Infiltration Choice")
             
-        attack_choice = st.selectbox("Select Attack Payload:", options=list(ATTACKS.keys()))
-        st.info(f"**Description:** {ATTACKS[attack_choice]['desc']}")
-        st.warning(f"**Expected Impact:** {ATTACKS[attack_choice]['impact']}")
+        attack_choice = st.selectbox("Select Attack Payload:", options=ATTACK_LIST)
+        
+        # Dynamically pulls in the Markdown file text
+        st.markdown(load_briefing("hackers", attack_choice))
         
         if st.button("💥 Launch Attack", type="primary"):
             state["active_attack"] = attack_choice
@@ -291,7 +275,9 @@ elif current_team == state["team_codes"]["it"]:
         st.info("⏳ Systems are currently stable. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 INCIDENT ALERT: {state['active_attack']}")
-        st.warning(ATTACK_IMPACTS[state['active_attack']]["it"])
+        
+        # Dynamically pulls in the Markdown file text
+        st.markdown(load_briefing("it", state["active_attack"]))
         st.markdown("---")
         
         if state["it_choice"] is None:
@@ -327,7 +313,9 @@ elif current_team == state["team_codes"]["executive"]:
         st.info("⏳ Business operations are nominal. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 CRISIS ALERT: {state['active_attack']}")
-        st.warning(ATTACK_IMPACTS[state['active_attack']]["exec"])
+        
+        # Dynamically pulls in the Markdown file text
+        st.markdown(load_briefing("exec", state["active_attack"]))
         st.markdown("---")
         
         if state["exec_choice"] is None:
