@@ -1,2 +1,0 @@
-### 💾 Data Exfiltration (The Reputation Killer)
-This is a quiet attack where hackers slowly siphon structured and unstructured data in small batches to avoid triggering data loss prevention alarms[cite: 3]. The goal is to steal sensitive information and move it to a server controlled by the hackers[cite: 3]. While the business keeps running, this breach of confidentiality liquidates the company's Trust Index[cite: 3]. The fallout involves massive regulatory fines, class-action lawsuits, and a permanent brand stain[cite: 3].
