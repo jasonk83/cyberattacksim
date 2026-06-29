@@ -15,9 +15,9 @@ def get_game_state():
     return {
         "scores": {"Trust": 50, "Fiscal": 100, "Op-Eff": 100},
         "round": 1,
-        "multiplier": 1.0,
+        "multiplier": 1.2, # Slight penalty multiplier for Round 2
         "history": [],
-        "current_phase": "lobby", # Phases: lobby, hacker, company, media, round_recap, hacker_finale, complete
+        "current_phase": "lobby",
         "active_attack": None,
         "hacker_turn_complete": False,
         "it_choice": None,
@@ -38,10 +38,14 @@ state = get_game_state()
 def load_briefing(role, attack_name):
     """Maps the UI attack name to the Markdown file slug and loads the text."""
     slugs = {
-        "Spear-Phishing (Finance Dept)": "phishing",
-        "Software Vulnerability Exploit": "exploit",
-        "Ransomware Deployment": "ransomware",
-        "Data Exfiltration": "exfiltration"
+        "Spear Phishing": "phishing",
+        "AI Prompt Injection": "prompt_injection",
+        "DDoS Smokescreen": "ddos_smokescreen",
+        "Zero-Day Network Software Exploit": "zero_day",
+        "Double Extortion Ransomware": "double_extortion",
+        "Supply Chain Pivot": "supply_chain",
+        "Database Integrity Sabotage": "database_sabotage",
+        "A.P.T. Data Exfiltration": "apt_exfiltration"
     }
     slug = slugs.get(attack_name, "phishing")
     filepath = os.path.join("content", role, f"{slug}.md")
@@ -52,50 +56,128 @@ def load_briefing(role, attack_name):
     except FileNotFoundError:
         return f"*(Error: Briefing document missing at {filepath})*"
 
-# --- ATTACK CHOICES ---
-ATTACK_LIST = [
-    "Spear-Phishing (Finance Dept)",
-    "Software Vulnerability Exploit",
-    "Ransomware Deployment",
-    "Data Exfiltration"
+# --- ROUND CONFIGURATIONS & SCORING ---
+ATTACKS_R1 = [
+    "Spear Phishing",
+    "AI Prompt Injection",
+    "DDoS Smokescreen",
+    "Zero-Day Network Software Exploit"
 ]
 
-# --- MITIGATION DICTIONARIES & SCORING ---
-MITIGATION_STRATEGIES = {
-    "Isolate network, reset credentials, deploy backups": "1",
-    "Monitor traffic and selectively disable accounts": "2",
-    "Hire external forensics before taking action": "3",
-    "Send security reminder but keep systems online": "4",
-    "Ignore alerts to maintain uptime": "5"
+ATTACKS_R2 = [
+    "Double Extortion Ransomware",
+    "Supply Chain Pivot",
+    "Database Integrity Sabotage",
+    "A.P.T. Data Exfiltration"
+]
+
+# IT Decisions primarily damage Operational Efficiency (Op-Eff)
+IT_CHOICES = {
+    "Spear Phishing": {
+        "Immediate Enterprise-Wide Password Reset (RTO: 6 Hours)": -15,
+        "Targeted Quarantine & EDR Deployment (RTO: 2 Hours)": -5,
+        "Silent Monitoring (Honeypot) (RTO: 72 Hours)": -10,
+        "Do Nothing (RTO: Indefinite)": -25
+    },
+    "AI Prompt Injection": {
+        "Hard Offline & Revert AI Model (RTO: 24 Hours)": -20,
+        "Deploy Aggressive Input Sanitization Filter (RTO: 4 Hours)": -10,
+        "Rate-Limit and Alert (RTO: 1 Hour)": -5,
+        "Do Nothing (RTO: Indefinite)": -25
+    },
+    "DDoS Smokescreen": {
+        "Blackhole External IP Traffic (RTO: 8 Hours)": -15,
+        "Route Traffic via DDoS Scrubbing Service (RTO: 2 Hours)": -5,
+        "Ignore External Outage & Hunt Internal Logs (RTO: 48 Hours)": -20,
+        "Do Nothing (RTO: Indefinite)": -40
+    },
+    "Zero-Day Network Software Exploit": {
+        "Air-Gap the Vulnerable Server (RTO: 12 Hours)": -20,
+        "Implement Custom WAF Rules (Virtual Patching) (RTO: 4 Hours)": -5,
+        "Migrate Services to a New OS (RTO: 7 Days)": -30,
+        "Do Nothing (RTO: Indefinite)": -50
+    },
+    "Double Extortion Ransomware": {
+        "Burn and Rebuild from Bare Metal (RTO: 14 Days)": -40,
+        "Pay Ransom and Run Decryptor Tool (RTO: 48 Hours)": -15,
+        "Attempt Manual Cryptanalysis (RTO: 6+ Months)": -60
+    },
+    "Supply Chain Pivot": {
+        "Trigger Emergency Global Kill-Switch (RTO: 24 Hours)": -25,
+        "Rollback and Push Clean Patch (RTO: 72 Hours)": -15,
+        "Isolate Build Servers for Forensics (RTO: 5 Days)": -30
+    },
+    "Database Integrity Sabotage": {
+        "Revert to 30-Day Old Backup (RTO: 4 Days)": -35,
+        "Freeze Database and Audit Manually (RTO: 3 Weeks)": -45,
+        "Implement 'Failsafe' Logic Moving Forward (RTO: 24 Hours)": -10
+    },
+    "A.P.T. Data Exfiltration": {
+        "Sever Total Internet Connectivity (RTO: 12 Hours)": -25,
+        "Implement Strict Egress Port Blocking (RTO: 6 Hours)": -10,
+        "Quietly Route Hacker to a Decoy Server (RTO: 48 Hours)": -15
+    }
 }
 
-TECH_SCORES = {
-    1: {"1": (-5, -10), "2": (-10, -5), "3": (-10, 0), "4": (0, -15), "5": (-10, -30)},
-    2: {"1": (-15, -20), "2": (-20, -10), "3": (-40, -5), "4": (-10, -30), "5": (-30, -50)}
-}
-
-MEDIA_HEADLINES = {
-    "⭐ HEROIC: CloudStore Thwarts Major Attack; Customer Data Secured": 10,
-    "📈 FAVORABLE: CloudStore Responds to Cyber Incident Predictably": 5,
-    "🔲 NEUTRAL: Cyber Event Hits CloudStore, Operations Continue": 0,
-    "📉 CRITICAL: CloudStore Scrambles Amidst Ongoing Network Issues": -5,
-    "💥 DAMNING: Total Incompetence! CloudStore Botches Major Cyber Crisis": -10
+# Executive Decisions primarily damage Stock/Fiscal Score
+EXEC_CHOICES = {
+    "Spear Phishing": {
+        "Mandatory Executive Security Audit": -5,
+        "Quietly Terminate Responsible Employee": -5,
+        "Hire Expensive External Consultants": -10,
+        "Ignore / Cover It Up": -20
+    },
+    "AI Prompt Injection": {
+        "Temporarily Suspend All AI Features": -10,
+        "Publicly Blame the AI Vendor": -5,
+        "Quietly Patch and Downplay": -10
+    },
+    "DDoS Smokescreen": {
+        "Admit the Attack & Apologize on Social Media": -5,
+        "Post a 'Scheduled Maintenance' Banner": -15,
+        "Purchase Platinum Cloud Defense Mid-Attack": -20
+    },
+    "Zero-Day Network Software Exploit": {
+        "Proactive Public Disclosure & Bounty Program": -5,
+        "Secretly Patch and Sign NDAs": -15,
+        "Halt All Digital Expansion Projects": -20
+    },
+    "Double Extortion Ransomware": {
+        "Refuse to Pay & Notify the Public": -30,
+        "Quietly Pay the Ransom via Intermediary": -15,
+        "Attempt to Sue the Software Provider": -25
+    },
+    "Supply Chain Pivot": {
+        "Immediate Global Notification & Apology": -35,
+        "Quietly Contact Only 'High Value' Clients": -25,
+        "Deny Responsibility (Blame Open-Source Code)": -40
+    },
+    "Database Integrity Sabotage": {
+        "Halt All Operations & Offer Blanket Refunds": -25,
+        "Keep Operating and Handle Complaints Individually": -15,
+        "Request an Emergency SEC Trading Halt": -35
+    },
+    "A.P.T. Data Exfiltration": {
+        "Full GDPR/CCPA Disclosure & Free Identity Theft Protection": -25,
+        "Downplay the Sensitivity of the Stolen Data": -15,
+        "Resignation of the CEO and CISO": -35
+    }
 }
 
 # --- AUTOMATIC PROGRESSION CHECKER ---
 if state["current_phase"] == "company":
     if state["it_choice"] is not None and state["exec_choice"] is not None:
-        strategy_level = MITIGATION_STRATEGIES[state["exec_choice"]]
-        f_change, o_change = TECH_SCORES[state["round"]][strategy_level]
+        
+        # Apply the specific penalty scores mapped in the dictionaries
+        o_change = IT_CHOICES[state["active_attack"]][state["it_choice"]]
+        f_change = EXEC_CHOICES[state["active_attack"]][state["exec_choice"]]
         
         if state["round"] == 2:
-            f_change *= state["multiplier"]
-            o_change *= state["multiplier"]
-        if state["round"] == 1 and strategy_level == "5":
-            state["multiplier"] = 2.0
+            o_change = int(o_change * state["multiplier"])
+            f_change = int(f_change * state["multiplier"])
             
-        state["scores"]["Fiscal"] += f_change
         state["scores"]["Op-Eff"] += o_change
+        state["scores"]["Fiscal"] += f_change
         
         state["current_phase"] = "media"
         st.rerun()
@@ -247,11 +329,17 @@ elif current_team == state["team_codes"]["hackers"]:
                 st.rerun()
                 
     elif not state["hacker_turn_complete"]:
-        st.markdown(f"### 🎯 Target: CloudStore (Round {state['round']})")
+        
         if state["round"] == 1:
+            st.markdown(f"### 🎯 Target: CloudStore (Round 1)")
             st.subheader("🕵️ Infiltration Choice")
+            options_list = ATTACKS_R1
+        else:
+            st.markdown(f"### 🎯 Target: CloudStore (Round 2)")
+            st.subheader("💥 Attack Execution")
+            options_list = ATTACKS_R2
             
-        attack_choice = st.selectbox("Select Attack Payload:", options=ATTACK_LIST)
+        attack_choice = st.selectbox("Select Payload:", options=options_list)
         
         # Dynamically pulls in the Markdown file text
         st.markdown(load_briefing("hackers", attack_choice))
@@ -281,21 +369,20 @@ elif current_team == state["team_codes"]["it"]:
         st.markdown("---")
         
         if state["it_choice"] is None:
-            it_selection = st.selectbox("Select recommended mitigation strategy:", options=list(MITIGATION_STRATEGIES.keys()))
-            if st.button("Submit Recommendation to Execs", type="primary"):
+            it_options = list(IT_CHOICES[state["active_attack"]].keys())
+            it_selection = st.selectbox("Select Technical Mitigation Protocol:", options=it_options)
+            
+            if st.button("Deploy Technical Response", type="primary"):
                 state["it_choice"] = it_selection
                 st.rerun()
         else:
-            st.info("✅ Recommendation submitted. Awaiting Executive Boardroom directive...")
+            st.info("✅ Technical response deployed. Awaiting Executive Boardroom directive...")
             
     elif state["current_phase"] in ["media", "round_recap", "hacker_finale", "complete"]:
         st.header("⚙️ Mitigation Deployment Status")
-        if state["it_choice"] != state["exec_choice"]:
-            st.error("### ⚠️ OVERRULED BY LEADERSHIP")
-            st.warning(f"**Executive Directive Executing:** {state['exec_choice']}")
-        else:
-            st.success("### ✅ RECOMMENDATION APPROVED")
-            st.write(f"**Executing:** {state['it_choice']}")
+        st.success("### ✅ TECHNICAL PROTOCOL EXECUTED")
+        st.write(f"**IT Department Action:** {state['it_choice']}")
+        st.write(f"**Executive Board Directive:** {state['exec_choice']}")
             
         if state["current_phase"] == "hacker_finale":
             st.warning("🚨 **SYSTEM ALERT:** Network sensors detecting lingering threat actor presence. Awaiting final resolution...")
@@ -320,20 +407,26 @@ elif current_team == state["team_codes"]["executive"]:
         
         if state["exec_choice"] is None:
             if state["it_choice"] is not None:
-                st.info(f"**Incoming IT Recommendation:** {state['it_choice']}")
+                st.info(f"**IT Department has logged their technical response.**")
             else:
-                st.warning("⚠️ IT has not yet submitted a recommendation.")
+                st.warning("⚠️ IT is currently deliberating their response.")
                 
-            exec_selection = st.selectbox("Select official company response:", options=list(MITIGATION_STRATEGIES.keys()))
+            exec_options = list(EXEC_CHOICES[state["active_attack"]].keys())
+            exec_selection = st.selectbox("Select Official Corporate Directive:", options=exec_options)
+            
             if st.button("Issue Binding Directive", type="primary"):
                 state["exec_choice"] = exec_selection
                 st.rerun()
         else:
             if state["it_choice"] is None:
-                st.info("✅ Directive locked in. Waiting for IT to log their initial assessment before deployment...")
+                st.info("✅ Directive locked in. Waiting for IT to log their final technical assessment before deployment...")
                 
     elif state["current_phase"] in ["media", "round_recap", "hacker_finale", "complete"]:
-        st.success(f"**Directive Executed:** {state['exec_choice']}")
+        st.header("📊 Business Response Status")
+        st.success("### ✅ CORPORATE DIRECTIVE ISSUED")
+        st.write(f"**Executive Board Directive:** {state['exec_choice']}")
+        st.write(f"**IT Department Action:** {state['it_choice']}")
+        
         if state["current_phase"] == "hacker_finale":
             st.warning("🚨 **SYSTEM ALERT:** Unresolved security vulnerabilities reported. Awaiting final resolution...")
         else:
@@ -351,15 +444,26 @@ elif current_team == state["team_codes"]["media"]:
     elif state["current_phase"] == "media":
         st.error("### 🚨 BREAKING: CYBER INCIDENT CONFIRMED")
         st.warning(f"**Leaked Executive Directive:** {state['exec_choice']}")
-        headline = st.selectbox("Select Publication Narrative:", options=list(MEDIA_HEADLINES.keys()))
+        st.write("Based on the Executive Team's specific choice, how will you frame this to the public?")
+        
+        # Dynamic headlines that weave the Executive's choice directly into the text!
+        DYNAMIC_HEADLINES = {
+            f"⭐ PRAISED: Market Reacts Positively to CloudStore's Decision to {state['exec_choice']}": 15,
+            f"📈 FAVORABLE: CloudStore Navigates Crisis, Opts to {state['exec_choice']}": 5,
+            f"🔲 NEUTRAL: CloudStore Incident Underway, Strategy is to {state['exec_choice']}": 0,
+            f"📉 CRITICAL: Experts Question CloudStore's Move to {state['exec_choice']}": -10,
+            f"💥 DAMNING: Total Backfire as CloudStore Attempts to {state['exec_choice']}": -25
+        }
+        
+        headline = st.selectbox("Select Publication Narrative:", options=list(DYNAMIC_HEADLINES.keys()))
         
         if st.button("📰 Publish Headline", type="primary"):
-            t_change = MEDIA_HEADLINES[headline]
+            t_change = DYNAMIC_HEADLINES[headline]
             state["scores"]["Trust"] += t_change
             state["latest_headline"] = headline
             
-            tech_val = MITIGATION_STRATEGIES[state["exec_choice"]]
-            state["history"].append(f"R{state['round']}: Tech({tech_val}) Media({t_change})")
+            # Record exactly what the Execs did and how the Media spun it
+            state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
             
             state["current_phase"] = "round_recap"
             st.rerun()
