@@ -14,6 +14,7 @@ st.set_page_config(
 def get_game_state():
     return {
         "scores": {"Trust": 50, "Fiscal": 100, "Op-Eff": 100},
+        "last_changes": {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}, # Tracks round-by-round impacts
         "round": 1,
         "multiplier": 1.2, 
         "history": [],
@@ -34,9 +35,34 @@ def get_game_state():
 
 state = get_game_state()
 
+def reset_simulation():
+    """Resets the game state back to default values while keeping the same team URLs."""
+    state["scores"] = {"Trust": 50, "Fiscal": 100, "Op-Eff": 100}
+    state["last_changes"] = {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}
+    state["round"] = 1
+    state["multiplier"] = 1.2
+    state["history"] = []
+    state["current_phase"] = "lobby"
+    state["active_attack"] = None
+    state["hacker_turn_complete"] = False
+    state["it_choice"] = None
+    state["exec_choice"] = None
+    state["latest_headline"] = None
+    state["finale_result"] = None
+
+def get_impact_text(metric, change):
+    """Converts raw point changes into descriptive impact text."""
+    if change >= 0:
+        return f"🟢 **{metric}:** No negative impact ({change} pts). Strategy successfully mitigated damage."
+    elif change >= -15:
+        return f"🟡 **{metric}:** Minor impact ({change} pts). Acceptable operational or reputational friction."
+    elif change >= -30:
+        return f"🟠 **{metric}:** Moderate damage ({change} pts). Noticeable disruption and loss of value."
+    else:
+        return f"🔴 **{metric}:** Severe degradation ({change} pts). Critical failure resulting in massive loss."
+
 # --- DYNAMIC MARKDOWN LOADER ---
 def load_briefing(role, attack_name):
-    """Maps the UI attack name to the Markdown file slug and loads the text."""
     slugs = {
         "Spear Phishing": "phishing",
         "AI Prompt Injection": "prompt_injection",
@@ -57,19 +83,8 @@ def load_briefing(role, attack_name):
         return f"*(Error: Briefing document missing at {filepath})*"
 
 # --- ROUND CONFIGURATIONS & SCORING ---
-ATTACKS_R1 = [
-    "Spear Phishing",
-    "AI Prompt Injection",
-    "DDoS Smokescreen",
-    "Zero-Day Network Software Exploit"
-]
-
-ATTACKS_R2 = [
-    "Double Extortion Ransomware",
-    "Supply Chain Pivot",
-    "Database Integrity Sabotage",
-    "A.P.T. Data Exfiltration"
-]
+ATTACKS_R1 = ["Spear Phishing", "AI Prompt Injection", "DDoS Smokescreen", "Zero-Day Network Software Exploit"]
+ATTACKS_R2 = ["Double Extortion Ransomware", "Supply Chain Pivot", "Database Integrity Sabotage", "A.P.T. Data Exfiltration"]
 
 IT_CHOICES = {
     "Spear Phishing": {
@@ -174,6 +189,11 @@ if state["current_phase"] == "company":
             
         state["scores"]["Op-Eff"] += o_change
         state["scores"]["Fiscal"] += f_change
+        
+        # Save changes for the impact report
+        state["last_changes"]["Op-Eff"] = o_change
+        state["last_changes"]["Fiscal"] = f_change
+        
         state["current_phase"] = "media"
         st.rerun()
 
@@ -188,7 +208,6 @@ if not current_team:
     st.title("🛡️ CLOUDSTORE COMMAND: MISSION CONTROL")
     st.markdown("---")
     
-    # ADDED THE INSTRUCTOR PRACTICE TAB HERE
     tab_lobby, tab_gm, tab_practice = st.tabs(["📋 Main Screen", "🔐 GM Access", "🎓 Instructor Practice"])
     
     with tab_lobby:
@@ -202,6 +221,7 @@ if not current_team:
             2. Do not share your URL with other teams.
             3. Once the simulation begins, you will only have access to your department's specific tools and intelligence.
             """)
+            st.info("Mechanics: The Game Master must click 'Start Simulation' below to generate the initial scenario and pass control to the Hacker team.")
             if st.button("🚀 Start Simulation", type="primary"):
                 state["current_phase"] = "hacker"
                 st.rerun()
@@ -219,19 +239,30 @@ if not current_team:
             
             if state["current_phase"] == "hacker":
                 st.warning("⚠️ **Alert:** Unrecognized traffic detected. Awaiting threat actor deployment...")
+                st.info("Mechanics: Awaiting Hacker team to select and launch their payload. Refresh screen to check for updates.")
                 st.button("🔄 Refresh Screen")
                 
             elif state["current_phase"] == "company":
                 st.error("🚨 **CRISIS ACTIVE:** IT and Executive teams are deliberating mitigation strategies...")
+                st.info("Mechanics: Awaiting IT and Executive teams to submit their respective directives. Refresh screen to check for updates.")
                 st.button("🔄 Refresh Screen")
                 
             elif state["current_phase"] == "media":
                 st.info("📰 **PRESS LEAK:** Awaiting Media & PR publication...")
+                st.info("Mechanics: Awaiting Media team to publish their spun headline. Refresh screen to check for updates.")
                 st.button("🔄 Refresh Screen")
                 
             elif state["current_phase"] == "round_recap":
                 st.success("🗞️ **BREAKING NEWS PUBLISHED**")
                 st.markdown(f"### 📰 \"{state['latest_headline']}\"")
+                
+                st.markdown("### 📉 Impact Analysis")
+                st.write(get_impact_text("Operational Efficiency", state['last_changes']['Op-Eff']))
+                st.write(get_impact_text("Fiscal/Stock Score", state['last_changes']['Fiscal']))
+                st.write(get_impact_text("Trust/Reputation Score", state['last_changes']['Trust']))
+                
+                st.markdown("---")
+                st.info("Mechanics: Review the impact above. The Game Master must click the button below to initiate the next phase.")
                 
                 if state["round"] == 1:
                     if st.button("▶️ Advance to Round 2", type="primary"):
@@ -249,6 +280,7 @@ if not current_team:
                         
             elif state["current_phase"] == "hacker_finale":
                 st.error("🚨 **CRITICAL WARNING:** Anomalous activity detected. Threat actors are weighing a final strike...")
+                st.info("Mechanics: Awaiting Hacker team to decide whether to extract or press the attack.")
                 st.button("🔄 Refresh Screen")
 
             elif state["current_phase"] == "complete":
@@ -272,6 +304,12 @@ if not current_team:
                     st.error(f"### OUTCOME: BANKRUPT (Avg: {avg_score:.1f})\nLegal fees and loss of trust have forced a shutdown.")
                     
                 st.info(f"**Timeline Evolution:** {' ➡️ '.join(state['history'])}")
+                
+                st.markdown("---")
+                st.info("Mechanics: The simulation has concluded. The Game Master can reset the game parameters using the button below. Team URLs will remain unchanged.")
+                if st.button("🔄 Restart Sim", type="primary"):
+                    reset_simulation()
+                    st.rerun()
 
     with tab_gm:
         st.header("Game Master Terminal")
@@ -289,7 +327,6 @@ if not current_team:
             st.code(f"Executive URL: {base_url}{state['team_codes']['executive']}")
             st.code(f"Media URL:     {base_url}{state['team_codes']['media']}")
 
-    # --- NEW INSTRUCTOR PRACTICE TAB ---
     with tab_practice:
         st.header("Instructor Practice Terminal")
         st.info("Test the entire simulation flow from a single screen. (Use the same admin password).")
@@ -306,7 +343,6 @@ if not current_team:
                 st.markdown(f"### 😈 Hacker Turn (Round {state['round']})")
                 options_list = ATTACKS_R1 if state["round"] == 1 else ATTACKS_R2
                 
-                # 'key' is critical here so it doesn't conflict with the real Hacker tab widget
                 attack_choice = st.selectbox("Select Payload:", options=options_list, key="prac_hack_sel")
                 st.markdown(load_briefing("hackers", attack_choice))
                 
@@ -360,6 +396,7 @@ if not current_team:
                     t_change = DYNAMIC_HEADLINES[headline]
                     state["scores"]["Trust"] += t_change
                     state["latest_headline"] = headline
+                    state["last_changes"]["Trust"] = t_change
                     state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
                     state["current_phase"] = "round_recap"
                     st.rerun()
@@ -385,6 +422,10 @@ if not current_team:
                         
             elif state["current_phase"] in ["round_recap", "complete"]:
                 st.info("Check the **Main Screen** tab to advance the round or view final results.")
+                if state["current_phase"] == "complete":
+                    if st.button("🔄 Restart Sim (Practice)", key="prac_restart_btn"):
+                        reset_simulation()
+                        st.rerun()
 
 # ==========================================
 # VIEW 2: HACKER TERMINAL
@@ -401,6 +442,7 @@ elif current_team == state["team_codes"]["hackers"]:
         st.write("You have successfully executed two waves of attacks. You can extract your team now and disappear into the shadows, or press your luck for one final devastating blow.")
         st.warning("**The Risks:** A follow-on attack has a 75% chance of crippling their reputation further. However, there is a 25% chance the FBI tracks your connection and shuts you down.")
         
+        st.info("Mechanics: Click either 'Extract & Disappear' to end the simulation immediately, or 'Press the Attack' to roll the probability engine for a final outcome.")
         c1, c2 = st.columns(2)
         with c1:
             if st.button("🛑 Extract & Disappear", use_container_width=True):
@@ -420,6 +462,7 @@ elif current_team == state["team_codes"]["hackers"]:
                 st.rerun()
                 
     elif not state["hacker_turn_complete"]:
+        
         if state["round"] == 1:
             st.markdown(f"### 🎯 Target: CloudStore (Round 1)")
             st.subheader("🕵️ Infiltration Choice")
@@ -429,7 +472,9 @@ elif current_team == state["team_codes"]["hackers"]:
             st.subheader("💥 Attack Execution")
             options_list = ATTACKS_R2
             
+        st.info("Mechanics: Select an option from the dropdown menu and click 'Launch Attack' to finalize your decision and advance the simulation to the Company Phase.")
         attack_choice = st.selectbox("Select Payload:", options=options_list)
+        
         st.markdown(load_briefing("hackers", attack_choice))
         
         if st.button("💥 Launch Attack", type="primary"):
@@ -451,10 +496,12 @@ elif current_team == state["team_codes"]["it"]:
         st.info("⏳ Systems are currently stable. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 INCIDENT ALERT: {state['active_attack']}")
+        
         st.markdown(load_briefing("it", state["active_attack"]))
         st.markdown("---")
         
         if state["it_choice"] is None:
+            st.info("Mechanics: Review the incident details, select a mitigation strategy from the dropdown, and click 'Deploy Technical Response' to submit your choice. The simulation will not advance to the Media phase until both the IT and Executive teams have submitted their decisions.")
             it_options = list(IT_CHOICES[state["active_attack"]].keys())
             it_selection = st.selectbox("Select Technical Mitigation Protocol:", options=it_options)
             
@@ -486,6 +533,7 @@ elif current_team == state["team_codes"]["executive"]:
         st.info("⏳ Business operations are nominal. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 CRISIS ALERT: {state['active_attack']}")
+        
         st.markdown(load_briefing("exec", state["active_attack"]))
         st.markdown("---")
         
@@ -495,6 +543,7 @@ elif current_team == state["team_codes"]["executive"]:
             else:
                 st.warning("⚠️ IT is currently deliberating their response.")
                 
+            st.info("Mechanics: Review the incident details, select a corporate directive from the dropdown, and click 'Issue Binding Directive' to submit your choice. The simulation will not advance to the Media phase until both the IT and Executive teams have submitted their decisions.")
             exec_options = list(EXEC_CHOICES[state["active_attack"]].keys())
             exec_selection = st.selectbox("Select Official Corporate Directive:", options=exec_options)
             
@@ -538,12 +587,15 @@ elif current_team == state["team_codes"]["media"]:
             f"💥 DAMNING: Total Backfire as CloudStore Attempts to {state['exec_choice']}": -25
         }
         
+        st.info("Mechanics: Review the Executive Directive, select a narrative from the dropdown, and click 'Publish Headline' to lock in your decision and advance the simulation to the Round Recap phase.")
         headline = st.selectbox("Select Publication Narrative:", options=list(DYNAMIC_HEADLINES.keys()))
         
         if st.button("📰 Publish Headline", type="primary"):
             t_change = DYNAMIC_HEADLINES[headline]
             state["scores"]["Trust"] += t_change
             state["latest_headline"] = headline
+            state["last_changes"]["Trust"] = t_change
+            
             state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
             state["current_phase"] = "round_recap"
             st.rerun()
