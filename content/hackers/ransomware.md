@@ -1,2 +1,0 @@
-### 🔒 Ransomware (The Business Disruptor)
-This malware uses asymmetric encryption to lock critical company files and databases, rendering them into unreadable gibberish. The attack spreads through the network and delivers a digital ransom note demanding payment in exchange for a decryption key. This creates an ultimate business continuity nightmare by stopping the business dead in its tracks. It forces a brutal choice between funding criminals to get back to work or spending weeks trying to rebuild systems from scratch.
