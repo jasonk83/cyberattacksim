@@ -4,6 +4,8 @@ A multiplayer, role-based tabletop cybersecurity simulation built with Python an
 
 This application is designed specifically as an interactive educational tool for **undergraduate Information Technology (IT) and Cybersecurity students**. It bridges the gap between technical theory and business reality by simulating the friction, siloed communication, and compounding consequences of a live cyber crisis.
 
+[Simulation URL](https://cyberattacksim-ksb113.streamlit.app/)
+
 ---
 
 ## 🎯 Simulation Overview
