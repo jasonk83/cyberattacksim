@@ -15,7 +15,7 @@ def get_game_state():
     return {
         "scores": {"Trust": 50, "Fiscal": 100, "Op-Eff": 100},
         "round": 1,
-        "multiplier": 1.2, # Slight penalty multiplier for Round 2
+        "multiplier": 1.2, 
         "history": [],
         "current_phase": "lobby",
         "active_attack": None,
@@ -71,7 +71,6 @@ ATTACKS_R2 = [
     "A.P.T. Data Exfiltration"
 ]
 
-# IT Decisions primarily damage Operational Efficiency (Op-Eff)
 IT_CHOICES = {
     "Spear Phishing": {
         "Immediate Enterprise-Wide Password Reset (RTO: 6 Hours)": -15,
@@ -119,7 +118,6 @@ IT_CHOICES = {
     }
 }
 
-# Executive Decisions primarily damage Stock/Fiscal Score
 EXEC_CHOICES = {
     "Spear Phishing": {
         "Mandatory Executive Security Audit": -5,
@@ -167,8 +165,6 @@ EXEC_CHOICES = {
 # --- AUTOMATIC PROGRESSION CHECKER ---
 if state["current_phase"] == "company":
     if state["it_choice"] is not None and state["exec_choice"] is not None:
-        
-        # Apply the specific penalty scores mapped in the dictionaries
         o_change = IT_CHOICES[state["active_attack"]][state["it_choice"]]
         f_change = EXEC_CHOICES[state["active_attack"]][state["exec_choice"]]
         
@@ -178,7 +174,6 @@ if state["current_phase"] == "company":
             
         state["scores"]["Op-Eff"] += o_change
         state["scores"]["Fiscal"] += f_change
-        
         state["current_phase"] = "media"
         st.rerun()
 
@@ -187,13 +182,14 @@ query_params = st.query_params
 current_team = query_params.get("team")
 
 # ==========================================
-# VIEW 1: MAIN LOBBY & GM DASHBOARD (Projector View)
+# VIEW 1: MAIN LOBBY, GM DASHBOARD & PRACTICE
 # ==========================================
 if not current_team:
     st.title("🛡️ CLOUDSTORE COMMAND: MISSION CONTROL")
     st.markdown("---")
     
-    tab_lobby, tab_gm = st.tabs(["📋 Main Screen", "🔐 GM Access"])
+    # ADDED THE INSTRUCTOR PRACTICE TAB HERE
+    tab_lobby, tab_gm, tab_practice = st.tabs(["📋 Main Screen", "🔐 GM Access", "🎓 Instructor Practice"])
     
     with tab_lobby:
         if state["current_phase"] == "lobby":
@@ -210,7 +206,6 @@ if not current_team:
                 state["current_phase"] = "hacker"
                 st.rerun()
         else:
-            # LIVE SCOREBOARD
             st.subheader(f"📡 LIVE STATUS: ROUND {state['round']}")
             
             cols = st.columns(3)
@@ -222,7 +217,6 @@ if not current_team:
                     st.progress(max(0, min(100, int(val))))
             st.markdown("---")
             
-            # PHASE INDICATORS
             if state["current_phase"] == "hacker":
                 st.warning("⚠️ **Alert:** Unrecognized traffic detected. Awaiting threat actor deployment...")
                 st.button("🔄 Refresh Screen")
@@ -295,6 +289,103 @@ if not current_team:
             st.code(f"Executive URL: {base_url}{state['team_codes']['executive']}")
             st.code(f"Media URL:     {base_url}{state['team_codes']['media']}")
 
+    # --- NEW INSTRUCTOR PRACTICE TAB ---
+    with tab_practice:
+        st.header("Instructor Practice Terminal")
+        st.info("Test the entire simulation flow from a single screen. (Use the same admin password).")
+        practice_password = st.text_input("Practice Password:", type="password", key="practice_pwd")
+        
+        if practice_password == "admin123":
+            st.success("Practice Mode Unlocked.")
+            st.markdown("---")
+            
+            if state["current_phase"] == "lobby":
+                st.write("Press **Start Simulation** on the Main Screen tab to begin practice.")
+                
+            elif state["current_phase"] == "hacker":
+                st.markdown(f"### 😈 Hacker Turn (Round {state['round']})")
+                options_list = ATTACKS_R1 if state["round"] == 1 else ATTACKS_R2
+                
+                # 'key' is critical here so it doesn't conflict with the real Hacker tab widget
+                attack_choice = st.selectbox("Select Payload:", options=options_list, key="prac_hack_sel")
+                st.markdown(load_briefing("hackers", attack_choice))
+                
+                if st.button("💥 Launch Attack (Practice)", type="primary", key="prac_hack_btn"):
+                    state["active_attack"] = attack_choice
+                    state["hacker_turn_complete"] = True
+                    state["current_phase"] = "company"
+                    st.rerun()
+                    
+            elif state["current_phase"] == "company":
+                st.markdown("### 🏢 Company Turn (IT & Execs)")
+                st.error(f"**Active Incident:** {state['active_attack']}")
+                
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.markdown("#### 💻 IT Department")
+                    if state["it_choice"] is None:
+                        it_options = list(IT_CHOICES[state["active_attack"]].keys())
+                        it_selection = st.selectbox("IT Mitigation:", options=it_options, key="prac_it_sel")
+                        if st.button("Submit IT", key="prac_it_btn"):
+                            state["it_choice"] = it_selection
+                            st.rerun()
+                    else:
+                        st.success(f"IT Selected: {state['it_choice']}")
+                        
+                with c2:
+                    st.markdown("#### 👔 Executive Board")
+                    if state["exec_choice"] is None:
+                        exec_options = list(EXEC_CHOICES[state["active_attack"]].keys())
+                        exec_selection = st.selectbox("Exec Directive:", options=exec_options, key="prac_exec_sel")
+                        if st.button("Submit Exec", key="prac_exec_btn"):
+                            state["exec_choice"] = exec_selection
+                            st.rerun()
+                    else:
+                        st.success(f"Execs Selected: {state['exec_choice']}")
+                        
+            elif state["current_phase"] == "media":
+                st.markdown("### 🎤 Media & PR Turn")
+                st.warning(f"**Leaked Directive:** {state['exec_choice']}")
+                
+                DYNAMIC_HEADLINES = {
+                    f"⭐ PRAISED: Market Reacts Positively to CloudStore's Decision to {state['exec_choice']}": 15,
+                    f"📈 FAVORABLE: CloudStore Navigates Crisis, Opts to {state['exec_choice']}": 5,
+                    f"🔲 NEUTRAL: CloudStore Incident Underway, Strategy is to {state['exec_choice']}": 0,
+                    f"📉 CRITICAL: Experts Question CloudStore's Move to {state['exec_choice']}": -10,
+                    f"💥 DAMNING: Total Backfire as CloudStore Attempts to {state['exec_choice']}": -25
+                }
+                
+                headline = st.selectbox("Select Narrative:", options=list(DYNAMIC_HEADLINES.keys()), key="prac_media_sel")
+                if st.button("📰 Publish Headline (Practice)", key="prac_media_btn"):
+                    t_change = DYNAMIC_HEADLINES[headline]
+                    state["scores"]["Trust"] += t_change
+                    state["latest_headline"] = headline
+                    state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
+                    state["current_phase"] = "round_recap"
+                    st.rerun()
+                    
+            elif state["current_phase"] == "hacker_finale":
+                st.markdown("### 🎲 The Final Gamble")
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button("🛑 Extract & Disappear", key="prac_ext_btn"):
+                        state["finale_result"] = "extract"
+                        state["current_phase"] = "complete"
+                        st.rerun()
+                with c2:
+                    if st.button("💥 Press the Attack", type="primary", key="prac_press_btn"):
+                        roll = random.random()
+                        if roll < 0.25:
+                            state["finale_result"] = "caught"
+                        else:
+                            state["finale_result"] = "success"
+                            state["scores"]["Trust"] -= 15
+                        state["current_phase"] = "complete"
+                        st.rerun()
+                        
+            elif state["current_phase"] in ["round_recap", "complete"]:
+                st.info("Check the **Main Screen** tab to advance the round or view final results.")
+
 # ==========================================
 # VIEW 2: HACKER TERMINAL
 # ==========================================
@@ -329,7 +420,6 @@ elif current_team == state["team_codes"]["hackers"]:
                 st.rerun()
                 
     elif not state["hacker_turn_complete"]:
-        
         if state["round"] == 1:
             st.markdown(f"### 🎯 Target: CloudStore (Round 1)")
             st.subheader("🕵️ Infiltration Choice")
@@ -340,8 +430,6 @@ elif current_team == state["team_codes"]["hackers"]:
             options_list = ATTACKS_R2
             
         attack_choice = st.selectbox("Select Payload:", options=options_list)
-        
-        # Dynamically pulls in the Markdown file text
         st.markdown(load_briefing("hackers", attack_choice))
         
         if st.button("💥 Launch Attack", type="primary"):
@@ -363,8 +451,6 @@ elif current_team == state["team_codes"]["it"]:
         st.info("⏳ Systems are currently stable. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 INCIDENT ALERT: {state['active_attack']}")
-        
-        # Dynamically pulls in the Markdown file text
         st.markdown(load_briefing("it", state["active_attack"]))
         st.markdown("---")
         
@@ -400,8 +486,6 @@ elif current_team == state["team_codes"]["executive"]:
         st.info("⏳ Business operations are nominal. Waiting for next steps...")
     elif state["current_phase"] == "company":
         st.error(f"### 🚨 CRISIS ALERT: {state['active_attack']}")
-        
-        # Dynamically pulls in the Markdown file text
         st.markdown(load_briefing("exec", state["active_attack"]))
         st.markdown("---")
         
@@ -446,7 +530,6 @@ elif current_team == state["team_codes"]["media"]:
         st.warning(f"**Leaked Executive Directive:** {state['exec_choice']}")
         st.write("Based on the Executive Team's specific choice, how will you frame this to the public?")
         
-        # Dynamic headlines that weave the Executive's choice directly into the text!
         DYNAMIC_HEADLINES = {
             f"⭐ PRAISED: Market Reacts Positively to CloudStore's Decision to {state['exec_choice']}": 15,
             f"📈 FAVORABLE: CloudStore Navigates Crisis, Opts to {state['exec_choice']}": 5,
@@ -461,10 +544,7 @@ elif current_team == state["team_codes"]["media"]:
             t_change = DYNAMIC_HEADLINES[headline]
             state["scores"]["Trust"] += t_change
             state["latest_headline"] = headline
-            
-            # Record exactly what the Execs did and how the Media spun it
             state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
-            
             state["current_phase"] = "round_recap"
             st.rerun()
             
