@@ -25,7 +25,7 @@ The organization's survival is tracked across three fragile metrics:
 ## 👥 The Roles
 
 ### 👑 The Game Master (GM)
-The GM is required to facilitate the simulation. Logging into the main application unlocks a password-protected terminal (Default password: `admin123`). The GM generates unique, randomized URLs for each team, displays the Main Lobby scoreboard on a projector, and manually advances the simulation through its phases.
+The GM is required to facilitate the simulation. Logging into the main application unlocks a password-protected terminal. The GM generates unique, randomized URLs for each team, displays the Main Lobby scoreboard on a projector, and manually advances the simulation through its phases.
 
 ### 😈 Threat Actors (Hackers)
 Students act as the adversaries, mapping their attacks to the Cyber Kill Chain. They initiate the crisis by selecting specific intrusion methods and follow-on payloads. At the end of the game, they are presented with a "Press Your Luck" finale to either extract safely or risk FBI apprehension for a final devastating blow.
