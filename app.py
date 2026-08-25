@@ -13,7 +13,7 @@ st.set_page_config(
 @st.cache_resource
 def get_game_state():
     return {
-        "scores": {"Trust": 50, "Fiscal": 100, "Op-Eff": 100},
+        "scores": {"Trust": 100, "Fiscal": 100, "Op-Eff": 100},
         "last_changes": {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}, # Tracks round-by-round impacts
         "round": 1,
         "multiplier": 1.2, 
