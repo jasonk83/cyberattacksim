@@ -88,92 +88,103 @@ ATTACKS_R2 = ["Double Extortion Ransomware", "Supply Chain Pivot", "Database Int
 
 IT_CHOICES = {
     "Spear Phishing": {
-        "Immediate Enterprise-Wide Password Reset (RTO: 6 Hours)": -15,
         "Targeted Quarantine & EDR Deployment (RTO: 2 Hours)": -5,
-        "Silent Monitoring (Honeypot) (RTO: 72 Hours)": -10,
-        "Do Nothing (RTO: Indefinite)": -25
+        "Immediate Enterprise-Wide Password Reset (RTO: 6 Hours)": -15,
+        "Silent Monitoring (Honeypot) (RTO: 72 Hours)": -25,
+        "Do Nothing (RTO: Indefinite)": -40
     },
     "AI Prompt Injection": {
-        "Hard Offline & Revert AI Model (RTO: 24 Hours)": -20,
-        "Deploy Aggressive Input Sanitization Filter (RTO: 4 Hours)": -10,
-        "Rate-Limit and Alert (RTO: 1 Hour)": -5,
-        "Do Nothing (RTO: Indefinite)": -25
+        "Deploy Aggressive Input Sanitization Filter (RTO: 4 Hours)": -5,
+        "Rate-Limit and Alert (RTO: 1 Hour)": -15,
+        "Hard Offline & Revert AI Model (RTO: 24 Hours)": -25,
+        "Do Nothing (RTO: Indefinite)": -40
     },
     "DDoS Smokescreen": {
-        "Blackhole External IP Traffic (RTO: 8 Hours)": -15,
         "Route Traffic via DDoS Scrubbing Service (RTO: 2 Hours)": -5,
-        "Ignore External Outage & Hunt Internal Logs (RTO: 48 Hours)": -20,
+        "Blackhole External IP Traffic (RTO: 8 Hours)": -15,
+        "Ignore External Outage & Hunt Internal Logs (RTO: 48 Hours)": -25,
         "Do Nothing (RTO: Indefinite)": -40
     },
     "Zero-Day Network Software Exploit": {
-        "Air-Gap the Vulnerable Server (RTO: 12 Hours)": -20,
         "Implement Custom WAF Rules (Virtual Patching) (RTO: 4 Hours)": -5,
-        "Migrate Services to a New OS (RTO: 7 Days)": -30,
-        "Do Nothing (RTO: Indefinite)": -50
+        "Air-Gap the Vulnerable Server (RTO: 12 Hours)": -15,
+        "Migrate Services to a New OS (RTO: 7 Days)": -25,
+        "Do Nothing (RTO: Indefinite)": -40
     },
     "Double Extortion Ransomware": {
-        "Burn and Rebuild from Bare Metal (RTO: 14 Days)": -40,
-        "Pay Ransom and Run Decryptor Tool (RTO: 48 Hours)": -15,
-        "Attempt Manual Cryptanalysis (RTO: 6+ Months)": -60
+        "Restore from Immutable Air-Gapped Backups (RTO: 8 Hours)": -5,
+        "Burn and Rebuild from Bare Metal (RTO: 14 Days)": -15,
+        "Pay Ransom and Run Decryptor Tool (RTO: 48 Hours)": -25,
+        "Attempt Manual Cryptanalysis (RTO: 6+ Months)": -40
     },
     "Supply Chain Pivot": {
-        "Trigger Emergency Global Kill-Switch (RTO: 24 Hours)": -25,
-        "Rollback and Push Clean Patch (RTO: 72 Hours)": -15,
-        "Isolate Build Servers for Forensics (RTO: 5 Days)": -30
+        "Rollback and Push Clean Patch (RTO: 72 Hours)": -5,
+        "Trigger Emergency Global Kill-Switch (RTO: 24 Hours)": -15,
+        "Isolate Build Servers for Forensics (RTO: 5 Days)": -25,
+        "Wait for Vendor Security Patch (RTO: Indefinite)": -40
     },
     "Database Integrity Sabotage": {
-        "Revert to 30-Day Old Backup (RTO: 4 Days)": -35,
-        "Freeze Database and Audit Manually (RTO: 3 Weeks)": -45,
-        "Implement 'Failsafe' Logic Moving Forward (RTO: 24 Hours)": -10
+        "Implement 'Failsafe' Logic Moving Forward (RTO: 24 Hours)": -5,
+        "Revert to 30-Day Old Backup (RTO: 4 Days)": -15,
+        "Freeze Database and Audit Manually (RTO: 3 Weeks)": -25,
+        "Ignore Anomalies and Continue Operations (RTO: 0 Hours)": -40
     },
     "A.P.T. Data Exfiltration": {
+        "Implement Strict Egress Port Blocking (RTO: 6 Hours)": -5,
+        "Quietly Route Hacker to a Decoy Server (RTO: 48 Hours)": -15,
         "Sever Total Internet Connectivity (RTO: 12 Hours)": -25,
-        "Implement Strict Egress Port Blocking (RTO: 6 Hours)": -10,
-        "Quietly Route Hacker to a Decoy Server (RTO: 48 Hours)": -15
+        "Assume False Positive and Close Ticket (RTO: None)": -40
     }
 }
 
 EXEC_CHOICES = {
     "Spear Phishing": {
         "Mandatory Executive Security Audit": -5,
-        "Quietly Terminate Responsible Employee": -5,
-        "Hire Expensive External Consultants": -10,
-        "Ignore / Cover It Up": -20
+        "Quietly Terminate Responsible Employee": -15,
+        "Hire Expensive External Consultants": -25,
+        "Ignore / Cover It Up": -40
     },
     "AI Prompt Injection": {
-        "Temporarily Suspend All AI Features": -10,
-        "Publicly Blame the AI Vendor": -5,
-        "Quietly Patch and Downplay": -10
+        "Temporarily Suspend All AI Features": -5,
+        "Quietly Patch and Downplay": -15,
+        "Publicly Blame the AI Vendor": -25,
+        "Deny the Vulnerability Exists": -40
     },
     "DDoS Smokescreen": {
         "Admit the Attack & Apologize on Social Media": -5,
         "Post a 'Scheduled Maintenance' Banner": -15,
-        "Purchase Platinum Cloud Defense Mid-Attack": -20
+        "Purchase Platinum Cloud Defense Mid-Attack": -25,
+        "Lash Out at the Threat Actors on Social Media": -40
     },
     "Zero-Day Network Software Exploit": {
         "Proactive Public Disclosure & Bounty Program": -5,
         "Secretly Patch and Sign NDAs": -15,
-        "Halt All Digital Expansion Projects": -20
+        "Halt All Digital Expansion Projects": -25,
+        "Threaten Security Researchers with Lawsuits": -40
     },
     "Double Extortion Ransomware": {
-        "Refuse to Pay & Notify the Public": -30,
+        "Refuse to Pay & Notify the Public": -5,
         "Quietly Pay the Ransom via Intermediary": -15,
-        "Attempt to Sue the Software Provider": -25
+        "Attempt to Sue the Software Provider": -25,
+        "Attempt a Complete Breach Cover-Up": -40
     },
     "Supply Chain Pivot": {
-        "Immediate Global Notification & Apology": -35,
-        "Quietly Contact Only 'High Value' Clients": -25,
-        "Deny Responsibility (Blame Open-Source Code)": -40
+        "Immediate Global Notification & Apology": -5,
+        "Quietly Contact Only 'High Value' Clients": -15,
+        "Deny Responsibility (Blame Open-Source Code)": -25,
+        "Threaten Customers Complaining of Service Issues": -40
     },
     "Database Integrity Sabotage": {
-        "Halt All Operations & Offer Blanket Refunds": -25,
-        "Keep Operating and Handle Complaints Individually": -15,
-        "Request an Emergency SEC Trading Halt": -35
+        "Keep Operating and Handle Complaints Individually": -5,
+        "Halt All Operations & Offer Blanket Refunds": -15,
+        "Request an Emergency SEC Trading Halt": -25,
+        "Falsify Financial Reports to Cover the Loss": -40
     },
     "A.P.T. Data Exfiltration": {
-        "Full GDPR/CCPA Disclosure & Free Identity Theft Protection": -25,
+        "Full GDPR/CCPA Disclosure & Free Identity Theft Protection": -5,
         "Downplay the Sensitivity of the Stolen Data": -15,
-        "Resignation of the CEO and CISO": -35
+        "Resignation of the CEO and CISO": -25,
+        "Blame the Victims for Poor Password Hygiene": -40
     }
 }
 
