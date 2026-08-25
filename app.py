@@ -88,52 +88,52 @@ ATTACKS_R2 = ["Double Extortion Ransomware", "Supply Chain Pivot", "Database Int
 
 IT_CHOICES = {
     "Spear Phishing": {
-        "Targeted Quarantine & EDR Deployment (RTO: 2 Hours)": -5,
-        "Immediate Enterprise-Wide Password Reset (RTO: 6 Hours)": -15,
-        "Silent Monitoring (Honeypot) (RTO: 72 Hours)": -25,
-        "Do Nothing (RTO: Indefinite)": -40
+        "Targeted Quarantine & EDR Deployment (Customer: 0 Hrs | Forensics: 2 Hrs)": -5,
+        "Immediate Enterprise-Wide Password Reset (Customer: 1 Hr | Forensics: 6 Hrs)": -15,
+        "Silent Monitoring (Honeypot) (Customer: 0 Hrs | Forensics: 72 Hrs)": -25,
+        "Do Nothing (Customer: 0 Hrs | Forensics: Indefinite)": -40
     },
     "AI Prompt Injection": {
-        "Deploy Aggressive Input Sanitization Filter (RTO: 4 Hours)": -5,
-        "Rate-Limit and Alert (RTO: 1 Hour)": -15,
-        "Hard Offline & Revert AI Model (RTO: 24 Hours)": -25,
-        "Do Nothing (RTO: Indefinite)": -40
+        "Deploy Aggressive Input Sanitization Filter (Customer: 1 Hr | Forensics: 4 Hrs)": -5,
+        "Rate-Limit and Alert (Customer: 0 Hrs | Forensics: 1 Hr)": -15,
+        "Hard Offline & Revert AI Model (Customer: 24 Hrs | Forensics: 48 Hrs)": -25,
+        "Do Nothing (Customer: 0 Hrs | Forensics: Indefinite)": -40
     },
     "DDoS Smokescreen": {
-        "Route Traffic via DDoS Scrubbing Service (RTO: 2 Hours)": -5,
-        "Blackhole External IP Traffic (RTO: 8 Hours)": -15,
-        "Ignore External Outage & Hunt Internal Logs (RTO: 48 Hours)": -25,
-        "Do Nothing (RTO: Indefinite)": -40
+        "Route Traffic via DDoS Scrubbing Service (Customer: 15 Mins | Forensics: 2 Hrs)": -5,
+        "Blackhole External IP Traffic (Customer: 8 Hrs | Forensics: 12 Hrs)": -15,
+        "Ignore External Outage & Hunt Internal Logs (Customer: 48 Hrs | Forensics: 72 Hrs)": -25,
+        "Do Nothing (Customer: Indefinite | Forensics: Indefinite)": -40
     },
     "Zero-Day Network Software Exploit": {
-        "Implement Custom WAF Rules (Virtual Patching) (RTO: 4 Hours)": -5,
-        "Air-Gap the Vulnerable Server (RTO: 12 Hours)": -15,
-        "Migrate Services to a New OS (RTO: 7 Days)": -25,
-        "Do Nothing (RTO: Indefinite)": -40
+        "Implement Custom WAF Rules (Virtual Patching) (Customer: 0 Hrs | Forensics: 4 Hrs)": -5,
+        "Air-Gap the Vulnerable Server (Customer: 12 Hrs | Forensics: 48 Hrs)": -15,
+        "Migrate Services to a New OS (Customer: 48 Hrs | Forensics: 7 Days)": -25,
+        "Do Nothing (Customer: Indefinite | Forensics: Indefinite)": -40
     },
     "Double Extortion Ransomware": {
-        "Restore from Immutable Air-Gapped Backups (RTO: 8 Hours)": -5,
-        "Burn and Rebuild from Bare Metal (RTO: 14 Days)": -15,
-        "Pay Ransom and Run Decryptor Tool (RTO: 48 Hours)": -25,
-        "Attempt Manual Cryptanalysis (RTO: 6+ Months)": -40
+        "Restore from Immutable Air-Gapped Backups (Customer: 8 Hrs | Forensics: 7 Days)": -5,
+        "Burn and Rebuild from Bare Metal (Customer: 14 Days | Forensics: 30 Days)": -15,
+        "Pay Ransom and Run Decryptor Tool (Customer: 48 Hrs | Forensics: 14 Days)": -25,
+        "Attempt Manual Cryptanalysis (Customer: 6+ Months | Forensics: 1+ Years)": -40
     },
     "Supply Chain Pivot": {
-        "Rollback and Push Clean Patch (RTO: 72 Hours)": -5,
-        "Trigger Emergency Global Kill-Switch (RTO: 24 Hours)": -15,
-        "Isolate Build Servers for Forensics (RTO: 5 Days)": -25,
-        "Wait for Vendor Security Patch (RTO: Indefinite)": -40
+        "Rollback and Push Clean Patch (Customer: 2 Hrs | Forensics: 72 Hrs)": -5,
+        "Trigger Emergency Global Kill-Switch (Customer: 24 Hrs | Forensics: 7 Days)": -15,
+        "Isolate Build Servers for Forensics (Customer: 5 Days | Forensics: 14 Days)": -25,
+        "Wait for Vendor Security Patch (Customer: Indefinite | Forensics: Indefinite)": -40
     },
     "Database Integrity Sabotage": {
-        "Implement 'Failsafe' Logic Moving Forward (RTO: 24 Hours)": -5,
-        "Revert to 30-Day Old Backup (RTO: 4 Days)": -15,
-        "Freeze Database and Audit Manually (RTO: 3 Weeks)": -25,
-        "Ignore Anomalies and Continue Operations (RTO: 0 Hours)": -40
+        "Implement 'Failsafe' Logic Moving Forward (Customer: 0 Hrs | Forensics: 24 Hrs)": -5,
+        "Revert to 30-Day Old Backup (Customer: 8 Hrs | Forensics: 4 Days)": -15,
+        "Freeze Database and Audit Manually (Customer: 3 Weeks | Forensics: 4 Weeks)": -25,
+        "Ignore Anomalies and Continue Operations (Customer: 0 Hrs | Forensics: 0 Hrs)": -40
     },
     "A.P.T. Data Exfiltration": {
-        "Implement Strict Egress Port Blocking (RTO: 6 Hours)": -5,
-        "Quietly Route Hacker to a Decoy Server (RTO: 48 Hours)": -15,
-        "Sever Total Internet Connectivity (RTO: 12 Hours)": -25,
-        "Assume False Positive and Close Ticket (RTO: None)": -40
+        "Implement Strict Egress Port Blocking (Customer: 0 Hrs | Forensics: 6 Hrs)": -5,
+        "Quietly Route Hacker to a Decoy Server (Customer: 0 Hrs | Forensics: 48 Hrs)": -15,
+        "Sever Total Internet Connectivity (Customer: 12 Hrs | Forensics: 72 Hrs)": -25,
+        "Assume False Positive and Close Ticket (Customer: 0 Hrs | Forensics: 0 Hrs)": -40
     }
 }
 
