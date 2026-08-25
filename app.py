@@ -425,6 +425,7 @@ if not current_team:
                         roll = random.random()
                         if roll < 0.25:
                             state["finale_result"] = "caught"
+                            state["scores"]["Trust"] += 10 # <-- NEW: Company recovers +10 Trust
                         else:
                             state["finale_result"] = "success"
                             state["scores"]["Trust"] -= 15
