@@ -51,15 +51,24 @@ def reset_simulation():
     state["finale_result"] = None
 
 def get_impact_text(metric, change):
-    """Converts raw point changes into descriptive impact text."""
+    """Converts raw point changes into descriptive impact text with concrete business values."""
+    
+    # Map abstract point changes to tangible business realities
+    if metric == "Operational Efficiency":
+        tangible = f"{abs(change) * 2} hours of critical system degradation" if change < 0 else "0 downtime hours"
+    elif metric == "Fiscal/Stock Score" or metric == "Fiscal":
+        tangible = f"~${abs(change) * 1.5}M loss in market capitalization" if change < 0 else "$0 revenue impact"
+    else: # Trust/Reputation
+        tangible = f"{abs(change) * 5}% drop in consumer confidence index" if change < 0 else "Consumer confidence held steady"
+
     if change >= 0:
-        return f"🟢 **{metric}:** No negative impact ({change} pts). Strategy successfully mitigated damage."
+        return f"🟢 **{metric}:** No negative impact ({change} pts | {tangible}). Strategy successfully mitigated damage."
     elif change >= -15:
-        return f"🟡 **{metric}:** Minor impact ({change} pts). Acceptable operational or reputational friction."
+        return f"🟡 **{metric}:** Minor impact ({change} pts | {tangible}). Acceptable operational or reputational friction."
     elif change >= -30:
-        return f"🟠 **{metric}:** Moderate damage ({change} pts). Noticeable disruption and loss of value."
+        return f"🟠 **{metric}:** Moderate damage ({change} pts | {tangible}). Noticeable disruption and loss of value."
     else:
-        return f"🔴 **{metric}:** Severe degradation ({change} pts). Critical failure resulting in massive loss."
+        return f"🔴 **{metric}:** Severe degradation ({change} pts | {tangible}). Critical failure resulting in massive loss."
 
 # --- DYNAMIC MARKDOWN LOADER ---
 def load_briefing(role, attack_name):
