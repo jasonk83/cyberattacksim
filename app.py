@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import os
+import copy
 
 # --- APP CONFIGURATION ---
 st.set_page_config(
@@ -13,11 +14,13 @@ st.set_page_config(
 @st.cache_resource
 def get_game_state():
     return {
-        "scores": {"Trust": 100, "Fiscal": 100, "Op-Eff": 100},
-        "last_changes": {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}, # Tracks round-by-round impacts
+        "scores": {"Trust": 100, "Fiscal": 100, "Op-Eff": 100}, # Normalized baseline
+        "last_changes": {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}, 
+        "team_impacts": {"it": 0, "exec": 0, "media": 0, "hacker": 0}, # For 4-Quadrant Scorecard
         "round": 1,
         "multiplier": 1.2, 
         "history": [],
+        "history_snapshots": [], # For Instructor Undo feature
         "current_phase": "lobby",
         "active_attack": None,
         "hacker_turn_complete": False,
@@ -35,13 +38,20 @@ def get_game_state():
 
 state = get_game_state()
 
+def save_snapshot():
+    """Takes a deep copy of the current state for the Practice Mode undo button."""
+    snapshot = copy.deepcopy(state)
+    state["history_snapshots"].append(snapshot)
+
 def reset_simulation():
     """Resets the game state back to default values while keeping the same team URLs."""
-    state["scores"] = {"Trust": 50, "Fiscal": 100, "Op-Eff": 100}
+    state["scores"] = {"Trust": 100, "Fiscal": 100, "Op-Eff": 100}
     state["last_changes"] = {"Trust": 0, "Fiscal": 0, "Op-Eff": 0}
+    state["team_impacts"] = {"it": 0, "exec": 0, "media": 0, "hacker": 0}
     state["round"] = 1
     state["multiplier"] = 1.2
     state["history"] = []
+    state["history_snapshots"] = []
     state["current_phase"] = "lobby"
     state["active_attack"] = None
     state["hacker_turn_complete"] = False
@@ -52,14 +62,12 @@ def reset_simulation():
 
 def get_impact_text(metric, change):
     """Converts raw point changes into descriptive impact text with concrete business values."""
-    
-    # Map abstract point changes to tangible business realities
     if metric == "Operational Efficiency":
         tangible = f"{abs(change) * 2} hours of critical system degradation" if change < 0 else "0 downtime hours"
     elif metric == "Fiscal/Stock Score" or metric == "Fiscal":
-        tangible = f"~${abs(change) * 1.5}M loss in market capitalization" if change < 0 else "$0 revenue impact"
-    else: # Trust/Reputation
-        tangible = f"{abs(change) * 5}% drop in consumer confidence index" if change < 0 else "Consumer confidence held steady"
+        tangible = f"~${abs(change) * 1.5}M loss in market cap" if change < 0 else "$0 revenue impact"
+    else: 
+        tangible = f"{abs(change) * 5}% drop in consumer confidence" if change < 0 else "Consumer confidence steady"
 
     if change >= 0:
         return f"🟢 **{metric}:** No negative impact ({change} pts | {tangible}). Strategy successfully mitigated damage."
@@ -197,6 +205,14 @@ EXEC_CHOICES = {
     }
 }
 
+DYNAMIC_HEADLINES = {
+    "⭐ MARKET UPDATE: CloudStore Navigates Crisis Intelligently": 15,
+    "📈 FAVORABLE: CloudStore Shows Resilience Under Fire": 5,
+    "🔲 NEUTRAL: CloudStore Acknowledges Incident, Operations Continue": 0,
+    "📉 CRITICAL: Experts Question CloudStore's Opaque Crisis Response": -10,
+    "💥 DAMNING: Total Backfire as CloudStore Mishandles Cyber Breach": -25
+}
+
 # --- AUTOMATIC PROGRESSION CHECKER ---
 if state["current_phase"] == "company":
     if state["it_choice"] is not None and state["exec_choice"] is not None:
@@ -210,9 +226,11 @@ if state["current_phase"] == "company":
         state["scores"]["Op-Eff"] += o_change
         state["scores"]["Fiscal"] += f_change
         
-        # Save changes for the impact report
+        # Save changes for the impact report & team tracking
         state["last_changes"]["Op-Eff"] = o_change
         state["last_changes"]["Fiscal"] = f_change
+        state["team_impacts"]["it"] += o_change
+        state["team_impacts"]["exec"] += f_change
         
         state["current_phase"] = "media"
         st.rerun()
@@ -278,8 +296,8 @@ if not current_team:
                 
                 st.markdown("### 📉 Impact Analysis")
                 st.write(get_impact_text("Operational Efficiency", state['last_changes']['Op-Eff']))
-                st.write(get_impact_text("Fiscal/Stock Score", state['last_changes']['Fiscal']))
-                st.write(get_impact_text("Trust/Reputation Score", state['last_changes']['Trust']))
+                st.write(get_impact_text("Fiscal", state['last_changes']['Fiscal']))
+                st.write(get_impact_text("Trust", state['last_changes']['Trust']))
                 
                 st.markdown("---")
                 st.info("Mechanics: Review the impact above. The Game Master must click the button below to initiate the next phase.")
@@ -307,9 +325,9 @@ if not current_team:
                 st.header("🏁 FINAL SIMULATION REPORT")
                 
                 if state["finale_result"] == "caught":
-                    st.success("🚓 **FINAL EVENT:** The hackers pushed their luck with a third attack and were apprehended by the FBI! No further damage sustained.")
+                    st.success("🚓 **FINAL EVENT:** The hackers pushed their luck with a third attack and were apprehended by the FBI! CloudStore recovers some public trust (+10 Trust).")
                 elif state["finale_result"] == "success":
-                    st.error("💥 **FINAL EVENT:** The hackers successfully launched a devastating follow-on attack, severely damaging CloudStore's remaining reputation (-15 Trust).")
+                    st.error("💥 **FINAL EVENT:** The hackers successfully launched a devastating follow-on attack, severely damaging CloudStore's remaining reputation (-25 Trust).")
                 elif state["finale_result"] == "extract":
                     st.info("🕵️ **FINAL EVENT:** The hackers quietly extracted their payloads and vanished without a trace.")
                 
@@ -322,6 +340,20 @@ if not current_team:
                     st.warning(f"### OUTCOME: RECOVERING (Avg: {avg_score:.1f})\nThe company is alive, but reputation is scarred.")
                 else:
                     st.error(f"### OUTCOME: BANKRUPT (Avg: {avg_score:.1f})\nLegal fees and loss of trust have forced a shutdown.")
+                
+                st.markdown("---")
+                st.markdown("### 📊 4-Quadrant Departmental Scorecard")
+                st.markdown("*(Net point impact contributed by each team's decisions)*")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("IT Operations", f"{state['team_impacts']['it']} pts")
+                with col2:
+                    st.metric("Executive Board", f"{state['team_impacts']['exec']} pts")
+                with col3:
+                    st.metric("Media & PR", f"{state['team_impacts']['media']} pts")
+                with col4:
+                    st.metric("Hacker Gambit", f"{state['team_impacts']['hacker']} pts")
                     
                 st.info(f"**Timeline Evolution:** {' ➡️ '.join(state['history'])}")
                 
@@ -349,6 +381,15 @@ if not current_team:
 
     with tab_practice:
         st.header("Instructor Practice Terminal")
+        
+        # Undo UI Block
+        if len(state.get("history_snapshots", [])) > 0:
+            if st.button("⏪ Step Back (Undo Last Action)"):
+                last_state = state["history_snapshots"].pop()
+                state.clear()
+                state.update(last_state)
+                st.rerun()
+                
         st.info("Test the entire simulation flow from a single screen. (Use the same admin password).")
         practice_password = st.text_input("Practice Password:", type="password", key="practice_pwd")
         
@@ -367,6 +408,7 @@ if not current_team:
                 st.markdown(load_briefing("hackers", attack_choice))
                 
                 if st.button("💥 Launch Attack (Practice)", type="primary", key="prac_hack_btn"):
+                    save_snapshot()
                     state["active_attack"] = attack_choice
                     state["hacker_turn_complete"] = True
                     state["current_phase"] = "company"
@@ -383,6 +425,7 @@ if not current_team:
                         it_options = list(IT_CHOICES[state["active_attack"]].keys())
                         it_selection = st.selectbox("IT Mitigation:", options=it_options, key="prac_it_sel")
                         if st.button("Submit IT", key="prac_it_btn"):
+                            save_snapshot()
                             state["it_choice"] = it_selection
                             st.rerun()
                     else:
@@ -394,6 +437,7 @@ if not current_team:
                         exec_options = list(EXEC_CHOICES[state["active_attack"]].keys())
                         exec_selection = st.selectbox("Exec Directive:", options=exec_options, key="prac_exec_sel")
                         if st.button("Submit Exec", key="prac_exec_btn"):
+                            save_snapshot()
                             state["exec_choice"] = exec_selection
                             st.rerun()
                     else:
@@ -403,18 +447,12 @@ if not current_team:
                 st.markdown("### 🎤 Media & PR Turn")
                 st.warning(f"**Leaked Directive:** {state['exec_choice']}")
                 
-                DYNAMIC_HEADLINES = {
-                    f"⭐ PRAISED: Market Reacts Positively to CloudStore's Decision to {state['exec_choice']}": 15,
-                    f"📈 FAVORABLE: CloudStore Navigates Crisis, Opts to {state['exec_choice']}": 5,
-                    f"🔲 NEUTRAL: CloudStore Incident Underway, Strategy is to {state['exec_choice']}": 0,
-                    f"📉 CRITICAL: Experts Question CloudStore's Move to {state['exec_choice']}": -10,
-                    f"💥 DAMNING: Total Backfire as CloudStore Attempts to {state['exec_choice']}": -25
-                }
-                
                 headline = st.selectbox("Select Narrative:", options=list(DYNAMIC_HEADLINES.keys()), key="prac_media_sel")
                 if st.button("📰 Publish Headline (Practice)", key="prac_media_btn"):
+                    save_snapshot()
                     t_change = DYNAMIC_HEADLINES[headline]
-                    state["scores"]["Trust"] += t_change
+                    state["scores"]["Trust"] = min(100, state["scores"]["Trust"] + t_change) # Cap Trust at 100
+                    state["team_impacts"]["media"] += t_change
                     state["latest_headline"] = headline
                     state["last_changes"]["Trust"] = t_change
                     state["history"].append(f"R{state['round']}: Exec({state['exec_choice']}) Media Spin({t_change} pts)")
@@ -426,18 +464,22 @@ if not current_team:
                 c1, c2 = st.columns(2)
                 with c1:
                     if st.button("🛑 Extract & Disappear", key="prac_ext_btn"):
+                        save_snapshot()
                         state["finale_result"] = "extract"
                         state["current_phase"] = "complete"
                         st.rerun()
                 with c2:
                     if st.button("💥 Press the Attack", type="primary", key="prac_press_btn"):
+                        save_snapshot()
                         roll = random.random()
                         if roll < 0.25:
                             state["finale_result"] = "caught"
-                            state["scores"]["Trust"] += 10 # <-- NEW: Company recovers +10 Trust
+                            state["scores"]["Trust"] = min(100, state["scores"]["Trust"] + 10)
+                            state["team_impacts"]["hacker"] += 10
                         else:
                             state["finale_result"] = "success"
-                            state["scores"]["Trust"] -= 15
+                            state["scores"]["Trust"] -= 25
+                            state["team_impacts"]["hacker"] -= 25
                         state["current_phase"] = "complete"
                         st.rerun()
                         
@@ -475,9 +517,12 @@ elif current_team == state["team_codes"]["hackers"]:
                 roll = random.random()
                 if roll < 0.25:
                     state["finale_result"] = "caught"
+                    state["scores"]["Trust"] = min(100, state["scores"]["Trust"] + 10)
+                    state["team_impacts"]["hacker"] += 10
                 else:
                     state["finale_result"] = "success"
-                    state["scores"]["Trust"] -= 15
+                    state["scores"]["Trust"] -= 25
+                    state["team_impacts"]["hacker"] -= 25
                     
                 state["current_phase"] = "complete"
                 st.rerun()
@@ -522,7 +567,7 @@ elif current_team == state["team_codes"]["it"]:
         st.markdown("---")
         
         if state["it_choice"] is None:
-            st.info("Mechanics: Review the incident details, select a mitigation strategy from the dropdown, and click 'Deploy Technical Response' to submit your choice. The simulation will not advance to the Media phase until both the IT and Executive teams have submitted their decisions.")
+            st.info("Mechanics: Review the incident details, select a mitigation strategy from the dropdown, and click 'Deploy Technical Response' to submit your choice.")
             it_options = list(IT_CHOICES[state["active_attack"]].keys())
             it_selection = st.selectbox("Select Technical Mitigation Protocol:", options=it_options)
             
@@ -564,7 +609,7 @@ elif current_team == state["team_codes"]["executive"]:
             else:
                 st.warning("⚠️ IT is currently deliberating their response.")
                 
-            st.info("Mechanics: Review the incident details, select a corporate directive from the dropdown, and click 'Issue Binding Directive' to submit your choice. The simulation will not advance to the Media phase until both the IT and Executive teams have submitted their decisions.")
+            st.info("Mechanics: Review the incident details, select a corporate directive from the dropdown, and click 'Issue Binding Directive'.")
             exec_options = list(EXEC_CHOICES[state["active_attack"]].keys())
             exec_selection = st.selectbox("Select Official Corporate Directive:", options=exec_options)
             
@@ -600,20 +645,13 @@ elif current_team == state["team_codes"]["media"]:
         st.warning(f"**Leaked Executive Directive:** {state['exec_choice']}")
         st.write("Based on the Executive Team's specific choice, how will you frame this to the public?")
         
-        DYNAMIC_HEADLINES = {
-            f"⭐ PRAISED: Market Reacts Positively to CloudStore's Decision to {state['exec_choice']}": 15,
-            f"📈 FAVORABLE: CloudStore Navigates Crisis, Opts to {state['exec_choice']}": 5,
-            f"🔲 NEUTRAL: CloudStore Incident Underway, Strategy is to {state['exec_choice']}": 0,
-            f"📉 CRITICAL: Experts Question CloudStore's Move to {state['exec_choice']}": -10,
-            f"💥 DAMNING: Total Backfire as CloudStore Attempts to {state['exec_choice']}": -25
-        }
-        
         st.info("Mechanics: Review the Executive Directive, select a narrative from the dropdown, and click 'Publish Headline' to lock in your decision and advance the simulation to the Round Recap phase.")
         headline = st.selectbox("Select Publication Narrative:", options=list(DYNAMIC_HEADLINES.keys()))
         
         if st.button("📰 Publish Headline", type="primary"):
             t_change = DYNAMIC_HEADLINES[headline]
-            state["scores"]["Trust"] += t_change
+            state["scores"]["Trust"] = min(100, state["scores"]["Trust"] + t_change) # Cap Trust at 100
+            state["team_impacts"]["media"] += t_change
             state["latest_headline"] = headline
             state["last_changes"]["Trust"] = t_change
             
