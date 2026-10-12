@@ -97,4 +97,66 @@ elif st.session_state.current_phase == 'Hackers':
             st.write(f"**Assessment:** {option['assessment']}")
             st.write(f"**Complexity:** {option['complexity']} | **Projected Impact:** {option['projected_impact']}")
             if st.button(f"Execute: {option['name']}", key=option["id"]):
-                process_turn(option, '
+                process_turn(option, 'IT')
+        st.divider()
+
+# PHASE 3: IT Team
+elif st.session_state.current_phase == 'IT':
+    display_feedback()
+    st.header("Phase 2: IT Defense Team (Blue Team)")
+    st.write("The network is under attack. The alarm bells are ringing. Choose your defense strategy:")
+    
+    for option in game_data.it_options:
+        with st.container():
+            st.subheader(option["name"])
+            st.write(f"**What this does:** {option['description']}")
+            st.write(f"**Pros & Cons:** {option['assessment']}")
+            st.write(f"**Complexity:** {option['complexity']} | **Projected Impact:** {option['projected_impact']}")
+            if st.button(f"Execute: {option['name']}", key=option["id"]):
+                process_turn(option, 'Execs')
+        st.divider()
+
+# PHASE 4: Executive Team
+elif st.session_state.current_phase == 'Execs':
+    display_feedback()
+    st.header("Phase 3: The Executive Team")
+    st.write("The IT team has responded, but the public and regulators are asking questions. How will leadership handle the fallout?")
+    
+    for option in game_data.exec_options:
+        with st.container():
+            st.subheader(option["name"])
+            st.write(f"**What this does:** {option['description']}")
+            st.write(f"**Pros & Cons:** {option['assessment']}")
+            st.write(f"**Complexity:** {option['complexity']} | **Projected Impact:** {option['projected_impact']}")
+            if st.button(f"Execute: {option['name']}", key=option["id"]):
+                process_turn(option, 'End')
+        st.divider()
+
+# PHASE 5: End Game / Results
+elif st.session_state.current_phase == 'End':
+    display_feedback()
+    st.header("Simulation Complete")
+    
+    # Calculate Theoretical Bounds for the evaluation engine
+    # (Hacker worst case * variance max) + (IT/Exec worst case * variance min)
+    # These rough bounds (-60 to 120) encompass the highest and lowest possible simulated scores 
+    min_possible_score = -60  
+    max_possible_score = 120  
+    
+    # Pass through the new evaluation engine
+    outcome_title, outcome_message = evaluate_final_outcome(
+        st.session_state.company_health_score, 
+        min_possible_score, 
+        max_possible_score
+    )
+    
+    # Display the targeted 15/65/20 result
+    st.subheader(f"Final State: {outcome_title}")
+    st.write(outcome_message)
+    st.info(f"**Final Company Health Score:** {st.session_state.company_health_score}")
+    
+    st.write("---")
+    st.write("Thank you for playing the Cyber Attack Sim. Did you get the result you expected? Try playing again with different strategies to see how the complexity and randomness shift the outcomes.")
+    
+    if st.button("Restart Simulation", type="primary"):
+        reset_game()
