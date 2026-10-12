@@ -195,18 +195,15 @@ def default_calculate_round_impact(attack, it_choice, exec_choice, media_headlin
 # ROBUST DYNAMIC MODULE INSPECTION & IMPORT
 # ---------------------------------------------------------
 def safe_resolve_attribute(module, candidate_names: List[str], default_value: Any) -> Tuple[Any, bool]:
-    """Inspects module top-level variables and class attributes safely without throwing exceptions."""
     if module is None:
         return default_value, False
 
-    # 1. Direct top-level check
     for name in candidate_names:
         if hasattr(module, name):
             val = getattr(module, name)
             if val is not None:
                 return val, True
 
-    # 2. Check inside any classes defined in module
     for attr in dir(module):
         try:
             obj = getattr(module, attr)
@@ -221,7 +218,6 @@ def safe_resolve_attribute(module, candidate_names: List[str], default_value: An
 
     return default_value, False
 
-# Attempt imports safely
 try:
     import game_data as _gd_mod
 except Exception:
@@ -232,7 +228,6 @@ try:
 except Exception:
     _se_mod = None
 
-# Safely extract attributes with comprehensive fallbacks
 TEAM_CODES, _found_codes = safe_resolve_attribute(
     _gd_mod,
     ["TEAM_CODES", "team_codes", "PASSCODES", "passcodes", "CODES", "codes", "ROLES", "roles", "PASSWORDS"],
@@ -269,11 +264,7 @@ calculate_round_impact, _found_scoring = safe_resolve_attribute(
     default_calculate_round_impact
 )
 
-# ---------------------------------------------------------
-# OPTION NORMALIZATION HELPER (Supports dict-of-dicts and list-of-dicts)
-# ---------------------------------------------------------
 def normalize_options_list(raw_options) -> List[Dict[str, Any]]:
-    """Converts either list-of-dicts or dict-of-dicts into standard list of option dictionaries."""
     normalized = []
     if isinstance(raw_options, dict):
         for k, v in raw_options.items():
@@ -319,14 +310,12 @@ class GameState:
         self.phase = "lobby"
         self.multiplier = 1.0
         
-        # Current round submissions
         self.selected_attack_key: Optional[str] = None
         self.selected_attack_data: Optional[Dict[str, Any]] = None
         self.it_choice_id: Optional[str] = None
         self.exec_choice_id: Optional[str] = None
         self.media_headline_idx: Optional[int] = None
         
-        # Cumulative 4-Quadrant Scorecard
         self.team_scorecard = {
             "IT": 0,
             "Exec": 0,
@@ -334,12 +323,10 @@ class GameState:
             "Hacker": 0
         }
         
-        # Round history & Undo snapshots
         self.history = []
         self.snapshots = []
 
     def create_snapshot(self):
-        """Saves deep copy of current state for Instructor Undo."""
         snap = {
             "scores": copy.deepcopy(self.scores),
             "current_round": self.current_round,
@@ -356,7 +343,6 @@ class GameState:
         self.snapshots.append(snap)
 
     def undo_last_round(self) -> bool:
-        """Rolls back state to the most recent snapshot."""
         if not self.snapshots:
             return False
         snap = self.snapshots.pop()
@@ -397,26 +383,21 @@ class GameState:
         self.evaluate_round()
 
     def evaluate_round(self):
-        """Evaluates round impacts using the scoring engine."""
         attack = self.selected_attack_data or {}
         
-        # Lookup IT choice
         raw_it = IT_CHOICES.get(self.current_round, {}).get(self.selected_attack_key, [])
         it_options = normalize_options_list(raw_it)
         it_choice = next((c for c in it_options if str(c.get("id")) == str(self.it_choice_id)), {})
         
-        # Lookup Exec choice
         raw_exec = EXEC_CHOICES.get(self.current_round, [])
         exec_options = normalize_options_list(raw_exec)
         exec_choice = next((c for c in exec_options if str(c.get("id")) == str(self.exec_choice_id)), {})
         
-        # Lookup Media choice
         media_choice = None
         norm_headlines = normalize_options_list(DYNAMIC_HEADLINES)
         if self.media_headline_idx is not None and 0 <= self.media_headline_idx < len(norm_headlines):
             media_choice = norm_headlines[self.media_headline_idx]
 
-        # Call modular scoring engine
         try:
             impact_result = calculate_round_impact(
                 attack=attack,
@@ -437,16 +418,13 @@ class GameState:
         deltas = impact_result.get("deltas", {})
         team_round_scores = impact_result.get("team_scorecard", {})
 
-        # Apply deltas to organizational scores
         for metric, delta in deltas.items():
             if metric in self.scores:
                 self.scores[metric] = max(0.0, min(self.base_score * 1.5, round(self.scores[metric] + delta, 1)))
 
-        # Update cumulative 4-quadrant team scorecard
         for team, score in team_round_scores.items():
             self.team_scorecard[team] = self.team_scorecard.get(team, 0) + score
 
-        # Record round history log
         record = {
             "round": self.current_round,
             "attack": attack.get("name", "Unknown Vector"),
@@ -500,7 +478,7 @@ def render_metric_gauge(label: str, value: float, max_val: float = 100.0):
             <span style="font-size: 12px; font-weight: 800; color: {bar_color};">{status_text}</span>
         </div>
         <div style="display: flex; align-items: baseline; gap: 8px;">
-            <span style="font-size: 26px; font-weight: 800; color: #f8fafc;">{value:.1f}</span>
+            <span style="font-size: 28px; font-weight: 800; color: #f8fafc;">{value:.1f}</span>
             <span style="font-size: 12px; color: #64748b;">/ {max_val:.0f}</span>
         </div>
         <div style="background-color: #1e293b; height: 8px; border-radius: 999px; overflow: hidden; margin-top: 8px;">
@@ -522,11 +500,11 @@ def render_scorecard_quadrant(scorecard: Dict[str, int]):
         st.metric(label="💀 Threat Actors", value=f"{scorecard.get('Hacker', 0)} pts")
 
 # ---------------------------------------------------------
-# ROLE TERMINAL VIEWS
+# DASHBOARD: MAIN MISSION CONTROL
 # ---------------------------------------------------------
-def render_instructor_view(game: GameState):
+def render_main_dashboard(game: GameState):
     st.title("🛡️ CloudStore Command: Mission Control")
-    st.caption("Central Operations Room & Instructor Control Console")
+    st.caption("Live Operational Cyber Incident Response Dashboard")
 
     # Top Metrics Row
     m1, m2, m3 = st.columns(3)
@@ -541,11 +519,11 @@ def render_instructor_view(game: GameState):
 
     # Current Game Status Banner
     phase_descriptions = {
-        "lobby": "🎮 Simulation Lobby — Waiting for Instructor to Launch",
-        "hacker": f"🔴 Round {game.current_round}: Awaiting Threat Actor Attack Vector...",
-        "defense": f"🟡 Round {game.current_round}: Incident Active! Defense Teams Deliberating...",
-        "media": f"🟠 Round {game.current_round}: Press Scrum in Progress — Awaiting News Headline...",
-        "recap": f"🟢 Round {game.current_round}: Assessment Complete — Reviewing Metrics",
+        "lobby": "🎮 Simulation in Lobby — Waiting for GM to Start Round 1",
+        "hacker": f"🔴 Round {game.current_round}: Awaiting Threat Actor Attack Vector Selection...",
+        "defense": f"🟡 Round {game.current_round}: Incident Active! IT Defense & Executive Board Deliberating...",
+        "media": f"🟠 Round {game.current_round}: Press Scrum Active — Awaiting Media Headline...",
+        "recap": f"🟢 Round {game.current_round}: Assessment Complete — Reviewing Score Impact",
         "game_over": "🏁 Simulation Concluded — Final Assessment"
     }
     st.info(phase_descriptions.get(game.phase, f"Phase: {game.phase}"))
@@ -554,9 +532,9 @@ def render_instructor_view(game: GameState):
     if game.selected_attack_data:
         att = game.selected_attack_data
         st.markdown(f"""
-        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin: 12px 0;">
+        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 18px; margin: 12px 0;">
             <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">ACTIVE INCIDENT ALERT</div>
-            <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 4px;">{att.get('icon', '🚨')} {att.get('name', 'Cyber Incident')}</div>
+            <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">{att.get('icon', '🚨')} {att.get('name', 'Cyber Incident')}</div>
             <div style="font-size: 14px; color: #fecaca; margin-top: 6px;">{att.get('description', '')}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -566,45 +544,11 @@ def render_instructor_view(game: GameState):
 
     st.markdown("---")
 
-    # Instructor Action Controls
-    st.subheader("⚙️ Mission Control Operator Controls")
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-        if game.phase == "lobby":
-            if st.button("🚀 Start Round 1", type="primary", use_container_width=True):
-                game.phase = "hacker"
-                st.rerun()
-        elif game.phase == "recap":
-            next_label = "🏁 Conclude Game" if game.current_round >= game.max_rounds else f"Start Round {game.current_round + 1}"
-            if st.button(f"➡️ {next_label}", type="primary", use_container_width=True):
-                game.advance_to_next_round()
-                st.rerun()
-
-    with c2:
-        game.multiplier = st.selectbox(
-            "Difficulty Multiplier",
-            options=[1.0, 1.2, 1.5, 2.0],
-            index=[1.0, 1.2, 1.5, 2.0].index(game.multiplier) if game.multiplier in [1.0, 1.2, 1.5, 2.0] else 0,
-            format_func=lambda x: f"{x}x Threat Intensity"
-        )
-
-    with c3:
-        if st.button("↩️ Undo Last Round", use_container_width=True, disabled=len(game.snapshots) == 0):
-            if game.undo_last_round():
-                st.success("Rolled back to previous state snapshot.")
-                st.rerun()
-
-    with c4:
-        if st.button("🔄 Reset Entire Simulation", type="secondary", use_container_width=True):
-            game.reset()
-            st.rerun()
-
     # Timeline Log
     if game.history:
         st.markdown("### 📜 Mission Incident Timeline")
         for entry in reversed(game.history):
-            with st.expander(f"Round {entry['round']}: {entry['attack']} ({entry['multiplier']}x Multiplier)", expanded=False):
+            with st.expander(f"Round {entry['round']}: {entry['attack']} ({entry['multiplier']}x Multiplier)", expanded=True):
                 col_a, col_b = st.columns(2)
                 with col_a:
                     st.write(f"**IT Containment:** {entry['it_action']}")
@@ -617,6 +561,9 @@ def render_instructor_view(game: GameState):
                         st.markdown(f"- {m}: <span style='color:{delta_color};font-weight:bold;'>{d:+g}</span>", unsafe_allow_html=True)
                     st.write(f"**Scores After Round:** Trust: {entry['scores_after']['Trust']:.1f} | Fiscal: {entry['scores_after']['Fiscal']:.1f} | Op-Eff: {entry['scores_after']['Op-Eff']:.1f}")
 
+# ---------------------------------------------------------
+# ROLE TERMINAL VIEWS (For Specific Teams)
+# ---------------------------------------------------------
 def render_hacker_terminal(game: GameState):
     st.title("💀 Threat Actor Command Terminal")
     st.caption("Access Level: Adversary / Red Team Infiltration")
@@ -667,7 +614,7 @@ def render_it_terminal(game: GameState):
     st.error(f"🚨 **ACTIVE BREACH:** {att.get('icon', '')} {att.get('name', 'Security Incident')} — {att.get('description', '')}")
 
     if game.it_choice_id:
-        st.success(f"✅ Technical mitigation submitted! Standing by for Executive and Media directives.")
+        st.success("✅ Technical mitigation submitted! Standing by for Executive and Media directives.")
         return
 
     st.subheader("Select Technical Containment Action")
@@ -771,7 +718,7 @@ def render_media_terminal(game: GameState):
             st.rerun()
 
 # ---------------------------------------------------------
-# MAIN APP ENTRYPOINT
+# MAIN APP ENTRYPOINT WITH DEDICATED GM SIDEBAR & QUERY PARAM ROUTING
 # ---------------------------------------------------------
 def main():
     st.set_page_config(
@@ -783,62 +730,141 @@ def main():
 
     game = get_global_game()
 
-    # Sidebar: Terminal Authentication & Routing
-    st.sidebar.title("🔐 Terminal Access")
-    role_options = {
-        "Mission Control (Instructor)": "main",
-        "Threat Actor (Hacker)": "hackers",
-        "IT Defense Command": "it",
-        "Executive Board": "exec",
-        "Media & PR Scrum": "media"
-    }
+    # 1. Resolve Team/Role from URL Query Parameters
+    # e.g., ?team=it or ?team=hackers or ?team=exec or ?team=media or ?team=main
+    try:
+        qp = st.query_params
+        url_role = qp.get("team") or qp.get("role") or ""
+    except Exception:
+        try:
+            qp_old = st.experimental_get_query_params()
+            url_role = qp_old.get("team", [""])[0] or qp_old.get("role", [""])[0]
+        except Exception:
+            url_role = ""
 
-    selected_role_label = st.sidebar.selectbox("Select Role", options=list(role_options.keys()))
-    role_key = role_options[selected_role_label]
-    correct_passcode = TEAM_CODES.get(role_key, "admin123")
+    url_role = url_role.lower().strip()
 
-    passcode = st.sidebar.text_input("Enter Passcode", type="password", key=f"pwd_{role_key}")
+    # 2. Check if user is on a dedicated Team URL
+    is_team_url = url_role in ["hackers", "it", "exec", "media"]
 
-    # Check Passcode (allows quick bypass if passcode matches or left blank in dev mode)
-    authenticated = (passcode == correct_passcode) or (passcode == "admin")
+    if is_team_url:
+        # Player Team Terminal View (Clean, distraction-free layout)
+        st.sidebar.title("🔐 Team Access")
+        st.sidebar.success(f"Connected: **{url_role.upper()}**")
+        st.sidebar.caption(f"Round: **{game.current_round} / {game.max_rounds}**")
+        st.sidebar.caption(f"Phase: **{game.phase.upper()}**")
+
+        if st.sidebar.button("🔄 Refresh View", use_container_width=True):
+            st.rerun()
+
+        st.sidebar.markdown("---")
+        if st.sidebar.button("🎮 Switch to GM Mode", use_container_width=True):
+            try:
+                st.query_params["team"] = "main"
+            except Exception:
+                pass
+            st.rerun()
+
+        # Render the specific team terminal in the main larger area
+        if url_role == "hackers":
+            render_hacker_terminal(game)
+        elif url_role == "it":
+            render_it_terminal(game)
+        elif url_role == "exec":
+            render_exec_terminal(game)
+        elif url_role == "media":
+            render_media_terminal(game)
+        return
+
+    # 3. GM / Instructor Mode (Dashboard in main area, GM controls in sidebar)
+    st.sidebar.title("🎮 Game Master (GM) Console")
+    st.sidebar.caption("Mission Control Operations & Team Management")
+
+    # GM State Overview
+    st.sidebar.markdown(f"**Round:** {game.current_round} / {game.max_rounds} &nbsp;|&nbsp; **Phase:** `{game.phase.upper()}`")
+    
+    # GM Controls: Simulation Progress
+    st.sidebar.markdown("### 🕹️ Round Management")
+    if game.phase == "lobby":
+        if st.sidebar.button("🚀 Start Round 1", type="primary", use_container_width=True):
+            game.phase = "hacker"
+            st.rerun()
+    elif game.phase == "recap":
+        next_label = "🏁 Conclude Game" if game.current_round >= game.max_rounds else f"Start Round {game.current_round + 1}"
+        if st.sidebar.button(f"➡️ {next_label}", type="primary", use_container_width=True):
+            game.advance_to_next_round()
+            st.rerun()
+    elif game.phase == "game_over":
+        st.sidebar.success("🏁 Simulation Finished!")
+    else:
+        st.sidebar.info(f"Awaiting team inputs for phase: **{game.phase.upper()}**")
+
+    # Threat Multiplier
+    game.multiplier = st.sidebar.selectbox(
+        "⚡ Threat Severity Multiplier",
+        options=[1.0, 1.2, 1.5, 2.0],
+        index=[1.0, 1.2, 1.5, 2.0].index(game.multiplier) if game.multiplier in [1.0, 1.2, 1.5, 2.0] else 0,
+        format_func=lambda x: f"{x}x Threat Intensity"
+    )
+
+    # Undo & Reset Controls
+    col_u, col_r = st.sidebar.columns(2)
+    with col_u:
+        if st.button("↩️ Undo", use_container_width=True, disabled=len(game.snapshots) == 0):
+            if game.undo_last_round():
+                st.success("Rolled back.")
+                st.rerun()
+    with col_r:
+        if st.button("🔄 Reset", use_container_width=True):
+            game.reset()
+            st.rerun()
 
     st.sidebar.markdown("---")
-    st.sidebar.caption(f"Current Simulation Round: **{game.current_round} / {game.max_rounds}**")
-    st.sidebar.caption(f"Active Phase: **{game.phase.upper()}**")
 
-    # Diagnostic info in sidebar
-    with st.sidebar.expander("🛠️ Module Diagnostics", expanded=False):
-        st.write(f"- `game_data`: {'✅ Loaded' if _gd_mod else '⚠️ Using built-in fallbacks'}")
-        st.write(f"- `scoring_engine`: {'✅ Loaded' if _se_mod else '⚠️ Using built-in fallbacks'}")
-        st.write(f"- `TEAM_CODES`: {'External' if _found_codes else 'Default'}")
-        st.write(f"- `ATTACKS`: {'External' if _found_attacks else 'Default'}")
-        st.write(f"- `IT_CHOICES`: {'External' if _found_it else 'Default'}")
-        st.write(f"- `EXEC_CHOICES`: {'External' if _found_exec else 'Default'}")
+    # Shareable Team Specific URLs Section
+    st.sidebar.markdown("### 🔗 Shareable Team URLs")
+    st.sidebar.caption("Send these direct links to the respective player teams:")
 
-    if st.sidebar.button("🔄 Force Refresh View", use_container_width=True):
+    # Base URL configuration (auto-detected or customized)
+    default_base_url = "https://cyberattacksim.streamlit.app"
+    base_url = st.sidebar.text_input("App Base URL", value=default_base_url, help="Change if testing on localhost or custom domain.")
+    base_url = base_url.rstrip("/")
+
+    team_links = {
+        "💀 Threat Actors (Hackers)": f"{base_url}/?team=hackers",
+        "🛡️ IT Defense Command": f"{base_url}/?team=it",
+        "💼 Executive Boardroom": f"{base_url}/?team=exec",
+        "🎤 Media & PR Scrum": f"{base_url}/?team=media",
+        "🎮 GM Mission Control": f"{base_url}/?team=main"
+    }
+
+    for label, link in team_links.items():
+        with st.sidebar.expander(label, expanded=False):
+            st.code(link, language="text")
+            st.caption(f"[Open Link in New Tab]({link})")
+
+    st.sidebar.markdown("---")
+
+    # GM View Switcher / Terminal Preview
+    st.sidebar.markdown("### 👁️ Terminal Preview")
+    preview_mode = st.sidebar.selectbox(
+        "View As:",
+        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal"]
+    )
+
+    if st.sidebar.button("🔄 Force Refresh All", use_container_width=True):
         st.rerun()
 
-    if not authenticated and passcode:
-        st.error("❌ Invalid Access Passcode for this Terminal.")
-        st.stop()
-    elif not authenticated and not passcode:
-        st.sidebar.info(f"💡 Enter team passcode for {selected_role_label} to access controls.")
-        if role_key == "main":
-            render_instructor_view(game)
-        else:
-            st.warning("Please enter your team passcode in the sidebar to activate this terminal.")
-        st.stop()
-
-    # Route to authenticated view
-    if role_key == "main":
-        render_instructor_view(game)
-    elif role_key == "hackers":
+    # Render selected view in the larger main area
+    if preview_mode == "Main Dashboard":
+        render_main_dashboard(game)
+    elif preview_mode == "Threat Actor Terminal":
         render_hacker_terminal(game)
-    elif role_key == "it":
+    elif preview_mode == "IT Defense Terminal":
         render_it_terminal(game)
-    elif role_key == "exec":
+    elif preview_mode == "Executive Terminal":
         render_exec_terminal(game)
-    elif role_key == "media":
+    elif preview_mode == "Media Terminal":
         render_media_terminal(game)
 
 if __name__ == "__main__":
