@@ -1,4 +1,6 @@
 import streamlit as st
+import game_data
+from scoring_engine import calculate_actual_impact, evaluate_final_outcome
 import random
 import os
 import copy
