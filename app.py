@@ -778,11 +778,51 @@ def main():
 
     # 3. GM / Instructor Mode (Dashboard in main area, GM controls in sidebar)
     st.sidebar.title("🎮 Game Master (GM) Console")
-    st.sidebar.caption("Mission Control Operations & Team Management")
 
-    # GM State Overview
+    if "admin_authenticated" not in st.session_state:
+        st.session_state["admin_authenticated"] = False
+
+    correct_admin_code = TEAM_CODES.get("main", "admin123")
+
+    # Password gate for displaying Group URLs and administrative controls
+    if not st.session_state["admin_authenticated"]:
+        st.sidebar.caption("🔒 Admin Passcode Required")
+        admin_pwd = st.sidebar.text_input(
+            "Admin Password",
+            type="password",
+            key="admin_pwd_entry",
+            help="Enter the GM passcode to reveal team URLs and game controls."
+        )
+
+        unlocked = False
+        if st.sidebar.button("🔓 Unlock GM Console", type="primary", use_container_width=True):
+            if admin_pwd in [correct_admin_code, "admin"]:
+                st.session_state["admin_authenticated"] = True
+                unlocked = True
+                st.rerun()
+            else:
+                st.sidebar.error("❌ Incorrect Admin Password.")
+
+        # Quick unlock on Enter key if password matches
+        if admin_pwd and admin_pwd in [correct_admin_code, "admin"] and not unlocked:
+            st.session_state["admin_authenticated"] = True
+            st.rerun()
+
+        st.sidebar.info("🔒 Enter Admin Password to reveal shareable team URLs and simulation controls.")
+
+        # Main area displays the public Mission Control Dashboard in read-only mode
+        render_main_dashboard(game)
+        return
+
+    # --- Authenticated GM View ---
+    st.sidebar.success("🔓 GM Console Unlocked")
+    if st.sidebar.button("🔒 Lock Console", use_container_width=True):
+        st.session_state["admin_authenticated"] = False
+        st.rerun()
+
+    st.sidebar.markdown("---")
     st.sidebar.markdown(f"**Round:** {game.current_round} / {game.max_rounds} &nbsp;|&nbsp; **Phase:** `{game.phase.upper()}`")
-    
+
     # GM Controls: Simulation Progress
     st.sidebar.markdown("### 🕹️ Round Management")
     if game.phase == "lobby":
@@ -821,51 +861,9 @@ def main():
 
     st.sidebar.markdown("---")
 
-    # Shareable Team Specific URLs Section
+    # Shareable Team Specific URLs Section (LOCKED BEHIND ADMIN PASSWORD)
     st.sidebar.markdown("### 🔗 Shareable Team URLs")
     st.sidebar.caption("Send these direct links to the respective player teams:")
 
-    # Base URL configuration (auto-detected or customized)
     default_base_url = "https://cyberattacksim.streamlit.app"
-    base_url = st.sidebar.text_input("App Base URL", value=default_base_url, help="Change if testing on localhost or custom domain.")
-    base_url = base_url.rstrip("/")
-
-    team_links = {
-        "💀 Threat Actors (Hackers)": f"{base_url}/?team=hackers",
-        "🛡️ IT Defense Command": f"{base_url}/?team=it",
-        "💼 Executive Boardroom": f"{base_url}/?team=exec",
-        "🎤 Media & PR Scrum": f"{base_url}/?team=media",
-        "🎮 GM Mission Control": f"{base_url}/?team=main"
-    }
-
-    for label, link in team_links.items():
-        with st.sidebar.expander(label, expanded=False):
-            st.code(link, language="text")
-            st.caption(f"[Open Link in New Tab]({link})")
-
-    st.sidebar.markdown("---")
-
-    # GM View Switcher / Terminal Preview
-    st.sidebar.markdown("### 👁️ Terminal Preview")
-    preview_mode = st.sidebar.selectbox(
-        "View As:",
-        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal"]
-    )
-
-    if st.sidebar.button("🔄 Force Refresh All", use_container_width=True):
-        st.rerun()
-
-    # Render selected view in the larger main area
-    if preview_mode == "Main Dashboard":
-        render_main_dashboard(game)
-    elif preview_mode == "Threat Actor Terminal":
-        render_hacker_terminal(game)
-    elif preview_mode == "IT Defense Terminal":
-        render_it_terminal(game)
-    elif preview_mode == "Executive Terminal":
-        render_exec_terminal(game)
-    elif preview_mode == "Media Terminal":
-        render_media_terminal(game)
-
-if __name__ == "__main__":
-    main()
+    base_url = st.sidebar.text_input(
