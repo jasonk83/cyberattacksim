@@ -866,4 +866,45 @@ def main():
     st.sidebar.caption("Send these direct links to the respective player teams:")
 
     default_base_url = "https://cyberattacksim.streamlit.app"
-    base_url = st.sidebar.text_input(
+    base_url = st.sidebar.text_input("App Base URL", value=default_base_url, help="Change if testing on localhost or custom domain.")
+    base_url = base_url.rstrip("/")
+
+    team_links = {
+        "💀 Threat Actors (Hackers)": f"{base_url}/?team=hackers",
+        "🛡️ IT Defense Command": f"{base_url}/?team=it",
+        "💼 Executive Boardroom": f"{base_url}/?team=exec",
+        "🎤 Media & PR Scrum": f"{base_url}/?team=media",
+        "🎮 GM Mission Control": f"{base_url}/?team=main"
+    }
+
+    for label, link in team_links.items():
+        with st.sidebar.expander(label, expanded=False):
+            st.code(link, language="text")
+            st.caption(f"[Open Link in New Tab]({link})")
+
+    st.sidebar.markdown("---")
+
+    # GM View Switcher / Terminal Preview
+    st.sidebar.markdown("### 👁️ Terminal Preview")
+    preview_mode = st.sidebar.selectbox(
+        "View As:",
+        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal"]
+    )
+
+    if st.sidebar.button("🔄 Force Refresh All", use_container_width=True):
+        st.rerun()
+
+    # Render selected view in the larger main area
+    if preview_mode == "Main Dashboard":
+        render_main_dashboard(game)
+    elif preview_mode == "Threat Actor Terminal":
+        render_hacker_terminal(game)
+    elif preview_mode == "IT Defense Terminal":
+        render_it_terminal(game)
+    elif preview_mode == "Executive Terminal":
+        render_exec_terminal(game)
+    elif preview_mode == "Media Terminal":
+        render_media_terminal(game)
+
+if __name__ == "__main__":
+    main()
