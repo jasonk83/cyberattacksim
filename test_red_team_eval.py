@@ -229,8 +229,7 @@ def test_full_three_round_attack_lifecycle():
 
     round_attacks_chosen = [
         ("Round 1", "C", -30, "AI LLM Prompt Injection & API Pivot"),
-        ("Round 2", "B", -28, "Production Database Sabotage & Deletion"),
-        ("Round 3", "A", -25, "Supply Chain Logistics API Poisoning")
+        ("Round 2", "B", -28, "Production Database Sabotage & Deletion")
     ]
 
     for rnd_label, chosen_vector, expected_dmg, expected_name in round_attacks_chosen:
@@ -305,17 +304,36 @@ def test_full_three_round_attack_lifecycle():
         assert any("RECAP" in m.value for m in gm.sidebar.markdown)
         print(f"  [OK] {rnd_label} concluded successfully.")
 
-        # GM advances to next round or finishes
-        advance_btn = next((b for b in gm.sidebar.button if b.label and ("Start Round" in b.label or "Conclude Game" in b.label)), None)
+        # GM advances to next round or final gambit
+        advance_btn = next((b for b in gm.sidebar.button if b.label and ("Start Round" in b.label or "Advance to Final" in b.label or "Conclude Game" in b.label)), None)
         if advance_btn:
             advance_btn.click().run()
             print(f"  [GM] Clicked '{advance_btn.label}'.")
 
-    # Verify simulation ended
+    # >>> Evaluating Adversary Final Action Gambit <<<
+    print("\n  >>> Evaluating Adversary Final Action Gambit <<<")
+    capt = AppTest.from_file("app.py")
+    capt.query_params["team"] = "hackers"
+    capt.run()
+    capt.sidebar.text_input[0].input("hacker123")
+    capt.sidebar.button[0].click().run()
+    assert any("FINAL_HACKER_ACTION" in c.value for c in capt.sidebar.caption)
+
+    # Verify buttons for Press the Attack and Safe Retreat exist
+    press_btn = next((b for b in capt.button if b.label and "Press the Attack" in b.label), None)
+    retreat_btn = next((b for b in capt.button if b.label and "Safe Retreat" in b.label), None)
+    assert press_btn is not None, "Could not find 'Authorize: Press the Attack' button!"
+    assert retreat_btn is not None, "Could not find 'Authorize: Safe Retreat' button!"
+
+    # Captain authorizes Press Attack
+    press_btn.click().run()
+    print("  [OK] Threat Actor Captain executed: Press the Attack!")
+
+    # Verify simulation ended in GAME_OVER
     gm.run()
     ended_elements = list(gm.sidebar.markdown) + list(gm.sidebar.caption) + list(gm.sidebar.success)
     assert any("GAME_OVER" in str(getattr(x, "value", "")) or "Simulation Finished" in str(getattr(x, "value", "")) for x in ended_elements)
-    print("\n✅ All 3 rounds successfully executed and verified from Red Team perspective!")
+    print("\n✅ All 2 rounds + Adversary Final Gambit successfully executed and verified from Red Team perspective!")
 
 
 if __name__ == "__main__":

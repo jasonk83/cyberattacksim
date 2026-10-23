@@ -2,7 +2,7 @@ import sys
 import time
 from streamlit.testing.v1 import AppTest
 from state_manager import GameState
-from game_data import TEAM_CODES, PHASE_DURATIONS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, ATTACKS
+from game_data import TEAM_CODES, PHASE_DURATIONS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, ATTACKS, get_it_choices
 
 def test_blue_team_deep():
     print("=====================================================================")
@@ -21,10 +21,10 @@ def test_blue_team_deep():
     gm.sidebar.button[0].click().run()
     assert not gm.exception
 
-    # Set 3 rounds in lobby
+    # Set 2 rounds in lobby (default)
     for r in gm.sidebar.radio:
         if r.label == "Session Round Count":
-            r.set_value(3)
+            r.set_value(2)
             break
     gm.run()
 
@@ -43,9 +43,9 @@ def test_blue_team_deep():
     start_btn.click().run()
     print("  [GM] Initiated Round 1.")
 
-    # Loop through Rounds 1, 2, 3
-    for current_round in range(1, 4):
-        print(f"\n==================== SIMULATING ROUND {current_round} / 3 ====================")
+    # Loop through Rounds 1, 2
+    for current_round in range(1, 3):
+        print(f"\n==================== SIMULATING ROUND {current_round} / 2 ====================")
         
         # Threat Actor Phase: Captain deploys attack vector A
         h_capt = AppTest.from_file("app.py")
@@ -93,7 +93,7 @@ def test_blue_team_deep():
 
         # Audit IT Option details (Downtime vs Disruption vs Mitigation %)
         all_it_md = " ".join([m.value for m in it_capt.markdown])
-        round_options = IT_CHOICES[current_round]
+        round_options = get_it_choices(current_round, "A")
         for opt in round_options:
             mit_badge = f"Mitigates {int(opt['mitigation_pct']*100)}% Damage"
             downtime_text = opt['downtime']
@@ -248,22 +248,34 @@ def test_blue_team_deep():
         gm.run()
         print(f"  [GM Scoreboard] Company Health after Round {current_round}: {gm.session_state.get('voter_id') is not None}")
         
-        if current_round < 3:
+        if current_round < 2:
             advance_btn = next((b for b in gm.sidebar.button if f"Start Round {current_round + 1}" in b.label), None)
             assert advance_btn is not None, f"Button 'Start Round {current_round + 1}' not found in GM sidebar"
             advance_btn.click().run()
             print(f"  [GM] Advanced simulation to Round {current_round + 1}.")
         else:
-            conclude_btn = next((b for b in gm.sidebar.button if "Conclude Game" in b.label), None)
-            assert conclude_btn is not None, "Button 'Conclude Game' not found in GM sidebar"
-            conclude_btn.click().run()
-            print("  [GM] Concluded simulation! Final evaluation screen active.")
+            advance_btn = next((b for b in gm.sidebar.button if "Advance to Final" in b.label or "Conclude Game" in b.label), None)
+            assert advance_btn is not None, "Button to advance to Final Threat Actor Gambit not found"
+            advance_btn.click().run()
+            print("  [GM] Advanced simulation to Adversary Final Gambit!")
+
+    # Adversary Final Action Gambit
+    print("\n  --- [ADVERSARY FINAL GAMBIT] ---")
+    h_capt = AppTest.from_file("app.py")
+    h_capt.query_params["team"] = "hackers"
+    h_capt.run()
+    h_capt.sidebar.text_input[0].input("hacker123")
+    h_capt.sidebar.button[0].click().run()
+    retreat_btn = next((b for b in h_capt.button if b.label and "Safe Retreat" in b.label), None)
+    assert retreat_btn is not None, "Could not find Safe Retreat button"
+    retreat_btn.click().run()
+    print("  [Hackers] Executed Safe Retreat.")
 
     # Verify Game Over screen
     gm.run()
     assert any("Simulation Finished" in s.value for s in gm.sidebar.success)
     print("\n=====================================================================")
-    print("🎉 ALL 3 ROUNDS OF BLUE TEAM EVALUATION PASSED FLAWLESSLY!")
+    print("🎉 ALL 2 ROUNDS + FINAL GAMBIT OF BLUE TEAM EVALUATION PASSED FLAWLESSLY!")
     print("=====================================================================")
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from scoring_engine import evaluate_final_outcome, get_outcome_thresholds
 def test_full_game_lifecycle():
     print("=== Testing Game State Lifecycle & Polling ===")
     game = GameState()
-    game.reset(base_health=100.0, max_rounds=3)
+    game.reset(base_health=100.0, max_rounds=2)
 
     # 1. Test Lobby & Timer
     assert game.phase == "lobby"
@@ -86,23 +86,66 @@ def test_full_game_lifecycle():
     assert len(game.snapshots) > 0
     rolled_back = game.undo_last_round()
     assert rolled_back is True
-    print("✅ Undo functionality verified!")
+    # Re-submit media choice to return to recap after undo test
+    game.submit_media_choice(2)
+    assert game.phase == "recap"
 
-    # 7. Advance to conclusion
+    # 7. Advance to Round 2 and Verify Straw Poll Reset
     game.advance_to_next_round()
-    print("✅ Round advancement verified!")
+    assert game.current_round == 2
+    assert game.phase == "hacker"
+    # Verify Hacker straw poll is cleanly reset
+    assert game.polls["hackers"]["open"] is False
+    assert len(game.polls["hackers"]["votes"]) == 0
+    stats = game.get_poll_stats("hackers")
+    assert stats["total_votes"] == 0
+    print("✅ Hacker straw poll cleanly reset upon advancing to Round 2!")
 
-    # 8. Test Outcome Thresholds for 2 and 3 rounds
+    # Complete Round 2
+    game.submit_hacker_attack("A")
+    game.submit_it_choice("1")
+    game.submit_exec_choice("approve")
+    game.submit_media_choice(1)
+    assert game.phase == "recap"
+    assert len(game.history) == 2
+    print("✅ Round 2 completed successfully!")
+
+    # 8. Advance from Round 2 Recap -> Triggers Final Hacker Action
+    game.advance_to_next_round()
+    assert game.phase == "final_hacker_action"
+    assert game.phase_duration == 180
+    print("✅ Advanced to Final Threat Actor Gambit (final_hacker_action phase)!")
+
+    # Test Hacker Straw Poll in Final Action
+    game.open_poll("hackers", [{"id": "press", "label": "Press Attack"}, {"id": "retreat", "label": "Safe Retreat"}])
+    game.cast_vote("hackers", "v1", "press")
+    game.cast_vote("hackers", "v2", "retreat")
+    stats = game.get_poll_stats("hackers")
+    assert stats["total_votes"] == 2
+
+    # Hacker Captain authorizes Press Attack
+    result = game.submit_final_hacker_action("press")
+    assert game.phase == "game_over"
+    assert result["action"] == "press"
+    assert 15 <= result["damage"] <= 25
+    if result["caught"]:
+        assert 3 <= result["recovery"] <= 15
+    else:
+        assert result["recovery"] == 0
+    assert game.final_hacker_action_data is not None
+    print(f"✅ Final Hacker Action executed: {result['summary']}")
+
+    # 9. Test Outcome Thresholds for 2 and 3 rounds
     b2, w2 = get_outcome_thresholds(2)
-    assert b2 == 52 and w2 == 78
+    assert b2 == 39 and w2 == 70
     b3, w3 = get_outcome_thresholds(3)
     assert b3 == 30 and w3 == 62
 
-    tier_win, _, _ = evaluate_final_outcome(85.0, 3)
+    tier_win, _, _ = evaluate_final_outcome(75.0, 2)
     assert tier_win == "Win"
-    tier_survive, _, _ = evaluate_final_outcome(50.0, 3)
+    tier_survive, _, _ = evaluate_final_outcome(50.0, 2)
     assert tier_survive == "Survive"
-    tier_bankrupt, _, _ = evaluate_final_outcome(20.0, 3)
+    tier_bankrupt, _, _ = evaluate_final_outcome(25.0, 2)
     assert tier_bankrupt == "Bankrupt"
     print("✅ Outcome evaluation tiers verified!")
     print("\n🎉 ALL GAMEPLAY TESTS PASSED!")

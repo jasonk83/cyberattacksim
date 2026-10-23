@@ -1,7 +1,13 @@
-### 💀 IT System Impact: Double Extortion Ransomware
-Systems are encrypted and data has left the building. IT must rebuild the operational environment from scratch while assuming the current network architecture is fundamentally compromised.
+### 💀 Technical SOC Briefing: Double Extortion Ransomware Lockout
+Adversary deployed high-speed encryption across active directory domain controllers and exfiltrated sensitive files to dark web leak sites, demanding a $5M extortion payment.
 
-**Recovery Timelines & Technical Impact by Decision:**
-* **Burn and Rebuild from Bare Metal:** (RTO: 14 Days) All hardware is wiped. Backups are restored to entirely new, clean servers. Maximum downtime, but guarantees the malware is eradicated.
-* **Pay Ransom and Run Decryptor Tool:** (RTO: 48 Hours) Relies on the hacker's software to unlock the files. Fast recovery, but leaves behind potential backdoors the hackers installed.
-* **Attempt Manual Cryptanalysis:** (RTO: 6+ Months) IT attempts to crack the AES encryption themselves without paying. Incredibly resource-intensive and statistically unlikely to succeed.
+**Containment Strategies & Technical Impact Analysis:**
+* **Option 1: Burn and Rebuild Bare-Metal from Clean Offline Golden Images**  
+  *Recovery Time Objective (RTO): 36 Hours Offline &bull; Threat Mitigation: 90% (Maximum)*  
+  Completely wipes encrypted bare-metal servers and restores systems from isolated offline golden backups. Severe disruption (-4 Health penalty), but guarantees complete eradication of ransomware binaries and attacker persistence.
+* **Option 2: Emergency Network Partition & Decryption Sandbox**  
+  *Recovery Time Objective (RTO): 8 Hours Offline &bull; Threat Mitigation: 60% (Balanced)*  
+  Partitions compromised subnet zones and attempts sandbox decryption of affected partitions. Moderate disruption (-2 Health penalty). Encrypted secondary controllers may remain locked.
+* **Option 3: Keep Production Online & Pursue Back-Channel Key Negotiation**  
+  *Recovery Time Objective (RTO): 0 Hours &bull; Threat Mitigation: 25% (Permissive)*  
+  Keeps remaining infrastructure online and opens secretive ransom negotiation channels. Zero operational disruption (0 Health penalty), but high risk: cybercriminals frequently fail to supply functioning decrypters.

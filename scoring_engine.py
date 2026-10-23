@@ -67,13 +67,14 @@ def calculate_round_impact(
 
 def get_outcome_thresholds(total_rounds: int) -> Tuple[int, int]:
     """
-    Returns (bankrupt_cutoff, win_cutoff) based on total rounds.
+    Returns (bankrupt_cutoff, win_cutoff) calibrated for target distribution:
     Scores < bankrupt_cutoff -> Bankrupt (~30%)
     Scores >= win_cutoff -> Win (~10%)
     Scores in between -> Survive (~60%)
+    Calibrated for 2 rounds of incident response followed by the Adversary Final Gambit.
     """
     if total_rounds == 2:
-        return 52, 78
+        return 39, 70
     else:
         return 30, 62
 

@@ -5,7 +5,7 @@ for CloudStore Command: Cyber Attack Simulation
 """
 
 import os
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 # Team Passcodes (used by Team Captains to unlock decision & polling controls)
 TEAM_CODES = {
@@ -18,11 +18,12 @@ TEAM_CODES = {
 
 # Phase Timers in Seconds
 PHASE_DURATIONS = {
-    "hacker": 300,   # 5 Minutes (300s)
-    "it": 300,       # 5 Minutes (300s)
-    "exec": 180,     # 3 Minutes (180s)
-    "media": 300,    # 5 Minutes (300s)
-    "recap": 120     # 2 Minutes (120s)
+    "hacker": 300,               # 5 Minutes (300s)
+    "it": 300,                   # 5 Minutes (300s)
+    "exec": 180,                 # 3 Minutes (180s)
+    "media": 300,                # 5 Minutes (300s)
+    "recap": 120,                # 2 Minutes (120s)
+    "final_hacker_action": 180   # 3 Minutes (180s)
 }
 
 # Directory path for modular markdown scenario content
@@ -249,6 +250,246 @@ IT_CHOICES = {
         }
     ]
 }
+
+# Attack-Specific IT Containment Options (Aligned directly with educational dossiers)
+ATTACK_SPECIFIC_IT_CHOICES: Dict[Tuple[int, str], List[Dict[str, Any]]] = {
+    (1, "A"): [  # Spear Phishing & Credential Harvest
+        {
+            "id": "1",
+            "label": "Enterprise-Wide Password Reset & Workstation Lockout",
+            "label_short": "Opt 1 (24h Full Lockout)",
+            "downtime": "24 Hours Offline (RTO: 24h)",
+            "disruption": "Severe Business Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Revoke all enterprise session tokens, force hardware MFA enrollment, and isolate corporate workstation subnets.",
+            "technical_detail": "Stops 90% of attacker lateral movement by immediately terminating compromised user sessions.",
+            "exec_view": "IT proposes a complete 24-hour company-wide lockout. All employee workstations will be disabled."
+        },
+        {
+            "id": "2",
+            "label": "Targeted Account Quarantine & EDR Deployment",
+            "label_short": "Opt 2 (6h EDR Isolation)",
+            "downtime": "6 Hours Offline (RTO: 6h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Isolate only the specific compromised finance accounts while deploying Endpoint Detection & Response (EDR) agents.",
+            "technical_detail": "Mitigates 60% of damage; threat actors may still evade detection if secondary credentials were compromised.",
+            "exec_view": "IT proposes targeted isolation of suspect accounts with an estimated 6 hours of department downtime."
+        },
+        {
+            "id": "3",
+            "label": "Silent Honeypot Monitoring & Passive Tap",
+            "label_short": "Opt 3 (0h Passive Tap)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Keep accounts active and route traffic into monitored sandbox honeypots to observe attacker tactics.",
+            "technical_detail": "High risk! Mitigates only 25% of damage; attackers frequently detect sandboxes and escalate privileges.",
+            "exec_view": "IT proposes silent monitoring with zero downtime or business interruption."
+        }
+    ],
+    (1, "B"): [  # Web Server CVE Exploit
+        {
+            "id": "1",
+            "label": "Air-Gap Public Gateways & Emergency Kernel Patching",
+            "label_short": "Opt 1 (24h Air-Gap Patch)",
+            "downtime": "24 Hours Offline (RTO: 24h)",
+            "disruption": "Severe Business Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Physically disconnect internet-facing web servers and apply emergency operating system and CVE security patches.",
+            "technical_detail": "Eliminates 90% of vulnerability attack surface by taking the exploited service completely offline.",
+            "exec_view": "IT proposes taking public customer portals and web gateways offline for 24 hours to patch zero-day CVE vulnerabilities."
+        },
+        {
+            "id": "2",
+            "label": "Deploy Custom WAF Virtual Patching & Host Isolation",
+            "label_short": "Opt 2 (6h WAF Virtual Patch)",
+            "downtime": "6 Hours Offline (RTO: 6h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Deploy Web Application Firewall (WAF) regex inspection rules to block exploit payloads while isolating suspect nodes.",
+            "technical_detail": "Mitigates 60% of damage; advanced attackers may use payload encoding to bypass firewall rules.",
+            "exec_view": "IT proposes applying virtual firewall filters and isolating suspicious web hosts with 6 hours of maintenance downtime."
+        },
+        {
+            "id": "3",
+            "label": "Inbound Traffic Inspection & Permissive Logging",
+            "label_short": "Opt 3 (0h Passive Inspection)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Maintain live web traffic and monitor inbound attack signatures without blocking incoming connections.",
+            "technical_detail": "Mitigates only 25% of damage; leaves remote code execution vulnerabilities active for exploitation.",
+            "exec_view": "IT proposes passive traffic monitoring with zero customer storefront downtime."
+        }
+    ],
+    (1, "C"): [  # AI Prompt Injection
+        {
+            "id": "1",
+            "label": "Hard Offline: Suspend AI Endpoints & Invalidate API Keys",
+            "label_short": "Opt 1 (24h AI Offline)",
+            "downtime": "24 Hours Offline (RTO: 24h)",
+            "disruption": "Severe Business Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Suspend all customer-facing LLM endpoints, revoke compromised backend API tokens, and purge context memory.",
+            "technical_detail": "Stops 90% of prompt injection exploit pathways by taking automated assistant integration offline.",
+            "exec_view": "IT proposes shutting down all automated customer assistants and backend APIs for 24 hours."
+        },
+        {
+            "id": "2",
+            "label": "Deploy Aggressive Input Sanitization Guardrail & Throttling",
+            "label_short": "Opt 2 (6h Guardrail Deploy)",
+            "downtime": "6 Hours Offline (RTO: 6h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Deploy input regex sanitization filters to strip jailbreak prompts and enforce rate-limiting on user sessions.",
+            "technical_detail": "Mitigates 60% of damage; sophisticated linguistic obfuscation may still trigger auxiliary API pivots.",
+            "exec_view": "IT proposes a 6-hour maintenance window to install input guardrail filters on chatbot portals."
+        },
+        {
+            "id": "3",
+            "label": "Silent Prompt Logging & Asynchronous Security Review",
+            "label_short": "Opt 3 (0h Prompt Log)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Keep customer chatbots online and asynchronously flag anomalous prompts for retrospective review.",
+            "technical_detail": "Mitigates only 25% of damage; the adversary retains live access to manipulate backend business logic.",
+            "exec_view": "IT proposes passive chat monitoring with zero customer disruption."
+        }
+    ],
+    (2, "A"): [  # PII & Card Exfiltration
+        {
+            "id": "1",
+            "label": "Database Subnet Isolation & Global Credential Revocation",
+            "label_short": "Opt 1 (36h DB Isolation)",
+            "downtime": "36 Hours Full Outage (RTO: 36h)",
+            "disruption": "Severe Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Sever all external database routes and reset enterprise service principal credentials.",
+            "technical_detail": "Thwarts 90% of ongoing exfiltration by terminating all database network egress.",
+            "exec_view": "IT proposes an emergency 36-hour database outage to sever all exfiltration channels."
+        },
+        {
+            "id": "2",
+            "label": "Targeted Egress Firewalling & Service Principal Reset",
+            "label_short": "Opt 2 (8h Egress Block)",
+            "downtime": "8 Hours Partial Outage (RTO: 8h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Block unauthorized outbound C2 ports and rotate compromised transaction keys.",
+            "technical_detail": "Mitigates 60% of damage, but encrypted tunnel staging may bypass port-based blocks.",
+            "exec_view": "IT proposes an 8-hour partial maintenance outage to restrict outbound data channels."
+        },
+        {
+            "id": "3",
+            "label": "Live In-Place Hotpatching & Dynamic Token Rotation",
+            "label_short": "Opt 3 (0h Live Rotation)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Rotate database tokens dynamically without interrupting live checkout transactions.",
+            "technical_detail": "Mitigates only 25% of damage; active attacker sessions in memory continue siphoning records.",
+            "exec_view": "IT proposes live token updates with zero checkout downtime."
+        }
+    ],
+    (2, "B"): [  # Database Sabotage
+        {
+            "id": "1",
+            "label": "Sever Production Clusters & Cold-Storage Backup Rebuild",
+            "label_short": "Opt 1 (36h Cold Rebuild)",
+            "downtime": "36 Hours Full Outage (RTO: 36h)",
+            "disruption": "Severe Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Cut external routing to production clusters and re-image servers from verified off-site cold storage.",
+            "technical_detail": "Eliminates 90% of sabotage impact by restoring guaranteed clean, tamper-free database snapshots.",
+            "exec_view": "IT proposes unplugging data centers for 36 hours to restore uncorrupted database snapshots."
+        },
+        {
+            "id": "2",
+            "label": "Restrict Database Traffic & Run Forensic Verification Scripts",
+            "label_short": "Opt 2 (8h Data Audit)",
+            "downtime": "8 Hours Partial Outage (RTO: 8h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Freeze transaction replicas and run automated consistency scripts line-by-line.",
+            "technical_detail": "Mitigates 60% of damage, but subtle data tampering and logical corruption may remain unnoticed.",
+            "exec_view": "IT proposes an 8-hour partial outage to audit and reconcile database tables."
+        },
+        {
+            "id": "3",
+            "label": "Live Read-Only Mode & Failsafe Integrity Logic",
+            "label_short": "Opt 3 (0h Read-Only)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Switch database to read-only replica mode without interrupting catalog browsing.",
+            "technical_detail": "Mitigates only 25% of damage; corrupted transaction records continue causing cascading errors.",
+            "exec_view": "IT proposes read-only browsing mode with zero customer store downtime."
+        }
+    ],
+    (2, "C"): [  # Ransomware
+        {
+            "id": "1",
+            "label": "Burn and Rebuild Bare-Metal from Clean Offline Golden Images",
+            "label_short": "Opt 1 (36h Bare Metal)",
+            "downtime": "36 Hours Full Outage (RTO: 36h)",
+            "disruption": "Severe Disruption (-4 Health Penalty)",
+            "disruption_penalty": -4,
+            "mitigation_pct": 0.90,
+            "desc": "Physically wipe encrypted domain controllers and re-image bare-metal servers from golden offline media.",
+            "technical_detail": "Overcomes 90% of ransomware impact by completely expelling attacker encryption keys and persistence.",
+            "exec_view": "IT proposes a 36-hour total shutdown to wipe and re-install all encrypted domain servers."
+        },
+        {
+            "id": "2",
+            "label": "Emergency Network Partition & Decryption Sandbox",
+            "label_short": "Opt 2 (8h Net Partition)",
+            "downtime": "8 Hours Partial Outage (RTO: 8h)",
+            "disruption": "Moderate Disruption (-2 Health Penalty)",
+            "disruption_penalty": -2,
+            "mitigation_pct": 0.60,
+            "desc": "Partition compromised subnet zones and isolate encrypted volumes in forensic sandboxes.",
+            "technical_detail": "Mitigates 60% of damage, but encryption payloads on partially partitioned nodes may still finish.",
+            "exec_view": "IT proposes an 8-hour network partition to quarantine encrypted subnet hosts."
+        },
+        {
+            "id": "3",
+            "label": "Keep Production Online & Pursue Back-Channel Key Negotiation",
+            "label_short": "Opt 3 (0h Threat Bounty)",
+            "downtime": "0 Hours (Zero Downtime)",
+            "disruption": "Zero Disruption (0 Health Penalty)",
+            "disruption_penalty": 0,
+            "mitigation_pct": 0.25,
+            "desc": "Attempt back-channel negotiations for decryption keys while keeping production storefronts online.",
+            "technical_detail": "High risk! Mitigates only 25% of damage; extorters often provide corrupt or non-functioning decrypters.",
+            "exec_view": "IT proposes keeping servers active and pursuing digital decryption keys with zero downtime."
+        }
+    ]
+}
+
+def get_it_choices(round_num: int, attack_key: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Returns IT containment options aligned with the active attack vector."""
+    if attack_key:
+        pair = (int(round_num), str(attack_key).upper())
+        if pair in ATTACK_SPECIFIC_IT_CHOICES:
+            return ATTACK_SPECIFIC_IT_CHOICES[pair]
+    return IT_CHOICES.get(int(round_num), IT_CHOICES.get(1, []))
 
 # Executive Governance Directives (Executives review IT's proposed plan blindly)
 EXEC_GOVERNANCE_OPTIONS = [

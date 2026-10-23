@@ -332,9 +332,9 @@ def test_gm_console_controls():
 
     # 2. Test Session Round Count Radio (2 vs 3 rounds)
     round_radio = gm.sidebar.radio[0]
-    assert round_radio.value == 3
-    round_radio.set_value(2).run()
+    assert round_radio.value == 2
     round_radio.set_value(3).run()
+    round_radio.set_value(2).run()
     print("  ✓ Round configuration toggled between 2 and 3 rounds.")
 
     # 3. Test Threat Multipliers (1.0x, 1.2x, 1.5x, 2.0x)
@@ -427,12 +427,12 @@ def test_game_over_and_outcome_assessment():
 
     # 1. Calibrated Threshold Verification
     b2, w2 = get_outcome_thresholds(2)
-    assert (b2, w2) == (52, 78)
-    assert evaluate_final_outcome(78.0, 2)[0] == "Win"
-    assert evaluate_final_outcome(77.9, 2)[0] == "Survive"
-    assert evaluate_final_outcome(52.0, 2)[0] == "Survive"
-    assert evaluate_final_outcome(51.9, 2)[0] == "Bankrupt"
-    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 52 | Survive 52-77 | Win >= 78).")
+    assert (b2, w2) == (39, 70)
+    assert evaluate_final_outcome(70.0, 2)[0] == "Win"
+    assert evaluate_final_outcome(69.9, 2)[0] == "Survive"
+    assert evaluate_final_outcome(39.0, 2)[0] == "Survive"
+    assert evaluate_final_outcome(38.9, 2)[0] == "Bankrupt"
+    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-69 | Win >= 70).")
 
     b3, w3 = get_outcome_thresholds(3)
     assert (b3, w3) == (30, 62)
@@ -541,12 +541,19 @@ def test_game_over_and_outcome_assessment():
             b.click().run()
             break
 
-    # GM in Round 2 Recap -> Conclude Game
+    # GM in Round 2 Recap -> Advance to Final Gambit
     gm.run()
-    conclude_btn = next((b for b in gm.sidebar.button if "Conclude Game" in b.label), None)
-    assert conclude_btn is not None, "Conclude Game button missing in Round 2 recap"
+    conclude_btn = next((b for b in gm.sidebar.button if "Advance to Final" in b.label or "Conclude Game" in b.label), None)
+    assert conclude_btn is not None, "Advance to Final button missing in Round 2 recap"
     conclude_btn.click().run()
-    print("  ✓ Conclude Game successfully transitioned simulation to 'game_over'.")
+    print("  ✓ Advanced simulation to Adversary Final Gambit.")
+
+    # Threat Actor executes Safe Retreat
+    h.run()
+    retreat_btn = next((b for b in h.button if "Safe Retreat" in b.label), None)
+    assert retreat_btn is not None, "Safe Retreat button not found in Hacker view"
+    retreat_btn.click().run()
+    print("  ✓ Hackers executed final gambit (Safe Retreat), transitioning to 'game_over'.")
 
     # Verify Game Over Banner rendered
     gm.run()

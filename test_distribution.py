@@ -44,6 +44,14 @@ def run_distribution_test(rounds=3, n_trials=20000):
             res = calculate_round_impact(att, it, ex, m)
             health = max(0.0, min(100.0, health + res["net_delta"]))
 
+        if rounds == 2:
+            # Adversary Final Gambit: Press Attack (70%) or Retreat (30%)
+            # Press: 15-25 dmg, 1/3 chance caught recovering 3-15 HP; Retreat: 0 dmg
+            if random.random() < 0.70:
+                dmg = random.randint(15, 25)
+                rec = random.randint(3, 15) if random.random() < (1.0 / 3.0) else 0
+                health = max(0.0, min(100.0, health - dmg + rec))
+
         tier, _, _ = evaluate_final_outcome(health, rounds)
         outcomes[tier] += 1
 

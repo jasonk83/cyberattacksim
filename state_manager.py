@@ -6,20 +6,22 @@ for CloudStore Command: Cyber Attack Simulation
 
 import time
 import copy
+import random
 from typing import Dict, Any, Optional, List, Tuple
-from game_data import PHASE_DURATIONS, ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES
+from game_data import PHASE_DURATIONS, ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
 from scoring_engine import calculate_round_impact, evaluate_final_outcome, get_outcome_thresholds
 
 class GameState:
     def __init__(self):
         self.reset()
 
-    def reset(self, base_health: float = 100.0, max_rounds: int = 3):
+    def reset(self, base_health: float = 100.0, max_rounds: int = 2):
         self.company_health = float(base_health)
         self.max_rounds = int(max_rounds)
         self.current_round = 1
         self.multiplier = 1.0
-        self.phase = "lobby"  # 'lobby', 'hacker', 'it', 'exec', 'media', 'recap', 'game_over'
+        self.phase = "lobby"  # 'lobby', 'hacker', 'it', 'exec', 'media', 'recap', 'final_hacker_action', 'game_over'
+        self.final_hacker_action_data: Optional[Dict[str, Any]] = None
 
         # Timer state
         self.phase_start_time = time.time()
@@ -63,9 +65,10 @@ class GameState:
         self.timer_paused = False
         self.pause_time_remaining = duration
 
-        # Reset poll state for the active role
-        if new_phase in self.polls:
-            self.polls[new_phase] = {"open": False, "options": [], "votes": {}}
+        # Reset poll state for the active role (normalize hackers/hacker)
+        role = "hackers" if new_phase in ["hacker", "final_hacker_action"] else new_phase
+        if role in self.polls:
+            self.polls[role] = {"open": False, "options": [], "votes": {}}
 
         # Update team statuses
         if new_phase == "hacker":
@@ -91,6 +94,11 @@ class GameState:
         elif new_phase == "recap":
             for k in self.team_status:
                 self.team_status[k] = "📊 Round Recap Active"
+        elif new_phase == "final_hacker_action":
+            self.team_status["hackers"] = "💀 Final Infiltration Gambit: Press Attack or Retreat"
+            self.team_status["it"] = "📡 SOC Perimeter Sensors Active (Tracking Attacker Movement)"
+            self.team_status["exec"] = "💼 Boardroom Awaiting Adversary Movement"
+            self.team_status["media"] = "📰 Press Wire Monitoring Breaking Threat"
         elif new_phase == "game_over":
             for k in self.team_status:
                 self.team_status[k] = "🏁 Simulation Concluded"
@@ -172,7 +180,7 @@ class GameState:
         self.create_snapshot()
         self.close_poll("it")
         self.it_choice_id = str(choice_id)
-        round_it = IT_CHOICES.get(self.current_round, [])
+        round_it = get_it_choices(self.current_round, self.selected_attack_key)
         self.it_choice_data = next((c for c in round_it if str(c.get("id")) == str(choice_id)), {})
         self.team_status["it"] = f"✅ Submitted Plan: {self.it_choice_data.get('label', 'Plan')}"
         # Advance to Executive Governance phase
@@ -238,8 +246,12 @@ class GameState:
         self.start_phase("recap")
 
     def advance_to_next_round(self):
+        # Reset all polls across all roles between rounds
+        for r in self.polls:
+            self.polls[r] = {"open": False, "options": [], "votes": {}}
+
         if self.current_round >= self.max_rounds:
-            self.start_phase("game_over")
+            self.start_phase("final_hacker_action")
         else:
             self.current_round += 1
             self.selected_attack_key = None
@@ -250,6 +262,51 @@ class GameState:
             self.media_headline_idx = None
             self.media_headline_data = None
             self.start_phase("hacker")
+
+    def submit_final_hacker_action(self, action: str) -> Dict[str, Any]:
+        """
+        Executes the final adversary gambit:
+        - 'press': 15 to 25 HP damage, 1 in 3 chance caught, if caught recovers 3 to 15 HP
+        - 'retreat': 0 damage, clean escape
+        """
+        self.create_snapshot()
+        self.close_poll("hackers")
+        action_clean = action.lower().strip()
+
+        if action_clean == "press":
+            damage = random.randint(15, 25)
+            caught = (random.random() < (1.0 / 3.0))
+            recovery = random.randint(3, 15) if caught else 0
+            net_delta = -damage + recovery
+            if caught:
+                summary = (f"🚨 HACKERS PRESSED THE ATTACK BUT WERE CAUGHT! Exploited secondary payment APIs for -{damage} HP damage, "
+                           f"but SOC investigators and federal cyber authorities traced the exfiltration node, recovering +{recovery} HP! (Net Impact: {net_delta:+g} HP)")
+            else:
+                summary = (f"💥 HACKERS PRESSED THE ATTACK UNDETECTED! Siphoned core database archives and disabled backups completely undetected, "
+                           f"inflicting -{damage} HP catastrophic damage! (Net Impact: {net_delta:+g} HP)")
+        else:  # retreat
+            damage = 0
+            caught = False
+            recovery = 0
+            net_delta = 0
+            summary = "🛑 HACKERS RETREATED SAFELY: Threat actors severed C2 beacons and withdrew into the dark web. Zero additional damage inflicted."
+
+        prev_health = self.company_health
+        self.company_health = max(0.0, min(100.0, round(self.company_health + net_delta, 1)))
+
+        result = {
+            "action": action_clean,
+            "damage": damage,
+            "caught": caught,
+            "recovery": recovery,
+            "net_delta": net_delta,
+            "health_before": prev_health,
+            "health_after": self.company_health,
+            "summary": summary
+        }
+        self.final_hacker_action_data = result
+        self.start_phase("game_over")
+        return result
 
     def create_snapshot(self):
         snap = {
@@ -265,6 +322,7 @@ class GameState:
             "exec_action": self.exec_action,
             "media_headline_idx": self.media_headline_idx,
             "media_headline_data": copy.deepcopy(self.media_headline_data),
+            "final_hacker_action_data": copy.deepcopy(self.final_hacker_action_data),
             "history": copy.deepcopy(self.history),
             "team_status": copy.deepcopy(self.team_status)
         }
@@ -285,6 +343,8 @@ class GameState:
         self.it_choice_data = copy.deepcopy(snap["it_choice_data"])
         self.exec_action = snap["exec_action"]
         self.media_headline_idx = snap["media_headline_idx"]
+        self.media_headline_data = copy.deepcopy(snap["media_headline_data"])
+        self.final_hacker_action_data = copy.deepcopy(snap.get("final_hacker_action_data"))
         self.media_headline_data = copy.deepcopy(snap["media_headline_data"])
         self.history = copy.deepcopy(snap["history"])
         self.team_status = copy.deepcopy(snap["team_status"])

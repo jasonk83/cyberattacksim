@@ -7,8 +7,14 @@ Includes single-URL Captain vs Viewer modes, live straw polling, and asymmetric 
 import streamlit as st
 from typing import Dict, Any, List
 from state_manager import GameState
-from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES
-from ui_components import render_threatening_clock, render_briefing_card, render_round_recap_card
+from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
+from ui_components import (
+    render_threatening_clock,
+    render_briefing_card,
+    render_round_recap_card,
+    render_final_hacker_action_card,
+    render_acronym_glossary
+)
 
 def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str, options: List[Dict[str, Any]]):
     """Renders the live straw poll interface for both Captain and Viewers."""
@@ -103,9 +109,83 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
     phase_label = "Hacker Exploitation" if game.phase == "hacker" else f"{game.phase.upper()} Phase"
     render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
 
-    if game.phase in ["recap", "game_over"]:
+    if game.phase == "game_over":
+        st.success("🏁 Simulation Concluded! Enterprise impact debrief:")
+        render_round_recap_card(game)
+        render_final_hacker_action_card(game)
+        render_acronym_glossary()
+        return
+
+    if game.phase == "recap":
         st.success("💥 Round Concluded! Enterprise impact debrief:")
         render_round_recap_card(game)
+        render_acronym_glossary()
+        return
+
+    if game.phase == "final_hacker_action":
+        st.subheader("⚡ Adversary Final Gambit: Press Attack or Retreat")
+        st.caption("Your initial intrusion compromised CloudStore's perimeter. Decide whether to press the attack or retreat into the shadows:")
+
+        gambit_options = [
+            {
+                "id": "press",
+                "label": "🚀 Press the Attack (-15 to -25 HP | 1-in-3 Catch Risk)",
+                "label_short": "Press Attack",
+                "desc": "Execute secondary exploit payloads against payment APIs. Inflicts 15 to 25 HP damage, but carries a 1-in-3 chance (33%) of being caught, recovering 3 to 15 HP for the company."
+            },
+            {
+                "id": "retreat",
+                "label": "🛑 Safe Strategic Retreat (0 HP | Zero Risk)",
+                "label_short": "Safe Retreat",
+                "desc": "Sever C2 beacons, purge logs, and withdraw safely with existing spoils. 0 HP damage, 0 risk of capture."
+            }
+        ]
+
+        # Poll UI for final action
+        _render_poll_ui(game, "hackers", is_captain, voter_id, gambit_options)
+
+        g_cols = st.columns(2)
+        with g_cols[0]:
+            st.markdown("""
+            <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                <div style="font-weight: 800; color: #fca5a5; font-size: 16px;">🚀 Option 1: Press the Attack</div>
+                <div style="color: #fecaca; font-size: 13px; margin-top: 6px;">
+                    Execute secondary exploits against payment endpoints and customer transaction ledgers.
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
+                    <strong>Threat Damage:</strong> -15 to -25 Enterprise HP<br/>
+                    <strong>Detection Risk:</strong> 1-in-3 chance (33%) caught by SOC/FBI (recovers +3 to +15 HP)
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if is_captain:
+                if st.button("🚀 Authorize: Press the Attack", key="btn_hacker_press", type="primary", use_container_width=True):
+                    game.submit_final_hacker_action("press")
+                    st.rerun()
+            else:
+                st.caption("🔒 *Only the Team Captain can submit the final attack decision.*")
+
+        with g_cols[1]:
+            st.markdown("""
+            <div style="background-color: #0f172a; border: 2px solid #64748b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                <div style="font-weight: 800; color: #cbd5e1; font-size: 16px;">🛑 Option 2: Safe Strategic Retreat</div>
+                <div style="color: #94a3b8; font-size: 13px; margin-top: 6px;">
+                    Sever Command & Control (C2) beacons, wipe forensic trails, and withdraw into the dark web.
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
+                    <strong>Threat Damage:</strong> 0 HP damage<br/>
+                    <strong>Detection Risk:</strong> Zero risk. Clean adversary escape.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if is_captain:
+                if st.button("🛑 Authorize: Safe Retreat", key="btn_hacker_retreat", type="secondary", use_container_width=True):
+                    game.submit_final_hacker_action("retreat")
+                    st.rerun()
+            else:
+                st.caption("🔒 *Only the Team Captain can submit the final attack decision.*")
+
+        render_acronym_glossary()
         return
 
     if game.phase != "hacker":
@@ -134,6 +214,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
             st.code("""[Public Wire] Incident leaked to trade publications and wire desks.
 [DarkNet Forum] Proof-of-concept exfiltration logs verified.
 [PR Watch] Waiting for breaking media spin...""", language="bash")
+        render_acronym_glossary()
         return
 
     st.subheader(f"Round {game.current_round}: Select Primary Infiltration Vector")
@@ -174,6 +255,19 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     if game.phase in ["lobby", "hacker"]:
         st.info("🟢 Network telemetry nominal. Awaiting detection alerts from perimeter intrusion sensors...")
+        render_acronym_glossary()
+        return
+
+    if game.phase == "final_hacker_action":
+        st.warning("⚠️ **ADVERSARY FINAL GAMBIT DETECTED:** Threat actors are positioning for a secondary attack or withdrawal. SOC sensors monitoring...")
+        render_acronym_glossary()
+        return
+
+    if game.phase == "game_over":
+        st.success("🏁 Simulation Concluded! Incident debrief:")
+        render_round_recap_card(game)
+        render_final_hacker_action_card(game)
+        render_acronym_glossary()
         return
 
     rem_secs = game.get_remaining_seconds()
@@ -190,9 +284,10 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.success(f"✅ Technical containment proposed: **{game.it_choice_data.get('label', 'Action')}**.")
         if game.phase == "exec":
             st.info("⏳ Waiting for Executive Boardroom to review and issue binding governance directive...")
+            render_acronym_glossary()
             return
 
-        if game.phase in ["media", "recap", "game_over"]:
+        if game.phase in ["media", "recap"]:
             exec_act = (game.exec_action or "pending").lower()
             if exec_act == "approve":
                 bg_color = "#064e3b"
@@ -220,17 +315,19 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
 
             if game.phase == "media":
                 st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
+                render_acronym_glossary()
                 return
 
-            if game.phase in ["recap", "game_over"]:
+            if game.phase == "recap":
                 st.success("🏁 Round Concluded! Incident debrief:")
                 render_round_recap_card(game)
+                render_acronym_glossary()
                 return
 
     st.subheader(f"Round {game.current_round}: Select Technical Containment Strategy")
     st.caption("⚠️ **Operational Trade-Off Rule:** Aggressive options with severe downtime provide the highest threat mitigation!")
 
-    options = IT_CHOICES.get(game.current_round, [])
+    options = get_it_choices(game.current_round, game.selected_attack_key)
 
     # Poll UI
     _render_poll_ui(game, "it", is_captain, voter_id, options)
@@ -259,6 +356,8 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
         else:
             st.caption(f"🔒 *Option {opt_id} available for voting in Straw Poll.*")
 
+    render_acronym_glossary()
+
 
 # ---------------------------------------------------------
 # 3. EXECUTIVE BOARDROOM TERMINAL (ASYMMETRIC GOVERNANCE)
@@ -269,10 +368,24 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     if game.phase in ["lobby", "hacker"]:
         st.info("🟢 Board in routine session. Monitoring corporate risk posture.")
+        render_acronym_glossary()
         return
 
     if game.phase == "it":
         st.warning("⚠️ Incident detected by SOC! Awaiting formal containment recommendation from IT Leadership...")
+        render_acronym_glossary()
+        return
+
+    if game.phase == "final_hacker_action":
+        st.warning("⚠️ **BOARDROOM CRISIS ALERT:** Adversary final gambit in progress. Awaiting intelligence on whether attackers press forward or retreat...")
+        render_acronym_glossary()
+        return
+
+    if game.phase == "game_over":
+        st.success(f"✅ Governance directive issued: **{game.exec_action.upper() if game.exec_action else 'N/A'}**.")
+        render_round_recap_card(game)
+        render_final_hacker_action_card(game)
+        render_acronym_glossary()
         return
 
     rem_secs = game.get_remaining_seconds()
@@ -303,9 +416,11 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.success(f"✅ Governance directive issued: **{game.exec_action.upper()}**.")
         if game.phase == "media":
             st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
+            render_acronym_glossary()
             return
-        if game.phase in ["recap", "game_over"]:
+        if game.phase == "recap":
             render_round_recap_card(game)
+            render_acronym_glossary()
             return
 
     st.subheader("Select Binding Corporate Governance Directive")
@@ -332,6 +447,8 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         else:
             st.caption(f"🔒 *Directive {opt['label']} open for voting in Straw Poll.*")
 
+    render_acronym_glossary()
+
 
 # ---------------------------------------------------------
 # 4. MEDIA & PR SCRUM TERMINAL
@@ -342,31 +459,42 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     if game.phase in ["lobby", "hacker", "it"]:
         st.info("📡 Monitoring live news wires. Waiting for executive statements from CloudStore leadership...")
+        render_acronym_glossary()
         return
 
     if game.phase == "exec":
         st.warning("📡 Executive Board is currently voting behind closed doors. Press scrum convening...")
+        render_acronym_glossary()
         return
 
-    rem_secs = game.get_remaining_seconds()
-    phase_label = "Breaking News Publication" if game.phase == "media" else f"{game.phase.upper()} Phase"
-    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
+    if game.phase == "final_hacker_action":
+        st.warning("📡 **NEWS WIRE BULLETIN:** Unconfirmed chatter on dark web forums suggests threat actors are executing a final maneuver...")
+        render_acronym_glossary()
+        return
 
-    att = game.selected_attack_data or {}
-    exec_act = game.exec_action or "Unknown"
-
-    st.markdown(f"""
-    <div style="background-color: #172554; border: 2px solid #3b82f6; padding: 14px; border-radius: 12px; margin-bottom: 14px;">
-        <div style="font-size: 11px; font-weight: 800; color: #93c5fd; text-transform: uppercase;">BREAKING INTELLIGENCE WIRE</div>
-        <div style="font-size: 18px; font-weight: 800; color: #ffffff; margin-top: 2px;">{att.get('name', 'Incident')}</div>
-        <div style="color: #bfdbfe; font-size: 13px; margin-top: 4px;">Executive Board Directive Issued: <strong>{exec_act.upper()}</strong></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if game.phase in ["recap", "game_over"]:
+    if game.phase == "game_over":
         st.success("📰 Breaking story published! Live impact debrief:")
         render_round_recap_card(game)
+        render_final_hacker_action_card(game)
+        render_acronym_glossary()
         return
+
+    if game.phase == "recap":
+        st.success("📰 Breaking story published! Live impact debrief:")
+        render_round_recap_card(game)
+        render_acronym_glossary()
+        return
+
+    # Breaking Wire & Executive Governance Briefing Card
+    att = game.selected_attack_data or {}
+    exec_act = (game.exec_action or "pending").upper()
+    st.markdown(f"""
+    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+        <div style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">📡 BREAKING INTELLIGENCE WIRE</div>
+        <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-top: 2px;">Incident: {att.get('icon', '🚨')} {att.get('name', 'Breach In Progress')}</div>
+        <div style="font-size: 13px; color: #c7d2fe; margin-top: 4px;">Executive Board Directive: <strong>{exec_act}</strong></div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.subheader(f"Round {game.current_round}: Select Breaking News Headline")
     st.caption("Choose which journalistic angle leads the front page (helps or hurts the enterprise):")

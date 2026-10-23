@@ -11,7 +11,12 @@ from typing import Dict, Any, Optional
 from state_manager import GameState
 from game_data import TEAM_CODES
 from scoring_engine import evaluate_final_outcome, get_outcome_thresholds
-from ui_components import render_threatening_clock, render_health_gauge
+from ui_components import (
+    render_threatening_clock,
+    render_health_gauge,
+    render_final_hacker_action_card,
+    render_acronym_glossary
+)
 from team_views import (
     render_hacker_terminal,
     render_it_terminal,
@@ -40,6 +45,60 @@ def render_main_dashboard(game: GameState):
         if st.button("🔄 Refresh Scoreboard", key="top_refresh_main", use_container_width=True):
             st.rerun()
 
+    # ---------------------------------------------------------
+    # GM QUICK OPERATIONAL COMMAND BAR
+    # ---------------------------------------------------------
+    st.markdown("### 🎛️ Game Master Mission Controls")
+    col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 1, 1])
+
+    with col_ctrl1:
+        if game.phase == "lobby":
+            if st.button("🚀 Start Round 1 (Launch Infiltration)", key="main_btn_start_r1", type="primary", use_container_width=True):
+                game.start_phase("hacker")
+                st.rerun()
+        elif game.phase == "recap":
+            if game.current_round < game.max_rounds:
+                if st.button(f"➡️ Advance to Round {game.current_round + 1}", key="main_btn_adv_r", type="primary", use_container_width=True):
+                    game.advance_to_next_round()
+                    st.rerun()
+            else:
+                if st.button("💀 Advance to Adversary Final Action", key="main_btn_adv_gambit", type="primary", use_container_width=True):
+                    game.advance_to_next_round()
+                    st.rerun()
+        elif game.phase == "final_hacker_action":
+            if st.button("⚡ Fast-Conclude Simulation (Retreat)", key="main_btn_bypass_final", use_container_width=True):
+                game.submit_final_hacker_action("retreat")
+                st.rerun()
+        elif game.phase == "game_over":
+            if st.button("🔄 Reset Simulation for New Session", key="main_btn_reset_game", type="primary", use_container_width=True):
+                game.reset(max_rounds=game.max_rounds)
+                st.rerun()
+        else:
+            next_phase_map = {"hacker": "it", "it": "exec", "exec": "media", "media": "recap"}
+            if st.button(f"⏭️ Force Advance ({game.phase.upper()})", key="main_btn_force_adv", use_container_width=True):
+                if game.phase == "media":
+                    game.evaluate_round()
+                else:
+                    game.start_phase(next_phase_map.get(game.phase, "recap"))
+                st.rerun()
+
+    with col_ctrl2:
+        if game.timer_paused:
+            if st.button("▶️ Resume Timer", key="main_btn_resume_timer", use_container_width=True):
+                game.resume_timer()
+                st.rerun()
+        else:
+            if st.button("⏸️ Pause Timer", key="main_btn_pause_timer", use_container_width=True):
+                game.pause_timer()
+                st.rerun()
+
+    with col_ctrl3:
+        if st.button("⏱️ Reset Phase Timer", key="main_btn_reset_timer", use_container_width=True):
+            game.reset_timer()
+            st.rerun()
+
+    st.markdown("---")
+
     # Threatening Countdown Clock
     rem_secs = game.get_remaining_seconds()
     phase_labels = {
@@ -49,6 +108,7 @@ def render_main_dashboard(game: GameState):
         "exec": "Executive Crisis Governance",
         "media": "Press Scrum & Media Spin",
         "recap": "Round Assessment",
+        "final_hacker_action": "Adversary Final Gambit",
         "game_over": "Simulation Concluded"
     }
     render_threatening_clock(
@@ -105,6 +165,18 @@ def render_main_dashboard(game: GameState):
         </div>
         """, unsafe_allow_html=True)
 
+        render_final_hacker_action_card(game)
+
+    # Adversary Final Action In Progress Alert
+    if game.phase == "final_hacker_action":
+        st.markdown("""
+        <div style="background-color: #3b0764; border: 2px solid #a855f7; border-radius: 12px; padding: 18px; margin: 12px 0;">
+            <div style="font-size: 11px; font-weight: 800; color: #f3e8ff; text-transform: uppercase; letter-spacing: 0.1em;">ADVERSARY FINAL GAMBIT IN PROGRESS</div>
+            <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">💀 Threat Actors Deliberating: Press Attack or Retreat</div>
+            <div style="font-size: 14px; color: #e9d5ff; margin-top: 6px;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems for an additional 15–25 HP damage (with a 1-in-3 chance of capture recovering 3–15 HP) or execute a clean retreat into the shadows.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
     # Active Incident Alert Card
     if game.selected_attack_data:
         att = game.selected_attack_data
@@ -133,6 +205,9 @@ def render_main_dashboard(game: GameState):
                     st.markdown(f"**Net Health Change:** <span style='font-size: 22px; font-weight: 800; color:{delta_color};'>{entry['net_delta']:+g} HP</span>", unsafe_allow_html=True)
                     st.write(f"Health Before: **{entry['health_before']:.1f}** &nbsp;→&nbsp; Health After: **{entry['health_after']:.1f}**")
                     st.caption(f"Threat Multiplier: {entry['multiplier']}x")
+
+    # Student Cybersecurity Vocabulary Glossary
+    render_acronym_glossary()
 
 # ---------------------------------------------------------
 # MAIN APP ENTRYPOINT
@@ -260,9 +335,14 @@ def main():
             game.start_phase("hacker")
             st.rerun()
     elif game.phase == "recap":
-        next_label = "🏁 Conclude Game" if game.current_round >= game.max_rounds else f"Start Round {game.current_round + 1}"
+        next_label = "💀 Advance to Final Threat Actor Gambit" if game.current_round >= game.max_rounds else f"Start Round {game.current_round + 1}"
         if st.sidebar.button(f"➡️ {next_label}", type="primary", use_container_width=True):
             game.advance_to_next_round()
+            st.rerun()
+    elif game.phase == "final_hacker_action":
+        st.sidebar.warning("💀 Adversary Final Gambit in Progress")
+        if st.sidebar.button("⚡ Fast-Conclude Simulation (Retreat)", use_container_width=True):
+            game.submit_final_hacker_action("retreat")
             st.rerun()
     elif game.phase == "game_over":
         st.sidebar.success("🏁 Simulation Finished!")

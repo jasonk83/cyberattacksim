@@ -186,3 +186,60 @@ def render_round_recap_card(game):
     </div>
     """, unsafe_allow_html=True)
 
+def render_final_hacker_action_card(game):
+    """Renders the debrief of the Adversary Final Gambit (Press Attack vs Retreat)."""
+    data = getattr(game, "final_hacker_action_data", None)
+    if not data:
+        return
+
+    action = data.get("action", "retreat")
+    delta = data.get("net_delta", 0)
+    delta_color = "#10b981" if delta > 0 else "#ef4444" if delta < 0 else "#94a3b8"
+
+    if action == "press":
+        card_bg = "#450a0a" if not data.get("caught") else "#3b0764"
+        card_border = "#ef4444" if not data.get("caught") else "#a855f7"
+        badge = "🚨 ADVERSARY PRESSED THE ATTACK"
+    else:
+        card_bg = "#0f172a"
+        card_border = "#64748b"
+        badge = "🛑 ADVERSARY RETREATED INTO THE SHADOWS"
+
+    st.markdown(f"""
+    <div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 18px; margin: 16px 0;">
+        <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+            <span style="font-size: 18px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>
+            <span style="font-size: 20px; font-weight: 900; color: {delta_color};">{delta:+g} HP</span>
+        </div>
+        <div style="color: #f8fafc; font-size: 14px; margin-top: 6px; line-height: 1.4;">{data.get('summary', '')}</div>
+        <div style="margin-top: 8px; font-size: 12px; color: #cbd5e1;">
+            Enterprise Health Shift: {data.get('health_before', 0):.1f} → <strong style="color: {delta_color};">{data.get('health_after', 0):.1f} HP</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_acronym_glossary():
+    """Renders an interactive educational cybersecurity vocabulary & acronym glossary."""
+    with st.expander("📚 Student Cybersecurity Vocabulary & Acronym Glossary (Click to Expand)", expanded=False):
+        st.markdown("""
+        | Acronym | Full Term | Classroom Definition & Practical Context |
+        | :--- | :--- | :--- |
+        | **IT** | Information Technology | Enterprise computing systems, cloud infrastructure, and technical administration. |
+        | **SOC** | Security Operations Center | The centralized incident response team monitoring network alerts and defending endpoints 24/7. |
+        | **RTO** | Recovery Time Objective | The maximum acceptable duration of system downtime after an outage before the business suffers catastrophic loss. |
+        | **EDR** | Endpoint Detection & Response | Advanced behavioral monitoring tools installed on workstations/servers to isolate infected devices before malware spreads. |
+        | **CVE** | Common Vulnerabilities & Exposures | Standardized public catalog identifying known software security flaws (e.g., CVE-2024-XXXXX). |
+        | **PII** | Personally Identifiable Information | Sensitive customer/employee data (passwords, credit cards, SSNs) protected by regulatory laws like GDPR and CCPA. |
+        | **APT** | Advanced Persistent Threat | Highly skilled, well-funded cyber adversary groups (often state-sponsored) conducting stealthy, prolonged intrusions. |
+        | **UEFI** | Unified Extensible Firmware Interface | Low-level firmware code on motherboards that executes before the operating system boots. Implants here survive OS reinstalls! |
+        | **WAF** | Web Application Firewall | Protective security barrier filtering and inspecting incoming web traffic to block SQL injections and web exploits. |
+        | **C2** | Command and Control | Attacker-controlled servers used to send instructions and extract stolen data from compromised internal machines. |
+        | **DDoS** | Distributed Denial of Service | Cyberattack that floods servers with millions of fake requests, knocking public websites offline. |
+        | **NPS** | Net Promoter Score | Metric measuring customer loyalty, trust, and brand perception (-100 to +100). |
+        | **SEC** | Securities & Exchange Commission | U.S. regulatory agency enforcing legal disclosure of material cyber incidents and penalties for corporate deception. |
+        | **OSINT** | Open-Source Intelligence | Publicly available intelligence (social media, public DNS, search engines) used by hackers for reconnaissance. |
+        | **HP** | Health Points | Simulated enterprise vitality metric (0 to 100) reflecting financial solvency, system availability, and brand trust. |
+        """)
+
+
