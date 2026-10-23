@@ -29,9 +29,16 @@ def get_global_game() -> GameState:
 # ---------------------------------------------------------
 # GM PROJECTOR & MISSION CONTROL SCOREBOARD
 # ---------------------------------------------------------
+@st.fragment(run_every=2)
 def render_main_dashboard(game: GameState):
-    st.title("🛡️ CloudStore Command: Mission Control")
-    st.caption("Live Operational Cyber Incident Response Tabletop Simulation")
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.title("🛡️ CloudStore Command: Mission Control")
+        st.caption("Live Operational Cyber Incident Response Tabletop Simulation")
+    with col2:
+        st.write("")
+        if st.button("🔄 Refresh Scoreboard", key="top_refresh_main", use_container_width=True):
+            st.rerun()
 
     # Threatening Countdown Clock
     rem_secs = game.get_remaining_seconds()

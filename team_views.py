@@ -68,12 +68,22 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
     st.markdown("---")
 
 
+def _render_top_header(title: str, subtitle: str, role_key: str):
+    """Renders a prominent header with a clear Refresh button at the top of the main body."""
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.title(title)
+        st.caption(subtitle)
+    with col2:
+        st.write("")
+        if st.button("🔄 Refresh View", key=f"top_refresh_{role_key}", use_container_width=True):
+            st.rerun()
+
 # ---------------------------------------------------------
 # 1. THREAT ACTOR (HACKER) TERMINAL
 # ---------------------------------------------------------
 def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
-    st.title("💀 Threat Actor Command Terminal")
-    st.caption("Access Level: Adversary / Red Team Infiltration")
+    _render_top_header("💀 Threat Actor Command Terminal", "Access Level: Adversary / Red Team Infiltration", "hackers")
 
     if game.phase == "lobby":
         st.warning("⏳ Simulation is in the Lobby. Standby for the Game Master to initiate Round 1.")
@@ -127,8 +137,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 # 2. IT DEFENSE COMMAND TERMINAL
 # ---------------------------------------------------------
 def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
-    st.title("🛡️ IT Defense Command Terminal")
-    st.caption("Access Level: Security Operations Center (SOC) / Incident Response")
+    _render_top_header("🛡️ IT Defense Command Terminal", "Access Level: Security Operations Center (SOC) / Incident Response", "it")
 
     if game.phase in ["lobby", "hacker"]:
         st.info("🟢 Network telemetry nominal. Awaiting detection alerts from perimeter intrusion sensors...")
@@ -182,8 +191,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
 # 3. EXECUTIVE BOARDROOM TERMINAL (ASYMMETRIC GOVERNANCE)
 # ---------------------------------------------------------
 def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
-    st.title("💼 Executive Boardroom Terminal")
-    st.caption("Access Level: Board of Directors / Chief Executive Office")
+    _render_top_header("💼 Executive Boardroom Terminal", "Access Level: Board of Directors / Chief Executive Office", "exec")
 
     if game.phase in ["lobby", "hacker"]:
         st.info("🟢 Board in routine session. Monitoring corporate risk posture.")
@@ -247,8 +255,7 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 # 4. MEDIA & PR SCRUM TERMINAL
 # ---------------------------------------------------------
 def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
-    st.title("🎤 Media & PR Press Scrum")
-    st.caption("Access Level: Public Affairs / Investigative Journalism Desk")
+    _render_top_header("🎤 Media & PR Press Scrum", "Access Level: Public Affairs / Investigative Journalism Desk", "media")
 
     if game.phase in ["lobby", "hacker", "it"]:
         st.info("📡 Monitoring live news wires. Waiting for executive statements from CloudStore leadership...")
@@ -285,6 +292,7 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     _render_poll_ui(game, "media", is_captain, voter_id, headlines)
 
     for idx, item in enumerate(headlines):
+        head_label = item.get("id", f"Headline {idx + 1}")
         delta = item.get("health_delta", 0)
         delta_str = f"+{delta}" if delta > 0 else f"{delta}"
         badge_color = "#10b981" if delta > 0 else "#64748b" if delta == 0 else "#ef4444"
@@ -292,6 +300,7 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.markdown(f"""
         <div style="background-color: #030712; padding: 14px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
             <div>
+                <span style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase;">{head_label} &bull; {item.get('tier', 'News')}</span><br/>
                 <span style="font-size: 15px; font-weight: 800; color: #f8fafc;">\"{item['headline']}\"</span>
                 <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">{item.get('desc', '')}</div>
             </div>
@@ -300,8 +309,8 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
         """, unsafe_allow_html=True)
 
         if is_captain:
-            if st.button(f"Publish Headline #{idx + 1}", key=f"btn_media_{idx}", type="primary", use_container_width=True):
+            if st.button(f"Publish {head_label}", key=f"btn_media_{idx}", type="primary", use_container_width=True):
                 game.submit_media_choice(idx)
                 st.rerun()
         else:
-            st.caption(f"🔒 *Headline #{idx + 1} open for voting in Straw Poll.*")
+            st.caption(f"🔒 *{head_label} open for voting in Straw Poll.*")
