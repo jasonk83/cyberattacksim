@@ -542,19 +542,27 @@ def main():
     st.sidebar.markdown("### 🔗 Shareable Team URLs")
     st.sidebar.caption("Distribute one link per team. Students join as Viewers; Captains unlock via passcode:")
 
-    base_url = "https://cyberattacksim.streamlit.app"
-    team_links = {
-        f"💀 Threat Actors (Passcode: {TEAM_CODES['hackers']})": f"{base_url}/?team=hackers",
-        f"🛡️ IT Defense (Passcode: {TEAM_CODES['it']})": f"{base_url}/?team=it",
-        f"💼 Executive Board (Passcode: {TEAM_CODES['exec']})": f"{base_url}/?team=exec",
-        f"🎤 Media & PR (Passcode: {TEAM_CODES['media']})": f"{base_url}/?team=media",
-        f"🎮 GM Projector": f"{base_url}/?team=main",
-        f"🧑‍🏫 Instructor Testing Mode (Passcode: {TEAM_CODES['instructor']})": f"{base_url}/?team=instructor"
-    }
+    default_base_url = "https://cyberattacksim.streamlit.app"
+    base_url_input = st.sidebar.text_input("App Base URL", value=default_base_url, help="Change if your app is hosted under a different domain or on localhost.")
+    base_url = base_url_input.rstrip("/")
 
-    for label, link in team_links.items():
-        with st.sidebar.expander(label, expanded=False):
-            st.code(link, language="text")
+    team_links = [
+        ("💀 Threat Actors", TEAM_CODES['hackers'], "hackers"),
+        ("🛡️ IT Defense", TEAM_CODES['it'], "it"),
+        ("💼 Executive Board", TEAM_CODES['exec'], "exec"),
+        ("🎤 Media & PR", TEAM_CODES['media'], "media"),
+        ("🎮 GM Projector", None, "main"),
+        ("🧑‍🏫 Instructor Testing Mode", TEAM_CODES['instructor'], "instructor"),
+    ]
+
+    for title, code, param in team_links:
+        header = f"{title} (Passcode: {code})" if code else title
+        with st.sidebar.expander(header, expanded=False):
+            full_link = f"{base_url}/?team={param}"
+            st.code(full_link, language="text")
+            st.markdown(f"🔗 [Open Link (Relative)](/?team={param})")
+
+    st.sidebar.caption("💡 **Tip:** In any browser tab, you can append `/?team=instructor` directly to your active URL, or use the **👁️ Terminal Preview** dropdown below.")
 
     # Terminal Preview Switcher
     st.sidebar.markdown("---")
