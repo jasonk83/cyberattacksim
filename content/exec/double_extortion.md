@@ -1,7 +1,10 @@
-### 💀 Executive Brief: Double Extortion Ransomware
-The ultimate boardroom nightmare. The company faces a total operational halt paired with the guarantee of a massive public data leak. 
+### 💼 Executive Crisis Briefing: Double Extortion Ransomware Lockout
+Critical infrastructure lockout paired with public extortion threats. The Board must decide whether to authorize painful bare-metal system wipes or seek risky commercial compromises.
 
-**72-Hour Impact Projections:**
-* **Refuse to Pay & Notify the Public:** (-15% Stock, -30 NPS) The stock crashes due to prolonged downtime, but the company avoids funding terrorism and cooperating with federal authorities looks legally sound.
-* **Quietly Pay the Ransom via Intermediary:** (-5% Stock, -60 NPS) Operations resume quickly, minimizing the stock hit. However, if the public finds out you paid criminals to hide a breach, trust is permanently destroyed.
-* **Attempt to Sue the Software Provider:** (-12% Stock, -45 NPS) A desperate legal maneuver that looks highly defensive and weak to the public markets.
+**Executive Governance Directives:**
+* **✅ Approve IT Recommendation (Full Containment):**  
+  Authorizes a 36-hour total offline wipe and bare-metal rebuild from verified offline golden backups. Maximizes short-term operational pain, but ensures malware eradication and avoids funding cyber extortion.
+* **⚖️ Downgrade to Business Compromise (Balanced):**  
+  Directs IT to partition subnets under an 8-hour partial outage. Preserves critical customer portals, but cuts threat containment by 50% as secondary controllers remain compromised.
+* **🚫 Overrule IT Plan (Protect Business Continuity):**  
+  Rejects IT system shutdowns and attempts back-channel extortion negotiations with zero downtime. Protects immediate stock price, but risks total corporate bankruptcy if attackers fail to deliver keys.

@@ -1,8 +1,13 @@
-### 🤖 IT System Impact: AI Prompt Injection
-An unauthorized user is manipulating the corporate LLM. IT must balance the need to patch the AI's guardrails against the business requirement to keep customer-facing chatbots online.
+### 🤖 Technical SOC Briefing: AI LLM Prompt Injection & API Pivot
+Adversarial prompts injected into the automated customer support assistant bypassed system guardrails, leaking internal API tokens and allowing unauthorized queries against backend customer datastores.
 
-**Recovery Timelines & Technical Impact by Decision:**
-* **Hard Offline & Revert AI Model:** (RTO: 24 Hours) Completely suspends all AI-driven business tools. Guaranteed to stop the injection, but causes massive service degradation for customers.
-* **Deploy Aggressive Input Sanitization Filter:** (RTO: 4 Hours) Keeps the AI online but routes all prompts through a strict keyword blocker. Fast, but causes high "false positives" that frustrate legitimate users.
-* **Rate-Limit and Alert:** (RTO: 1 Hour) Throttles the number of questions any user can ask the AI, buying IT time to manually review chat logs for the malicious inputs.
-* **Do Nothing:** (RTO: Indefinite) The AI continues to leak data or perform unauthorized backend commands.
+**Containment Strategies & Technical Impact Analysis:**
+* **Option 1: Hard Offline: Suspend AI Endpoints & Invalidate API Keys**  
+  *Recovery Time Objective (RTO): 24 Hours Offline &bull; Threat Mitigation: 90% (Maximum)*  
+  Completely shuts down automated assistant endpoints, revokes all service principal API tokens, and clears model context caches. Severe operational impact (-4 Health penalty), but guarantees eradication of the exploit pathway.
+* **Option 2: Deploy Aggressive Input Sanitization Guardrail & Throttling**  
+  *Recovery Time Objective (RTO): 6 Hours Offline &bull; Threat Mitigation: 60% (Balanced)*  
+  Installs regex sanitization filters to strip jailbreak prompts and enforces rate-limiting on user sessions. Moderate disruption (-2 Health penalty). Linguistic obfuscation may still trigger auxiliary API pivots.
+* **Option 3: Silent Prompt Logging & Asynchronous Security Review**  
+  *Recovery Time Objective (RTO): 0 Hours &bull; Threat Mitigation: 25% (Permissive)*  
+  Leaves customer chatbots online while logging anomalous prompts for manual retrospective review. Zero operational disruption (0 Health penalty), but leaves the vulnerability exposed to ongoing manipulation.

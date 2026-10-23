@@ -1,7 +1,10 @@
-### 🤖 Executive Brief: AI Prompt Injection
-An innovation risk. The company rushed an AI feature to market, and investors are now questioning the board's technical due diligence.
+### 💼 Executive Crisis Briefing: AI LLM Prompt Injection & API Pivot
+An attacker manipulated corporate customer chatbots to extract proprietary keys and backend system tokens. The Board must evaluate innovative brand reputation versus data privacy compliance.
 
-**72-Hour Impact Projections:**
-* **Temporarily Suspend All AI Features:** (-3% Stock, -5 NPS) Frustrates users and hurts the "innovative" brand image, but proves the company prioritizes safety over hype.
-* **Publicly Blame the AI Vendor (e.g., OpenAI/Anthropic):** (-1% Stock, -15 NPS) Protects the stock by shifting legal liability, but the tech community and partners view the company as untrustworthy.
-* **Quietly Patch and Downplay:** (-2% Stock, -10 NPS) Business continues, but tech journalists will likely discover the vulnerability and publish a negative expose.
+**Executive Governance Directives:**
+* **✅ Approve IT Recommendation (Full Containment):**  
+  Authorizes a 24-hour total suspension of all AI features and backend API keys. Disrupts automated customer support and signals an AI stumble, but closes 90% of breach leakage paths.
+* **⚖️ Downgrade to Business Compromise (Balanced):**  
+  Directs IT to apply input sanitization filters under a 6-hour maintenance window. Keeps customer features operational, but halves threat containment effectiveness.
+* **🚫 Overrule IT Plan (Protect Business Continuity):**  
+  Demands AI features remain live without interruption to preserve the company's innovation narrative. Threat mitigation drops to 5%, allowing adversaries to continue manipulating internal data.
