@@ -4,8 +4,22 @@ Role-specific terminals for Threat Actors, IT Defense, Executive Board, and Medi
 Includes single-URL Captain vs Viewer modes, live straw polling, and asymmetric information flow.
 """
 
+import sys
+import os
+from pathlib import Path
+import importlib
 import streamlit as st
 from typing import Dict, Any, List
+
+# Ensure repository root is in sys.path
+_repo_dir = str(Path(__file__).resolve().parent)
+if _repo_dir not in sys.path:
+    sys.path.insert(0, _repo_dir)
+
+if "game_data" in sys.modules and not hasattr(sys.modules["game_data"], "ATTACKS"):
+    del sys.modules["game_data"]
+    importlib.invalidate_caches()
+
 from state_manager import GameState
 from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
 from ui_components import (

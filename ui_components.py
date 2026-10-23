@@ -4,9 +4,18 @@ Reusable UI widgets for CloudStore Command: Cyber Attack Simulation
 Includes Threatening Ticking Clock, Health Gauge, Polling Bars, and Briefings.
 """
 
+import sys
+import os
+from pathlib import Path
 import streamlit as st
 import time
 from typing import Dict, Any, List, Optional
+
+# Ensure repository root is in sys.path
+_repo_dir = str(Path(__file__).resolve().parent)
+if _repo_dir not in sys.path:
+    sys.path.insert(0, _repo_dir)
+
 from game_data import load_markdown_content
 
 def render_threatening_clock(remaining_secs: int, total_secs: int, phase_name: str, is_paused: bool = False):

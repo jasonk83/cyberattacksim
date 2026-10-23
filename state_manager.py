@@ -4,11 +4,33 @@ Global in-memory synchronized game state across multi-device sessions
 for CloudStore Command: Cyber Attack Simulation
 """
 
+import sys
+import os
+from pathlib import Path
+import importlib
 import time
 import copy
 import random
 from typing import Dict, Any, Optional, List, Tuple
-from game_data import PHASE_DURATIONS, ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
+
+# Ensure repository root is in sys.path
+_repo_dir = str(Path(__file__).resolve().parent)
+if _repo_dir not in sys.path:
+    sys.path.insert(0, _repo_dir)
+
+# Evict stale game_data module if lingering from previous Streamlit worker execution
+if "game_data" in sys.modules and not hasattr(sys.modules["game_data"], "PHASE_DURATIONS"):
+    del sys.modules["game_data"]
+    importlib.invalidate_caches()
+
+try:
+    from game_data import PHASE_DURATIONS, ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
+except ImportError:
+    importlib.invalidate_caches()
+    if "game_data" in sys.modules:
+        del sys.modules["game_data"]
+    from game_data import PHASE_DURATIONS, ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
+
 from scoring_engine import calculate_round_impact, evaluate_final_outcome, get_outcome_thresholds
 
 class GameState:

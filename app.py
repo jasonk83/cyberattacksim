@@ -4,9 +4,23 @@ Multiplayer Cyber Incident Response Tabletop Simulation
 Streamlit Application
 """
 
-import streamlit as st
+import sys
+import os
+from pathlib import Path
+import importlib
 import uuid
 from typing import Dict, Any, Optional
+import streamlit as st
+
+# Ensure repository root directory is prioritized in sys.path (critical for Streamlit Cloud)
+ROOT_DIR = str(Path(__file__).resolve().parent)
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+# Invalidate stale in-memory module caches on Streamlit Cloud hot-reloads
+importlib.invalidate_caches()
+if "game_data" in sys.modules and not hasattr(sys.modules["game_data"], "PHASE_DURATIONS"):
+    del sys.modules["game_data"]
 
 from state_manager import GameState
 from game_data import TEAM_CODES

@@ -539,3 +539,89 @@ DYNAMIC_HEADLINES = {
         {"id": "Headline 4", "label": "Favorable (+8 HP)", "tier": "Favorable", "headline": "🛡️ Masterclass in Crisis Leadership: CloudStore Prevails", "health_delta": 8, "desc": "Glowing review praising the organization's crisis turnaround."}
     ]
 }
+
+# ---------------------------------------------------------
+# BACKWARD COMPATIBILITY ALIASES
+# (Guarantees zero crashes if legacy callers or cached workers access old attributes)
+# ---------------------------------------------------------
+hacker_options = [
+    {
+        "id": "H1",
+        "name": "Phishing Campaign",
+        "description": "This action involves sending fake emails to employees to trick them into giving away their passwords.",
+        "assessment": "High likelihood of success, immediate damage usually limited to compromised accounts.",
+        "complexity": "Low",
+        "projected_impact": -10
+    },
+    {
+        "id": "H2",
+        "name": "DDoS Attack",
+        "description": "Overwhelms website with fake traffic so real customers cannot access it.",
+        "assessment": "Causes temporary financial loss and reputation damage while site is down.",
+        "complexity": "Medium",
+        "projected_impact": -20
+    },
+    {
+        "id": "H3",
+        "name": "Ransomware Deployment",
+        "description": "Uses malicious software to lock up company files until a ransom is paid.",
+        "assessment": "Severe damage halting business operations if successful.",
+        "complexity": "High",
+        "projected_impact": -35
+    }
+]
+
+it_options = [
+    {
+        "id": "IT1",
+        "name": "Isolate Affected Systems",
+        "description": "Disconnects infected computers from the network.",
+        "assessment": "Quickly stops spread, but isolated departments cannot work.",
+        "complexity": "Low",
+        "projected_impact": 10
+    },
+    {
+        "id": "IT2",
+        "name": "Restore from Backups",
+        "description": "Wipes infected computers and restores safe older copy.",
+        "assessment": "Removes attacker without paying, but recent unsaved work lost.",
+        "complexity": "Medium",
+        "projected_impact": 20
+    },
+    {
+        "id": "IT3",
+        "name": "Deploy Advanced Threat Hunting",
+        "description": "Security experts actively hunt for persistent hidden attackers.",
+        "assessment": "Thorough network security, but expensive and time-consuming.",
+        "complexity": "High",
+        "projected_impact": 35
+    }
+]
+
+exec_options = [
+    {
+        "id": "E1",
+        "name": "Public Apology and Transparency",
+        "description": "Public statement explaining the breach and apologizing.",
+        "assessment": "Builds long-term trust, but invites immediate press scrutiny.",
+        "complexity": "Low",
+        "projected_impact": 10
+    },
+    {
+        "id": "E2",
+        "name": "Hire External PR and Legal Firm",
+        "description": "Outside crisis experts handle media and legal exposure.",
+        "assessment": "Minimizes reputation fallout at high budgetary expense.",
+        "complexity": "Medium",
+        "projected_impact": 20
+    },
+    {
+        "id": "E3",
+        "name": "Negotiate and Pay Ransom",
+        "description": "Secretly pay attackers hoping for decryptor and data deletion.",
+        "assessment": "Fast recovery attempt, but risks repeat extortion and bad faith.",
+        "complexity": "High",
+        "projected_impact": 35
+    }
+]
+
