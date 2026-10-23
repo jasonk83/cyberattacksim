@@ -13,7 +13,9 @@ TEAM_CODES = {
     "hackers": "hacker123",   # Threat Actor Command
     "it": "tech123",          # IT Defense Command
     "exec": "board123",       # Executive Boardroom
-    "media": "press123"       # Media & PR Scrum
+    "media": "press123",      # Media & PR Scrum
+    "instructor": "tryit123", # Single-Player Instructor Sandbox
+    "solo": "tryit123"        # Alias for instructor mode
 }
 
 # Phase Timers in Seconds

@@ -15,6 +15,7 @@ from ui_components import (
     render_threatening_clock,
     render_health_gauge,
     render_final_hacker_action_card,
+    render_round_recap_card,
     render_acronym_glossary
 )
 from team_views import (
@@ -210,6 +211,133 @@ def render_main_dashboard(game: GameState):
     render_acronym_glossary()
 
 # ---------------------------------------------------------
+# SINGLE-PLAYER INSTRUCTOR TESTING MODE
+# ---------------------------------------------------------
+def render_instructor_mode(voter_id: str):
+    """
+    Dedicated single-player instructor test experience.
+    Runs on an isolated GameState instance so testing does not affect live multiplayer games.
+    Renders the Game Master Console above a divider and walks the instructor
+    through each team's Captain terminal sequentially as choices are made.
+    """
+    # 1. Initialize isolated private game state for instructor
+    if "instructor_game" not in st.session_state:
+        st.session_state["instructor_game"] = GameState()
+    solo_game = st.session_state["instructor_game"]
+
+    if "instructor_authenticated" not in st.session_state:
+        st.session_state["instructor_authenticated"] = False
+
+    st.sidebar.title("🧑‍🏫 Instructor Testing Mode")
+
+    # 2. Passcode gate (tryit123)
+    correct_pwd = TEAM_CODES.get("instructor", "tryit123")
+    if not st.session_state["instructor_authenticated"]:
+        st.sidebar.caption("🔒 Instructor Passcode Required")
+        pwd_sidebar = st.sidebar.text_input("Instructor Passcode", type="password", key="pwd_solo_sidebar")
+        if st.sidebar.button("🔓 Unlock Instructor Sandbox", type="primary", key="btn_unlock_solo_sidebar", use_container_width=True):
+            if pwd_sidebar == correct_pwd:
+                st.session_state["instructor_authenticated"] = True
+                st.rerun()
+            else:
+                st.sidebar.error("❌ Invalid Passcode. Please enter tryit123.")
+
+        st.title("🧑‍🏫 Instructor Testing Sandbox")
+        st.caption("Full Single-Player Tabletop Incident Response Simulation Environment")
+        st.info("🔒 **Access Restricted:** Enter the instructor passcode (`tryit123`) to unlock single-player simulation testing.")
+
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            pwd_main = st.text_input("Instructor Passcode", type="password", key="pwd_solo_main", placeholder="Enter tryit123")
+        with col2:
+            st.write("")
+            if st.button("🔓 Unlock Sandbox", type="primary", key="btn_unlock_solo_main", use_container_width=True):
+                if pwd_main == correct_pwd:
+                    st.session_state["instructor_authenticated"] = True
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid Passcode. Please enter tryit123.")
+        return
+
+    # 3. Authenticated Instructor Sidebar Controls
+    st.sidebar.success("⭐ **CAPTAIN ACCESS UNLOCKED**")
+    st.sidebar.caption("You control decisions across all 4 teams sequentially as the scenario unfolds.")
+    st.sidebar.markdown(f"**Round:** {solo_game.current_round} / {solo_game.max_rounds} &nbsp;|&nbsp; **Phase:** `{solo_game.phase.upper()}`")
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🕹️ Sandbox Controls")
+    if st.sidebar.button("🔄 Reset Test Simulation", key="solo_reset_sidebar", use_container_width=True):
+        solo_game.reset(max_rounds=solo_game.max_rounds)
+        st.rerun()
+
+    if st.sidebar.button("🎮 Switch to GM Projector", key="solo_switch_gm", use_container_width=True):
+        st.query_params["team"] = "main"
+        st.rerun()
+
+    if st.sidebar.button("🔒 Lock Sandbox", key="solo_lock_sidebar", use_container_width=True):
+        st.session_state["instructor_authenticated"] = False
+        st.rerun()
+
+    # ---------------------------------------------------------
+    # TOP: GAME MASTER CONSOLE & MISSION CONTROL SCOREBOARD
+    # ---------------------------------------------------------
+    render_main_dashboard(solo_game)
+
+    # ---------------------------------------------------------
+    # DIVIDER LINE
+    # ---------------------------------------------------------
+    st.markdown("---")
+    st.markdown("## 🧑‍🏫 Active Captain Command Console")
+
+    phase = solo_game.phase
+
+    # Sequence indicator and active guidance
+    step_descriptions = {
+        "lobby": "Simulation in Lobby. Click **🚀 Start Round 1 (Launch Infiltration)** in the Mission Controls above to launch.",
+        "hacker": "Active Step: **💀 Threat Actor Captain** — Select and deploy an attack vector below.",
+        "it": "Active Step: **🛡️ IT Defense Captain** — Deliberate containment options and recommend a plan to the Board.",
+        "exec": "Active Step: **💼 Executive Boardroom Captain** — Review IT's proposal and issue a binding corporate governance directive.",
+        "media": "Active Step: **🎤 Media & PR Captain** — Select and publish the breaking front-page headline.",
+        "recap": f"Active Step: **📊 Round {solo_game.current_round} Debrief** — Review incident metrics above and advance when ready.",
+        "final_hacker_action": "Active Step: **💀 Threat Actor Captain (Final Gambit)** — Decide whether to Press Attack further or safely Retreat.",
+        "game_over": "🏁 **Simulation Concluded** — Final enterprise outcome and score evaluated above."
+    }
+    st.info(f"👉 {step_descriptions.get(phase, 'Proceed with team decisions below.')}")
+
+    # ---------------------------------------------------------
+    # BOTTOM: ACTIVE TEAM CAPTAIN TERMINAL
+    # ---------------------------------------------------------
+    if phase == "lobby":
+        st.write("Ready to test the scenario? Click **🚀 Start Round 1 (Launch Infiltration)** in the Game Master Mission Controls above to begin.")
+    elif phase == "hacker":
+        render_hacker_terminal(solo_game, is_captain=True, voter_id=voter_id)
+    elif phase == "it":
+        render_it_terminal(solo_game, is_captain=True, voter_id=voter_id)
+    elif phase == "exec":
+        render_exec_terminal(solo_game, is_captain=True, voter_id=voter_id)
+    elif phase == "media":
+        render_media_terminal(solo_game, is_captain=True, voter_id=voter_id)
+    elif phase == "recap":
+        render_round_recap_card(solo_game)
+        next_label = "💀 Advance to Final Threat Actor Gambit" if solo_game.current_round >= solo_game.max_rounds else f"➡️ Start Round {solo_game.current_round + 1}"
+        col_r1, col_r2 = st.columns(2)
+        with col_r1:
+            if st.button(next_label, key="solo_adv_recap_btn", type="primary", use_container_width=True):
+                solo_game.advance_to_next_round()
+                st.rerun()
+        with col_r2:
+            if st.button("🔄 Reset Test Simulation", key="solo_reset_recap_btn", use_container_width=True):
+                solo_game.reset(max_rounds=solo_game.max_rounds)
+                st.rerun()
+    elif phase == "final_hacker_action":
+        render_hacker_terminal(solo_game, is_captain=True, voter_id=voter_id)
+    elif phase == "game_over":
+        st.success("🏁 You have completed the tabletop simulation scenario!")
+        if st.button("🔄 Start New Playthrough (Reset Test Sim)", key="solo_reset_gameover_btn", type="primary", use_container_width=True):
+            solo_game.reset(max_rounds=solo_game.max_rounds)
+            st.rerun()
+
+# ---------------------------------------------------------
 # MAIN APP ENTRYPOINT
 # ---------------------------------------------------------
 def main():
@@ -235,6 +363,14 @@ def main():
     url_role = str(url_role).lower().strip()
 
     is_team_url = url_role in ["hackers", "it", "exec", "media"]
+    is_instructor_url = url_role in ["instructor", "solo"]
+
+    # ---------------------------------------------------------
+    # SINGLE-PLAYER INSTRUCTOR TESTING MODE (?team=instructor)
+    # ---------------------------------------------------------
+    if is_instructor_url:
+        render_instructor_mode(voter_id)
+        return
 
     # ---------------------------------------------------------
     # DEDICATED TEAM TERMINAL VIEW (SINGLE URL: VIEWER / CAPTAIN)
@@ -398,7 +534,8 @@ def main():
         f"🛡️ IT Defense (Passcode: {TEAM_CODES['it']})": f"{base_url}/?team=it",
         f"💼 Executive Board (Passcode: {TEAM_CODES['exec']})": f"{base_url}/?team=exec",
         f"🎤 Media & PR (Passcode: {TEAM_CODES['media']})": f"{base_url}/?team=media",
-        f"🎮 GM Projector": f"{base_url}/?team=main"
+        f"🎮 GM Projector": f"{base_url}/?team=main",
+        f"🧑‍🏫 Instructor Testing Mode (Passcode: {TEAM_CODES['instructor']})": f"{base_url}/?team=instructor"
     }
 
     for label, link in team_links.items():
@@ -410,7 +547,7 @@ def main():
     st.sidebar.markdown("### 👁️ Terminal Preview")
     preview_mode = st.sidebar.selectbox(
         "View As:",
-        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal"]
+        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal", "Instructor Testing Mode"]
     )
 
     if st.sidebar.button("🔄 Force Refresh All", use_container_width=True):
@@ -426,6 +563,8 @@ def main():
         render_exec_terminal(game, True, voter_id)
     elif preview_mode == "Media Terminal":
         render_media_terminal(game, True, voter_id)
+    elif preview_mode == "Instructor Testing Mode":
+        render_instructor_mode(voter_id)
 
 if __name__ == "__main__":
     main()
