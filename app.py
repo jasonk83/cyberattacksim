@@ -174,7 +174,7 @@ def render_main_dashboard(game: GameState):
         <div style="background-color: #3b0764; border: 2px solid #a855f7; border-radius: 12px; padding: 18px; margin: 12px 0;">
             <div style="font-size: 11px; font-weight: 800; color: #f3e8ff; text-transform: uppercase; letter-spacing: 0.1em;">ADVERSARY FINAL GAMBIT IN PROGRESS</div>
             <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">💀 Threat Actors Deliberating: Press Attack or Retreat</div>
-            <div style="font-size: 14px; color: #e9d5ff; margin-top: 6px;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems for an additional 15–25 HP damage (with a 1-in-3 chance of capture recovering 3–15 HP) or execute a clean retreat into the shadows.</div>
+            <div style="font-size: 14px; color: #e9d5ff; margin-top: 6px;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems (75% chance of inflicting 15–30 HP damage, or a 1-in-4 chance of being caught inflicting 0 damage while company recovers 3–15 HP) or execute a clean retreat into the shadows.</div>
         </div>
         """, unsafe_allow_html=True)
 

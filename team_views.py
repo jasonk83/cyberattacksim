@@ -129,9 +129,9 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         gambit_options = [
             {
                 "id": "press",
-                "label": "🚀 Press the Attack (-15 to -25 HP | 1-in-3 Catch Risk)",
+                "label": "🚀 Press the Attack (-15 to -30 HP | 1-in-4 Catch Risk)",
                 "label_short": "Press Attack",
-                "desc": "Execute secondary exploit payloads against payment APIs. Inflicts 15 to 25 HP damage, but carries a 1-in-3 chance (33%) of being caught, recovering 3 to 15 HP for the company."
+                "desc": "Execute secondary exploit payloads against payment APIs. If undetected (75%), inflicts 15 to 30 HP damage. If caught (25%), inflicts 0 damage and the company recovers 3 to 15 HP."
             },
             {
                 "id": "retreat",
@@ -153,8 +153,8 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
                     Execute secondary exploits against payment endpoints and customer transaction ledgers.
                 </div>
                 <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
-                    <strong>Threat Damage:</strong> -15 to -25 Enterprise HP<br/>
-                    <strong>Detection Risk:</strong> 1-in-3 chance (33%) caught by SOC/FBI (recovers +3 to +15 HP)
+                    <strong>Undetected (75%):</strong> -15 to -30 Enterprise HP damage<br/>
+                    <strong>Detection Risk (25% - 1 in 4 chance):</strong> 0 damage inflicted & company recovers +3 to +15 HP
                 </div>
             </div>
             """, unsafe_allow_html=True)

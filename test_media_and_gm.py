@@ -427,12 +427,12 @@ def test_game_over_and_outcome_assessment():
 
     # 1. Calibrated Threshold Verification
     b2, w2 = get_outcome_thresholds(2)
-    assert (b2, w2) == (39, 70)
-    assert evaluate_final_outcome(70.0, 2)[0] == "Win"
-    assert evaluate_final_outcome(69.9, 2)[0] == "Survive"
+    assert (b2, w2) == (39, 76)
+    assert evaluate_final_outcome(76.0, 2)[0] == "Win"
+    assert evaluate_final_outcome(75.9, 2)[0] == "Survive"
     assert evaluate_final_outcome(39.0, 2)[0] == "Survive"
     assert evaluate_final_outcome(38.9, 2)[0] == "Bankrupt"
-    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-69 | Win >= 70).")
+    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-75 | Win >= 76).")
 
     b3, w3 = get_outcome_thresholds(3)
     assert (b3, w3) == (30, 62)

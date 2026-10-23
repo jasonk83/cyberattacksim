@@ -127,21 +127,24 @@ def test_full_game_lifecycle():
     result = game.submit_final_hacker_action("press")
     assert game.phase == "game_over"
     assert result["action"] == "press"
-    assert 15 <= result["damage"] <= 25
     if result["caught"]:
+        assert result["damage"] == 0
         assert 3 <= result["recovery"] <= 15
+        assert result["net_delta"] == result["recovery"]
     else:
+        assert 15 <= result["damage"] <= 30
         assert result["recovery"] == 0
+        assert result["net_delta"] == -result["damage"]
     assert game.final_hacker_action_data is not None
     print(f"✅ Final Hacker Action executed: {result['summary']}")
 
     # 9. Test Outcome Thresholds for 2 and 3 rounds
     b2, w2 = get_outcome_thresholds(2)
-    assert b2 == 39 and w2 == 70
+    assert b2 == 39 and w2 == 76
     b3, w3 = get_outcome_thresholds(3)
     assert b3 == 30 and w3 == 62
 
-    tier_win, _, _ = evaluate_final_outcome(75.0, 2)
+    tier_win, _, _ = evaluate_final_outcome(78.0, 2)
     assert tier_win == "Win"
     tier_survive, _, _ = evaluate_final_outcome(50.0, 2)
     assert tier_survive == "Survive"

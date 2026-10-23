@@ -46,10 +46,15 @@ def run_distribution_test(rounds=3, n_trials=20000):
 
         if rounds == 2:
             # Adversary Final Gambit: Press Attack (70%) or Retreat (30%)
-            # Press: 15-25 dmg, 1/3 chance caught recovering 3-15 HP; Retreat: 0 dmg
+            # Press: 1-in-4 chance (25%) caught. If caught: 0 dmg, +3 to +15 recovery.
+            # If not caught: -15 to -30 dmg, 0 recovery. Retreat: 0 dmg.
             if random.random() < 0.70:
-                dmg = random.randint(15, 25)
-                rec = random.randint(3, 15) if random.random() < (1.0 / 3.0) else 0
+                if random.random() < 0.25:  # caught (1 in 4)
+                    dmg = 0
+                    rec = random.randint(3, 15)
+                else:  # not caught
+                    dmg = random.randint(15, 30)
+                    rec = 0
                 health = max(0.0, min(100.0, health - dmg + rec))
 
         tier, _, _ = evaluate_final_outcome(health, rounds)

@@ -266,24 +266,27 @@ class GameState:
     def submit_final_hacker_action(self, action: str) -> Dict[str, Any]:
         """
         Executes the final adversary gambit:
-        - 'press': 15 to 25 HP damage, 1 in 3 chance caught, if caught recovers 3 to 15 HP
-        - 'retreat': 0 damage, clean escape
+        - 'press': 1 in 4 chance (25%) caught.
+          - If not caught: 15 to 30 HP damage, 0 recovery.
+          - If caught: 0 damage, +3 to +15 HP company recovery.
+        - 'retreat': 0 damage, clean escape.
         """
         self.create_snapshot()
         self.close_poll("hackers")
         action_clean = action.lower().strip()
 
         if action_clean == "press":
-            damage = random.randint(15, 25)
-            caught = (random.random() < (1.0 / 3.0))
-            recovery = random.randint(3, 15) if caught else 0
-            net_delta = -damage + recovery
+            caught = (random.random() < 0.25)
             if caught:
-                summary = (f"🚨 HACKERS PRESSED THE ATTACK BUT WERE CAUGHT! Exploited secondary payment APIs for -{damage} HP damage, "
-                           f"but SOC investigators and federal cyber authorities traced the exfiltration node, recovering +{recovery} HP! (Net Impact: {net_delta:+g} HP)")
+                damage = 0
+                recovery = random.randint(3, 15)
+                net_delta = recovery
+                summary = (f"🚨 HACKERS PRESSED THE ATTACK BUT WERE CAUGHT! SOC perimeter defenses and federal authorities intercepted the intrusion node before payloads executed—inflicting 0 additional damage while investigators recovered critical enterprise assets (+{recovery} HP recovered for the company!) (Net Impact: {net_delta:+g} HP)")
             else:
-                summary = (f"💥 HACKERS PRESSED THE ATTACK UNDETECTED! Siphoned core database archives and disabled backups completely undetected, "
-                           f"inflicting -{damage} HP catastrophic damage! (Net Impact: {net_delta:+g} HP)")
+                damage = random.randint(15, 30)
+                recovery = 0
+                net_delta = -damage
+                summary = (f"💥 HACKERS PRESSED THE ATTACK UNDETECTED! Threat actors exploited secondary payment APIs and siphoned database archives completely undetected, inflicting -{damage} HP catastrophic damage! (Net Impact: {net_delta:+g} HP)")
         else:  # retreat
             damage = 0
             caught = False

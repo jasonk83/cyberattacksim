@@ -74,7 +74,7 @@ def get_outcome_thresholds(total_rounds: int) -> Tuple[int, int]:
     Calibrated for 2 rounds of incident response followed by the Adversary Final Gambit.
     """
     if total_rounds == 2:
-        return 39, 70
+        return 39, 76
     else:
         return 30, 62
 
