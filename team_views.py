@@ -8,7 +8,7 @@ import streamlit as st
 from typing import Dict, Any, List
 from state_manager import GameState
 from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES
-from ui_components import render_threatening_clock, render_briefing_card
+from ui_components import render_threatening_clock, render_briefing_card, render_round_recap_card
 
 def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str, options: List[Dict[str, Any]]):
     """Renders the live straw poll interface for both Captain and Viewers."""
@@ -43,10 +43,15 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
         for idx, opt in enumerate(options):
             with vote_cols[idx]:
                 opt_id = str(opt.get("id"))
-                label = opt.get("label", opt.get("name", f"Option {opt_id}"))
+                short_desc = opt.get("label_short")
+                if short_desc and short_desc != opt_id:
+                    btn_text = f"{opt_id} ({short_desc})"
+                else:
+                    btn_text = f"{opt_id}"
+
                 is_selected = (current_vote == opt_id)
                 btn_type = "primary" if is_selected else "secondary"
-                btn_label = f"✅ Voted: {opt_id}" if is_selected else f"Vote: {opt_id}"
+                btn_label = f"✅ Voted: {btn_text}" if is_selected else f"Vote: {btn_text}"
 
                 if st.button(btn_label, key=f"vote_btn_{role}_{opt_id}", type=btn_type, use_container_width=True):
                     game.cast_vote(role, voter_id, opt_id)
@@ -60,9 +65,13 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
             stat = stats["tallies"].get(opt_id, {"count": 0, "percent": 0.0})
             cnt = stat["count"]
             pct = stat["percent"]
-            label = opt.get("label", opt.get("name", f"Option {opt_id}"))
+            label = opt.get("label_short", opt.get("label", opt.get("name", f"Option {opt_id}")))
+            if str(opt_id) in str(label):
+                display_label = label
+            else:
+                display_label = f"{opt_id}: {label}"
 
-            st.write(f"**{opt_id}: {label}** — {cnt} votes ({pct:.1f}%)")
+            st.write(f"**{display_label}** — {cnt} votes ({pct:.1f}%)")
             st.progress(pct / 100.0)
 
     st.markdown("---")
@@ -82,6 +91,7 @@ def _render_top_header(title: str, subtitle: str, role_key: str):
 # ---------------------------------------------------------
 # 1. THREAT ACTOR (HACKER) TERMINAL
 # ---------------------------------------------------------
+@st.fragment(run_every=2)
 def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
     _render_top_header("💀 Threat Actor Command Terminal", "Access Level: Adversary / Red Team Infiltration", "hackers")
 
@@ -90,18 +100,40 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         return
 
     rem_secs = game.get_remaining_seconds()
-    render_threatening_clock(rem_secs, game.phase_duration, "Hacker Exploitation", game.timer_paused)
+    phase_label = "Hacker Exploitation" if game.phase == "hacker" else f"{game.phase.upper()} Phase"
+    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
+
+    if game.phase in ["recap", "game_over"]:
+        st.success("💥 Round Concluded! Enterprise impact debrief:")
+        render_round_recap_card(game)
+        return
 
     if game.phase != "hacker":
         st.info("🔒 Attack vector deployed! Standing by while CloudStore's defenders react.")
         if game.selected_attack_data:
             att = game.selected_attack_data
             st.markdown(f"""
-            <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 14px; border-radius: 8px;">
+            <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 14px; border-radius: 8px; margin-bottom: 12px;">
                 <div style="font-weight: 800; color: #ffffff;">ACTIVE PAYLOAD: {att.get('icon', '🚨')} {att.get('name')}</div>
                 <div style="color: #c7d2fe; font-size: 13px; margin-top: 4px;">{att.get('description')}</div>
+                <div style="color: #f87171; font-weight: 700; font-size: 13px; margin-top: 6px;">Inflicted Threat Damage: {att.get('damage')} Enterprise HP</div>
             </div>
             """, unsafe_allow_html=True)
+
+        # C2 Wiretap Console during defender turns
+        st.markdown("### 📡 Adversary C2 Surveillance Console")
+        if game.phase == "it":
+            st.code("""[C2 Beacon 10.14.0.22] Infiltration node active on CloudStore core subnet.
+[Telemetry Intercept] SOC alert triggered: High-priority incident declared.
+[Sensor Log] Monitoring IT containment responses...""", language="bash")
+        elif game.phase == "exec":
+            st.code("""[Signal Intercept] Executive boardroom emergency quorum active.
+[Financial Telemetry] Board debating operational downtime vs breach disclosure.
+[Market Feed] Volatility indicators rising...""", language="bash")
+        elif game.phase == "media":
+            st.code("""[Public Wire] Incident leaked to trade publications and wire desks.
+[DarkNet Forum] Proof-of-concept exfiltration logs verified.
+[PR Watch] Waiting for breaking media spin...""", language="bash")
         return
 
     st.subheader(f"Round {game.current_round}: Select Primary Infiltration Vector")
@@ -136,6 +168,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 # ---------------------------------------------------------
 # 2. IT DEFENSE COMMAND TERMINAL
 # ---------------------------------------------------------
+@st.fragment(run_every=2)
 def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
     _render_top_header("🛡️ IT Defense Command Terminal", "Access Level: Security Operations Center (SOC) / Incident Response", "it")
 
@@ -144,15 +177,55 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
         return
 
     rem_secs = game.get_remaining_seconds()
-    render_threatening_clock(rem_secs, game.phase_duration, "IT Containment Deliberation", game.timer_paused)
+    phase_label = "IT Containment Deliberation" if game.phase == "it" else f"{game.phase.upper()} Phase"
+    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
 
     att = game.selected_attack_data or {}
     st.error(f"🚨 **ACTIVE BREACH DETECTED:** {att.get('icon', '🚨')} **{att.get('name', 'Breach')}** — {att.get('description', '')}")
 
+    # Educational Technical Briefing Dossier
+    render_briefing_card("it", att.get("md_file", ""), f"Technical Impact Analysis: {att.get('name', 'Incident')}", att.get("assessment", ""))
+
     if game.it_choice_id:
         st.success(f"✅ Technical containment proposed: **{game.it_choice_data.get('label', 'Action')}**.")
-        st.info("⏳ Waiting for Executive Boardroom to review and issue binding governance directive...")
-        return
+        if game.phase == "exec":
+            st.info("⏳ Waiting for Executive Boardroom to review and issue binding governance directive...")
+            return
+
+        if game.phase in ["media", "recap", "game_over"]:
+            exec_act = (game.exec_action or "pending").lower()
+            if exec_act == "approve":
+                bg_color = "#064e3b"
+                border_color = "#10b981"
+                badge = "DIRECTIVE: APPROVED FULL CONTAINMENT"
+                detail = "The Board approved your technical containment recommendation in full. Maximum threat mitigation is active."
+            elif exec_act == "downgrade":
+                bg_color = "#78350f"
+                border_color = "#f59e0b"
+                badge = "DIRECTIVE: DOWNGRADED FOR BUSINESS UPTIME"
+                detail = "The Board compromised your containment plan to keep customer portals active. Threat mitigation was halved!"
+            else:
+                bg_color = "#7f1d1d"
+                border_color = "#ef4444"
+                badge = "DIRECTIVE: OVERRULED / DISMISSED"
+                detail = "The Board rejected system isolations to avoid panic. Threat mitigation collapsed to 0%!"
+
+            st.markdown(f"""
+            <div style="background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 12px; padding: 16px; margin: 12px 0;">
+                <div style="font-size: 11px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;">🏢 EXECUTIVE BOARD DIRECTIVE ISSUED</div>
+                <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 4px;">{badge}</div>
+                <div style="font-size: 13px; color: #f8fafc; margin-top: 6px;">{detail}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if game.phase == "media":
+                st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
+                return
+
+            if game.phase in ["recap", "game_over"]:
+                st.success("🏁 Round Concluded! Incident debrief:")
+                render_round_recap_card(game)
+                return
 
     st.subheader(f"Round {game.current_round}: Select Technical Containment Strategy")
     st.caption("⚠️ **Operational Trade-Off Rule:** Aggressive options with severe downtime provide the highest threat mitigation!")
@@ -190,6 +263,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
 # ---------------------------------------------------------
 # 3. EXECUTIVE BOARDROOM TERMINAL (ASYMMETRIC GOVERNANCE)
 # ---------------------------------------------------------
+@st.fragment(run_every=2)
 def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
     _render_top_header("💼 Executive Boardroom Terminal", "Access Level: Board of Directors / Chief Executive Office", "exec")
 
@@ -202,12 +276,16 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         return
 
     rem_secs = game.get_remaining_seconds()
-    render_threatening_clock(rem_secs, game.phase_duration, "Executive Crisis Governance", game.timer_paused)
+    phase_label = "Executive Crisis Governance" if game.phase == "exec" else f"{game.phase.upper()} Phase"
+    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
 
     att = game.selected_attack_data or {}
     it_plan = game.it_choice_data or {}
 
     st.error(f"🚨 **ENTERPRISE CRISIS ALERT:** {att.get('icon', '🚨')} **{att.get('name', 'Breach')}** — {att.get('description', '')}")
+
+    # Educational Executive Risk Dossier
+    render_briefing_card("exec", att.get("md_file", ""), f"Executive Risk Briefing: {att.get('name', 'Incident')}", "Review projected stock impact, customer sentiment, and regulatory compliance liabilities.")
 
     # Asymmetric Information Briefing: Execs see IT downtime & disruption, but NOT protection %!
     st.markdown(f"""
@@ -223,8 +301,12 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     if game.exec_action:
         st.success(f"✅ Governance directive issued: **{game.exec_action.upper()}**.")
-        st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
-        return
+        if game.phase == "media":
+            st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
+            return
+        if game.phase in ["recap", "game_over"]:
+            render_round_recap_card(game)
+            return
 
     st.subheader("Select Binding Corporate Governance Directive")
     st.caption("Decide whether to authorize IT's disruptive system shutdown or overrule them to preserve business operations:")
@@ -254,6 +336,7 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 # ---------------------------------------------------------
 # 4. MEDIA & PR SCRUM TERMINAL
 # ---------------------------------------------------------
+@st.fragment(run_every=2)
 def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     _render_top_header("🎤 Media & PR Press Scrum", "Access Level: Public Affairs / Investigative Journalism Desk", "media")
 
@@ -266,7 +349,8 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
         return
 
     rem_secs = game.get_remaining_seconds()
-    render_threatening_clock(rem_secs, game.phase_duration, "Breaking News Publication", game.timer_paused)
+    phase_label = "Breaking News Publication" if game.phase == "media" else f"{game.phase.upper()} Phase"
+    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
 
     att = game.selected_attack_data or {}
     exec_act = game.exec_action or "Unknown"
@@ -279,8 +363,9 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     </div>
     """, unsafe_allow_html=True)
 
-    if game.phase == "recap":
-        st.success("📰 Breaking story published! View Mission Control projector for the impact on Company Health.")
+    if game.phase in ["recap", "game_over"]:
+        st.success("📰 Breaking story published! Live impact debrief:")
+        render_round_recap_card(game)
         return
 
     st.subheader(f"Round {game.current_round}: Select Breaking News Headline")

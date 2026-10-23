@@ -156,3 +156,33 @@ def render_briefing_card(role: str, filename: str, fallback_title: str, fallback
             st.markdown(md_content)
         else:
             st.info(fallback_desc)
+
+def render_round_recap_card(game):
+    """Renders the round debrief and net impact breakdown across all player terminals."""
+    if not game.history:
+        return
+    entry = game.history[-1]
+    delta_color = "#10b981" if entry['net_delta'] >= 0 else "#ef4444"
+    st.markdown(f"""
+    <div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 18px; margin: 16px 0;">
+        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry['round']} INCIDENT DEBRIEF</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+            <span style="font-size: 20px; font-weight: 900; color: #ffffff;">{entry['attack_name']}</span>
+            <span style="font-size: 22px; font-weight: 900; color: {delta_color};">{entry['net_delta']:+g} HP</span>
+        </div>
+        <div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">
+            Headline: <em>"{entry['headline']}"</em> ({entry['media_delta']:+g} HP)
+        </div>
+        <hr style="border-color: #1e293b; margin: 10px 0;" />
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #cbd5e1;">
+            <div><strong>Threat Exploit:</strong> {entry['attack_damage']:+g} HP</div>
+            <div><strong>IT Defense Mitigated:</strong> +{entry['it_mitigated']:g} HP</div>
+            <div><strong>Operational Disruption:</strong> {entry['disruption_penalty']:+g} HP</div>
+            <div><strong>Governance:</strong> {entry['exec_decision']}</div>
+        </div>
+        <div style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #f8fafc;">
+            Enterprise Health: {entry['health_before']:.1f} → <span style="color: {delta_color};">{entry['health_after']:.1f} / 100.0 HP</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+

@@ -187,6 +187,7 @@ class GameState:
         self.start_phase("media")
 
     def submit_media_choice(self, headline_idx: int):
+        self.create_snapshot()
         self.close_poll("media")
         self.media_headline_idx = headline_idx
         headlines = DYNAMIC_HEADLINES.get(self.current_round, [])

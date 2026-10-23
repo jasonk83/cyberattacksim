@@ -125,7 +125,7 @@ ATTACKS = {
             "icon": "🏴‍☠️",
             "damage": -30,
             "description": "Advanced persistent threat implants UEFI firmware rootkit and lists corporate IP on dark forums.",
-            "md_file": "apt_exfiltration.md",
+            "md_file": "firmware_persistence.md",
             "assessment": "Maximum reputation devastation and permanent loss of enterprise intellectual property."
         }
     }
@@ -138,6 +138,7 @@ IT_CHOICES = {
         {
             "id": "1",
             "label": "Full Credential Reset & Workstation Lockout",
+            "label_short": "Opt 1 (24h Full Lockout)",
             "downtime": "24 Hours Offline",
             "disruption": "Severe Business Disruption (-4 Health Penalty)",
             "disruption_penalty": -4,
@@ -149,6 +150,7 @@ IT_CHOICES = {
         {
             "id": "2",
             "label": "Targeted EDR Account Isolation & Lateral Trace",
+            "label_short": "Opt 2 (6h EDR Isolation)",
             "downtime": "6 Hours Offline",
             "disruption": "Moderate Disruption (-2 Health Penalty)",
             "disruption_penalty": -2,
@@ -160,6 +162,7 @@ IT_CHOICES = {
         {
             "id": "3",
             "label": "Silent Honeypot Monitoring & Passive Tap",
+            "label_short": "Opt 3 (0h Passive Tap)",
             "downtime": "0 Hours (Zero Downtime)",
             "disruption": "Zero Disruption (0 Health Penalty)",
             "disruption_penalty": 0,
@@ -173,6 +176,7 @@ IT_CHOICES = {
         {
             "id": "1",
             "label": "Sever Data Centers & Cold-Storage Backup Rebuild",
+            "label_short": "Opt 1 (36h Cold Rebuild)",
             "downtime": "36 Hours Full Outage",
             "disruption": "Severe Disruption (-4 Health Penalty)",
             "disruption_penalty": -4,
@@ -184,6 +188,7 @@ IT_CHOICES = {
         {
             "id": "2",
             "label": "Emergency Token Invalidation & Subnet Firewalling",
+            "label_short": "Opt 2 (8h Subnet Isolation)",
             "downtime": "8 Hours Partial Outage",
             "disruption": "Moderate Disruption (-2 Health Penalty)",
             "disruption_penalty": -2,
@@ -195,6 +200,7 @@ IT_CHOICES = {
         {
             "id": "3",
             "label": "Live In-Place Hotpatching Without Taking Systems Down",
+            "label_short": "Opt 3 (0h Hotpatching)",
             "downtime": "0 Hours (Zero Downtime)",
             "disruption": "Zero Disruption (0 Health Penalty)",
             "disruption_penalty": 0,
@@ -208,6 +214,7 @@ IT_CHOICES = {
         {
             "id": "1",
             "label": "Sever All Partner API Integrations & Rebuild Trust Root",
+            "label_short": "Opt 1 (48h Vendor Sever)",
             "downtime": "48 Hours Integration Halt",
             "disruption": "Severe Disruption (-4 Health Penalty)",
             "disruption_penalty": -4,
@@ -219,6 +226,7 @@ IT_CHOICES = {
         {
             "id": "2",
             "label": "Edge CDN Scrubbing & Rate Limiting",
+            "label_short": "Opt 2 (10h Scrubbing)",
             "downtime": "10 Hours Slowdown",
             "disruption": "Moderate Disruption (-2 Health Penalty)",
             "disruption_penalty": -2,
@@ -230,6 +238,7 @@ IT_CHOICES = {
         {
             "id": "3",
             "label": "Maintain Partner Traffic & Rely on Vendor Warranties",
+            "label_short": "Opt 3 (0h Self-Attest)",
             "downtime": "0 Hours (Zero Downtime)",
             "disruption": "Zero Disruption (0 Health Penalty)",
             "disruption_penalty": 0,
@@ -269,21 +278,21 @@ EXEC_GOVERNANCE_OPTIONS = [
 # Media Headlines by Round (4 Tiers: Sensationalist, Critical, Balanced, Favorable)
 DYNAMIC_HEADLINES = {
     1: [
-        {"id": "Headline 1", "label": "Headline 1", "tier": "Sensationalist", "headline": "💥 CloudStore in Freefall: Catastrophic Infiltration Exposed!", "health_delta": -12, "desc": "Sensationalized panic coverage driving immediate stock selloff."},
-        {"id": "Headline 2", "label": "Headline 2", "tier": "Critical", "headline": "⚠️ CloudStore Breached: Security Lapses Spark Customer Alarm", "health_delta": -5, "desc": "Critical investigative report highlighting lax cyber hygiene."},
-        {"id": "Headline 3", "label": "Headline 3", "tier": "Balanced", "headline": "📰 CloudStore Investigates Security Anomaly: Systems Monitored", "health_delta": 2, "desc": "Objective news coverage noting ongoing internal review."},
-        {"id": "Headline 4", "label": "Headline 4", "tier": "Favorable", "headline": "🛡️ Decisive Defense: CloudStore Thwarts Infiltration Attempt", "health_delta": 8, "desc": "Commendatory press praising rapid corporate response."}
+        {"id": "Headline 1", "label": "Sensationalist (-12 HP)", "tier": "Sensationalist", "headline": "💥 CloudStore in Freefall: Catastrophic Infiltration Exposed!", "health_delta": -12, "desc": "Sensationalized panic coverage driving immediate stock selloff."},
+        {"id": "Headline 2", "label": "Critical (-5 HP)", "tier": "Critical", "headline": "⚠️ CloudStore Breached: Security Lapses Spark Customer Alarm", "health_delta": -5, "desc": "Critical investigative report highlighting lax cyber hygiene."},
+        {"id": "Headline 3", "label": "Balanced (+2 HP)", "tier": "Balanced", "headline": "📰 CloudStore Investigates Security Anomaly: Systems Monitored", "health_delta": 2, "desc": "Objective news coverage noting ongoing internal review."},
+        {"id": "Headline 4", "label": "Favorable (+8 HP)", "tier": "Favorable", "headline": "🛡️ Decisive Defense: CloudStore Thwarts Infiltration Attempt", "health_delta": 8, "desc": "Commendatory press praising rapid corporate response."}
     ],
     2: [
-        {"id": "Headline 1", "label": "Headline 1", "tier": "Sensationalist", "headline": "💥 Total Blackout: Extortionists Hold CloudStore Hostage!", "health_delta": -12, "desc": "Front-page headlines stoking widespread public panic."},
-        {"id": "Headline 2", "label": "Headline 2", "tier": "Critical", "headline": "⚠️ Millions at Risk: CloudStore Stumbles as Breach Deepens", "health_delta": -5, "desc": "Journalistic scrutiny over executive delays and lost customer trust."},
-        {"id": "Headline 3", "label": "Headline 3", "tier": "Balanced", "headline": "📰 CloudStore Executes Incident Response Amid System Strains", "health_delta": 2, "desc": "Factual reporting on containment protocols and business impact."},
-        {"id": "Headline 4", "label": "Headline 4", "tier": "Favorable", "headline": "🛡️ Customer First: CloudStore Shields Data with Strong Protocols", "health_delta": 8, "desc": "Positive media narrative highlighting transparency and resilience."}
+        {"id": "Headline 1", "label": "Sensationalist (-12 HP)", "tier": "Sensationalist", "headline": "💥 Total Blackout: Extortionists Hold CloudStore Hostage!", "health_delta": -12, "desc": "Front-page headlines stoking widespread public panic."},
+        {"id": "Headline 2", "label": "Critical (-5 HP)", "tier": "Critical", "headline": "⚠️ Millions at Risk: CloudStore Stumbles as Breach Deepens", "health_delta": -5, "desc": "Journalistic scrutiny over executive delays and lost customer trust."},
+        {"id": "Headline 3", "label": "Balanced (+2 HP)", "tier": "Balanced", "headline": "📰 CloudStore Executes Incident Response Amid System Strains", "health_delta": 2, "desc": "Factual reporting on containment protocols and business impact."},
+        {"id": "Headline 4", "label": "Favorable (+8 HP)", "tier": "Favorable", "headline": "🛡️ Customer First: CloudStore Shields Data with Strong Protocols", "health_delta": 8, "desc": "Positive media narrative highlighting transparency and resilience."}
     ],
     3: [
-        {"id": "Headline 1", "label": "Headline 1", "tier": "Sensationalist", "headline": "💥 Insolvency Looming? CloudStore Collapses Under Cyber Blitz", "health_delta": -12, "desc": "Brutal market commentary questioning enterprise survival."},
-        {"id": "Headline 2", "label": "Headline 2", "tier": "Critical", "headline": "⚠️ Regulatory Inquiries Launched Against CloudStore Leadership", "health_delta": -5, "desc": "Critical focus on regulatory fines and compliance liabilities."},
-        {"id": "Headline 3", "label": "Headline 3", "tier": "Balanced", "headline": "📰 CloudStore Concludes Containment Phase; Audits Continue", "health_delta": 2, "desc": "Balanced assessment of long-term recovery prospects."},
-        {"id": "Headline 4", "label": "Headline 4", "tier": "Favorable", "headline": "🛡️ Masterclass in Crisis Leadership: CloudStore Prevails", "health_delta": 8, "desc": "Glowing review praising the organization's crisis turnaround."}
+        {"id": "Headline 1", "label": "Sensationalist (-12 HP)", "tier": "Sensationalist", "headline": "💥 Insolvency Looming? CloudStore Collapses Under Cyber Blitz", "health_delta": -12, "desc": "Brutal market commentary questioning enterprise survival."},
+        {"id": "Headline 2", "label": "Critical (-5 HP)", "tier": "Critical", "headline": "⚠️ Regulatory Inquiries Launched Against CloudStore Leadership", "health_delta": -5, "desc": "Critical focus on regulatory fines and compliance liabilities."},
+        {"id": "Headline 3", "label": "Balanced (+2 HP)", "tier": "Balanced", "headline": "📰 CloudStore Concludes Containment Phase; Audits Continue", "health_delta": 2, "desc": "Balanced assessment of long-term recovery prospects."},
+        {"id": "Headline 4", "label": "Favorable (+8 HP)", "tier": "Favorable", "headline": "🛡️ Masterclass in Crisis Leadership: CloudStore Prevails", "health_delta": 8, "desc": "Glowing review praising the organization's crisis turnaround."}
     ]
 }
