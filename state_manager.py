@@ -150,6 +150,19 @@ class GameState:
         self.pause_time_remaining = duration
 
     # ---------------------------------------------------------
+    # MANUAL HEALTH ADJUSTMENT
+    # ---------------------------------------------------------
+    def adjust_company_health(self, delta: float, reason: Optional[str] = None) -> float:
+        """
+        Manually adjust company health by delta (e.g. +10.0 or -10.0 HP).
+        Clamps resulting health between 0.0 and 100.0 HP.
+        Creates a snapshot prior to modification to enable GM rollback via Undo.
+        """
+        self.create_snapshot()
+        self.company_health = max(0.0, min(100.0, round(self.company_health + float(delta), 1)))
+        return self.company_health
+
+    # ---------------------------------------------------------
     # STRAW POLLING STATE ENGINE
     # ---------------------------------------------------------
     def open_poll(self, role: str, options: List[Dict[str, Any]]):

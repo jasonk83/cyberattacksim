@@ -367,6 +367,18 @@ def test_gm_console_controls():
     reset_btn.click().run()
     print("  ✓ Timer reset back to full duration.")
 
+    # 6. Test Manual Company HP Adjustment Buttons (+10 HP / -10 HP)
+    add_hp_btn = next((b for b in gm.button if "Add +10 HP" in b.label), None)
+    sub_hp_btn = next((b for b in gm.button if "Subtract -10 HP" in b.label), None)
+    assert add_hp_btn is not None, "+10 HP button missing in GM console main area"
+    assert sub_hp_btn is not None, "-10 HP button missing in GM console main area"
+    sub_hp_btn.click().run()
+    gm_text = " ".join(m.value for m in gm.markdown)
+    assert "90.0" in gm_text or "90" in gm_text
+    add_hp_btn = next((b for b in gm.button if "Add +10 HP" in b.label), None)
+    add_hp_btn.click().run()
+    print("  ✓ Manual HP adjustment (+10 HP / -10 HP) buttons verified in GM console main area.")
+
     # 6. Test Multiplier Effect on Round Scoring
     # Attack C (-30 dmg) with 2.0x multiplier = -60.0 dmg
     h = AppTest.from_file("app.py")

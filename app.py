@@ -50,7 +50,7 @@ def get_global_game() -> GameState:
 # GM PROJECTOR & MISSION CONTROL SCOREBOARD
 # ---------------------------------------------------------
 @st.fragment(run_every=2)
-def render_main_dashboard(game: GameState):
+def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None):
     col1, col2 = st.columns([4, 1])
     with col1:
         st.title("🛡️ CloudStore Command: Mission Control")
@@ -59,6 +59,10 @@ def render_main_dashboard(game: GameState):
         st.write("")
         if st.button("🔄 Refresh Scoreboard", key="top_refresh_main", use_container_width=True):
             st.rerun()
+
+    # Determine whether GM admin privileges are active
+    if is_admin is None:
+        is_admin = st.session_state.get("admin_authenticated", False) or st.session_state.get("instructor_authenticated", False)
 
     # ---------------------------------------------------------
     # GM QUICK OPERATIONAL COMMAND BAR
@@ -111,6 +115,36 @@ def render_main_dashboard(game: GameState):
         if st.button("⏱️ Reset Phase Timer", key="main_btn_reset_timer", use_container_width=True):
             game.reset_timer()
             st.rerun()
+
+    # Manual Company HP Adjustments (Authorized GM / Admin Only)
+    if is_admin:
+        st.markdown(
+            "<div style='font-size: 13px; font-weight: 700; color: #94a3b8; margin: 10px 0 4px 0; letter-spacing: 0.05em;'>"
+            "⚖️ MANUAL COMPANY HP ADJUSTMENT (PENALTY / BONUS)"
+            "</div>",
+            unsafe_allow_html=True
+        )
+        col_hp1, col_hp2 = st.columns(2)
+        with col_hp1:
+            if st.button(
+                "➕ Add +10 HP (Penalize Hackers / Media)",
+                key="main_btn_add_10_hp",
+                use_container_width=True,
+                help="Add 10 HP to Company Vitality. Use to penalize Threat Actors or Media if they fail to submit a response before the timer expires."
+            ):
+                game.adjust_company_health(10.0, reason="GM Penalty to Hackers/Media (+10 HP)")
+                st.toast(f"⚖️ Applied +10 HP adjustment. Enterprise Health: {game.company_health:.1f} HP")
+                st.rerun()
+        with col_hp2:
+            if st.button(
+                "➖ Subtract -10 HP (Penalize IT / Exec)",
+                key="main_btn_sub_10_hp",
+                use_container_width=True,
+                help="Subtract 10 HP from Company Vitality. Use to penalize IT Defense or Executive Board if they fail to submit a response before the timer expires."
+            ):
+                game.adjust_company_health(-10.0, reason="GM Penalty to IT/Exec (-10 HP)")
+                st.toast(f"⚖️ Applied -10 HP penalty. Enterprise Health: {game.company_health:.1f} HP")
+                st.rerun()
 
     st.markdown("---")
 
