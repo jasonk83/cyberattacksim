@@ -47,106 +47,148 @@ def get_global_game() -> GameState:
     return GameState()
 
 # ---------------------------------------------------------
+# DEDICATED CLASS PROJECTOR VIEW (?team=projector)
+# ---------------------------------------------------------
+def render_projector_view(game: GameState):
+    """
+    Renders an uncluttered, read-only big-screen presentation dashboard for screensharing.
+    Completely suppresses the sidebar and all interactive mission control buttons,
+    displaying real-time synchronized telemetry, health gauges, and incident cards.
+    """
+    st.markdown(
+        """
+        <style>
+        /* Suppress sidebar, collapsed chevron, and header toolbar for clean projector presentation */
+        [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+        section.main > div {
+            max-width: 100% !important;
+            padding-top: 1.5rem !important;
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    render_main_dashboard(game, is_admin=False, is_projector=True)
+
+# ---------------------------------------------------------
 # GM PROJECTOR & MISSION CONTROL SCOREBOARD
 # ---------------------------------------------------------
 @st.fragment(run_every=2)
-def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None):
-    col1, col2 = st.columns([4, 1])
+def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_projector: bool = False):
+    col1, col2 = st.columns([3, 1])
     with col1:
         st.title("🛡️ CloudStore Command: Mission Control")
         st.caption("Live Operational Cyber Incident Response Tabletop Simulation")
     with col2:
         st.write("")
-        if st.button("🔄 Refresh Scoreboard", key="top_refresh_main", use_container_width=True):
-            st.rerun()
-
-    # Determine whether GM admin privileges are active
-    if is_admin is None:
-        is_admin = st.session_state.get("admin_authenticated", False) or st.session_state.get("instructor_authenticated", False)
-
-    # ---------------------------------------------------------
-    # GM QUICK OPERATIONAL COMMAND BAR
-    # ---------------------------------------------------------
-    st.markdown("### 🎛️ Game Master Mission Controls")
-    col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 1, 1])
-
-    with col_ctrl1:
-        if game.phase == "lobby":
-            if st.button("🚀 Start Round 1 (Launch Infiltration)", key="main_btn_start_r1", type="primary", use_container_width=True):
-                game.start_phase("hacker")
+        if is_projector:
+            st.markdown(
+                """
+                <div style="text-align: right; margin-top: 10px;">
+                    <span style="display: inline-flex; align-items: center; gap: 8px; background-color: #0f172a; border: 1px solid #10b981; border-radius: 9999px; padding: 6px 16px; font-size: 13px; font-weight: 700; color: #34d399;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #10b981;"></span>
+                        Live Telemetry Auto-Sync
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            if st.button("🔄 Refresh Scoreboard", key="top_refresh_main", use_container_width=True):
                 st.rerun()
-        elif game.phase == "recap":
-            if game.current_round < game.max_rounds:
-                if st.button(f"➡️ Advance to Round {game.current_round + 1}", key="main_btn_adv_r", type="primary", use_container_width=True):
-                    game.advance_to_next_round()
+
+    # ---------------------------------------------------------
+    # GM QUICK OPERATIONAL COMMAND BAR (Hidden on Projector)
+    # ---------------------------------------------------------
+    if not is_projector:
+        # Determine whether GM admin privileges are active
+        if is_admin is None:
+            is_admin = st.session_state.get("admin_authenticated", False) or st.session_state.get("instructor_authenticated", False)
+
+        st.markdown("### 🎛️ Game Master Mission Controls")
+        col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([2, 1, 1])
+
+        with col_ctrl1:
+            if game.phase == "lobby":
+                if st.button("🚀 Start Round 1 (Launch Infiltration)", key="main_btn_start_r1", type="primary", use_container_width=True):
+                    game.start_phase("hacker")
+                    st.rerun()
+            elif game.phase == "recap":
+                if game.current_round < game.max_rounds:
+                    if st.button(f"➡️ Advance to Round {game.current_round + 1}", key="main_btn_adv_r", type="primary", use_container_width=True):
+                        game.advance_to_next_round()
+                        st.rerun()
+                else:
+                    if st.button("💀 Advance to Adversary Final Action", key="main_btn_adv_gambit", type="primary", use_container_width=True):
+                        game.advance_to_next_round()
+                        st.rerun()
+            elif game.phase == "final_hacker_action":
+                if st.button("⚡ Fast-Conclude Simulation (Retreat)", key="main_btn_bypass_final", use_container_width=True):
+                    game.submit_final_hacker_action("retreat")
+                    st.rerun()
+            elif game.phase == "game_over":
+                if st.button("🔄 Reset Simulation for New Session", key="main_btn_reset_game", type="primary", use_container_width=True):
+                    game.reset(max_rounds=game.max_rounds)
                     st.rerun()
             else:
-                if st.button("💀 Advance to Adversary Final Action", key="main_btn_adv_gambit", type="primary", use_container_width=True):
-                    game.advance_to_next_round()
+                next_phase_map = {"hacker": "it", "it": "exec", "exec": "media", "media": "recap"}
+                if st.button(f"⏭️ Force Advance ({game.phase.upper()})", key="main_btn_force_adv", use_container_width=True):
+                    if game.phase == "media":
+                        game.evaluate_round()
+                    else:
+                        game.start_phase(next_phase_map.get(game.phase, "recap"))
                     st.rerun()
-        elif game.phase == "final_hacker_action":
-            if st.button("⚡ Fast-Conclude Simulation (Retreat)", key="main_btn_bypass_final", use_container_width=True):
-                game.submit_final_hacker_action("retreat")
-                st.rerun()
-        elif game.phase == "game_over":
-            if st.button("🔄 Reset Simulation for New Session", key="main_btn_reset_game", type="primary", use_container_width=True):
-                game.reset(max_rounds=game.max_rounds)
-                st.rerun()
-        else:
-            next_phase_map = {"hacker": "it", "it": "exec", "exec": "media", "media": "recap"}
-            if st.button(f"⏭️ Force Advance ({game.phase.upper()})", key="main_btn_force_adv", use_container_width=True):
-                if game.phase == "media":
-                    game.evaluate_round()
-                else:
-                    game.start_phase(next_phase_map.get(game.phase, "recap"))
+
+        with col_ctrl2:
+            if game.timer_paused:
+                if st.button("▶️ Resume Timer", key="main_btn_resume_timer", use_container_width=True):
+                    game.resume_timer()
+                    st.rerun()
+            else:
+                if st.button("⏸️ Pause Timer", key="main_btn_pause_timer", use_container_width=True):
+                    game.pause_timer()
+                    st.rerun()
+
+        with col_ctrl3:
+            if st.button("⏱️ Reset Phase Timer", key="main_btn_reset_timer", use_container_width=True):
+                game.reset_timer()
                 st.rerun()
 
-    with col_ctrl2:
-        if game.timer_paused:
-            if st.button("▶️ Resume Timer", key="main_btn_resume_timer", use_container_width=True):
-                game.resume_timer()
-                st.rerun()
-        else:
-            if st.button("⏸️ Pause Timer", key="main_btn_pause_timer", use_container_width=True):
-                game.pause_timer()
-                st.rerun()
+        # Manual Company HP Adjustments (Authorized GM / Admin Only)
+        if is_admin:
+            st.markdown(
+                "<div style='font-size: 13px; font-weight: 700; color: #94a3b8; margin: 10px 0 4px 0; letter-spacing: 0.05em;'>"
+                "⚖️ MANUAL COMPANY HP ADJUSTMENT (PENALTY / BONUS)"
+                "</div>",
+                unsafe_allow_html=True
+            )
+            col_hp1, col_hp2 = st.columns(2)
+            with col_hp1:
+                if st.button(
+                    "➕ Add +10 HP (Penalize Hackers / Media)",
+                    key="main_btn_add_10_hp",
+                    use_container_width=True,
+                    help="Add 10 HP to Company Vitality. Use to penalize Threat Actors or Media if they fail to submit a response before the timer expires."
+                ):
+                    game.adjust_company_health(10.0, reason="GM Penalty to Hackers/Media (+10 HP)")
+                    st.toast(f"⚖️ Applied +10 HP adjustment. Enterprise Health: {game.company_health:.1f} HP")
+                    st.rerun()
+            with col_hp2:
+                if st.button(
+                    "➖ Subtract -10 HP (Penalize IT / Exec)",
+                    key="main_btn_sub_10_hp",
+                    use_container_width=True,
+                    help="Subtract 10 HP from Company Vitality. Use to penalize IT Defense or Executive Board if they fail to submit a response before the timer expires."
+                ):
+                    game.adjust_company_health(-10.0, reason="GM Penalty to IT/Exec (-10 HP)")
+                    st.toast(f"⚖️ Applied -10 HP penalty. Enterprise Health: {game.company_health:.1f} HP")
+                    st.rerun()
 
-    with col_ctrl3:
-        if st.button("⏱️ Reset Phase Timer", key="main_btn_reset_timer", use_container_width=True):
-            game.reset_timer()
-            st.rerun()
-
-    # Manual Company HP Adjustments (Authorized GM / Admin Only)
-    if is_admin:
-        st.markdown(
-            "<div style='font-size: 13px; font-weight: 700; color: #94a3b8; margin: 10px 0 4px 0; letter-spacing: 0.05em;'>"
-            "⚖️ MANUAL COMPANY HP ADJUSTMENT (PENALTY / BONUS)"
-            "</div>",
-            unsafe_allow_html=True
-        )
-        col_hp1, col_hp2 = st.columns(2)
-        with col_hp1:
-            if st.button(
-                "➕ Add +10 HP (Penalize Hackers / Media)",
-                key="main_btn_add_10_hp",
-                use_container_width=True,
-                help="Add 10 HP to Company Vitality. Use to penalize Threat Actors or Media if they fail to submit a response before the timer expires."
-            ):
-                game.adjust_company_health(10.0, reason="GM Penalty to Hackers/Media (+10 HP)")
-                st.toast(f"⚖️ Applied +10 HP adjustment. Enterprise Health: {game.company_health:.1f} HP")
-                st.rerun()
-        with col_hp2:
-            if st.button(
-                "➖ Subtract -10 HP (Penalize IT / Exec)",
-                key="main_btn_sub_10_hp",
-                use_container_width=True,
-                help="Subtract 10 HP from Company Vitality. Use to penalize IT Defense or Executive Board if they fail to submit a response before the timer expires."
-            ):
-                game.adjust_company_health(-10.0, reason="GM Penalty to IT/Exec (-10 HP)")
-                st.toast(f"⚖️ Applied -10 HP penalty. Enterprise Health: {game.company_health:.1f} HP")
-                st.rerun()
-
-    st.markdown("---")
+        st.markdown("---")
 
     # Threatening Countdown Clock
     rem_secs = game.get_remaining_seconds()
@@ -412,6 +454,14 @@ def main():
 
     is_team_url = url_role in ["hackers", "it", "exec", "media"]
     is_instructor_url = url_role in ["instructor", "solo"]
+    is_projector_url = url_role in ["projector", "display", "screen"]
+
+    # ---------------------------------------------------------
+    # DEDICATED CLASS PROJECTOR VIEW (?team=projector)
+    # ---------------------------------------------------------
+    if is_projector_url:
+        render_projector_view(game)
+        return
 
     # ---------------------------------------------------------
     # SINGLE-PLAYER INSTRUCTOR TESTING MODE (?team=instructor)
@@ -585,7 +635,8 @@ def main():
         ("🛡️ IT Defense", TEAM_CODES['it'], "it"),
         ("💼 Executive Board", TEAM_CODES['exec'], "exec"),
         ("🎤 Media & PR", TEAM_CODES['media'], "media"),
-        ("🎮 GM Projector", None, "main"),
+        ("📽️ Class Projector (Clean Display)", None, "projector"),
+        ("🎮 GM Mission Control (Console)", None, "main"),
         ("🧑‍🏫 Instructor Testing Mode", TEAM_CODES['instructor'], "instructor"),
     ]
 
@@ -596,14 +647,22 @@ def main():
             st.code(full_link, language="text")
             st.markdown(f"🔗 [Open Link (Relative)](/?team={param})")
 
-    st.sidebar.caption("💡 **Tip:** In any browser tab, you can append `/?team=instructor` directly to your active URL, or use the **👁️ Terminal Preview** dropdown below.")
+    st.sidebar.caption("💡 **Tip:** In any browser tab, you can append `/?team=projector` directly to your active URL for the clean class display, or use the **👁️ Terminal Preview** dropdown below.")
 
     # Terminal Preview Switcher
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 👁️ Terminal Preview")
     preview_mode = st.sidebar.selectbox(
         "View As:",
-        options=["Main Dashboard", "Threat Actor Terminal", "IT Defense Terminal", "Executive Terminal", "Media Terminal", "Instructor Testing Mode"]
+        options=[
+            "Main Dashboard",
+            "Class Projector (Clean Display)",
+            "Threat Actor Terminal",
+            "IT Defense Terminal",
+            "Executive Terminal",
+            "Media Terminal",
+            "Instructor Testing Mode"
+        ]
     )
 
     if st.sidebar.button("🔄 Force Refresh All", use_container_width=True):
@@ -611,6 +670,8 @@ def main():
 
     if preview_mode == "Main Dashboard":
         render_main_dashboard(game)
+    elif preview_mode == "Class Projector (Clean Display)":
+        render_projector_view(game)
     elif preview_mode == "Threat Actor Terminal":
         render_hacker_terminal(game, True, voter_id)
     elif preview_mode == "IT Defense Terminal":
