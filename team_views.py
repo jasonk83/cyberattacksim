@@ -79,7 +79,7 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
 
     # Live Bar Chart of Votes (Visible to everyone)
     if stats["total_votes"] > 0:
-        st.markdown(f"**Live Polling Results ({stats['total_votes']} total votes):**")
+        st.markdown(f"<div style='font-size: 16px; font-weight: 800; color: #f8fafc; margin-top: 10px; margin-bottom: 6px;'>📊 Live Polling Results ({stats['total_votes']} total votes):</div>", unsafe_allow_html=True)
         for opt in options:
             opt_id = str(opt.get("id"))
             stat = stats["tallies"].get(opt_id, {"count": 0, "percent": 0.0})
@@ -91,7 +91,7 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
             else:
                 display_label = f"{opt_id}: {label}"
 
-            st.write(f"**{display_label}** — {cnt} votes ({pct:.1f}%)")
+            st.markdown(f"<div style='font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;'>{display_label} &mdash; <span style='color: #38bdf8;'>{cnt} votes ({pct:.1f}%)</span></div>", unsafe_allow_html=True)
             st.progress(pct / 100.0)
 
     st.markdown("---")
@@ -102,7 +102,7 @@ def _render_top_header(title: str, subtitle: str, role_key: str):
     col1, col2 = st.columns([4, 1])
     with col1:
         st.title(title)
-        st.caption(subtitle)
+        st.markdown(f"<div style='font-size: 15px; color: #cbd5e1; margin-top: -10px; margin-bottom: 14px;'>{subtitle}</div>", unsafe_allow_html=True)
     with col2:
         st.write("")
         if st.button("🔄 Refresh View", key=f"top_refresh_{role_key}", use_container_width=True):
@@ -163,18 +163,18 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         g_cols = st.columns(2)
         with g_cols[0]:
             st.markdown(f"""
-            <div style="background-color: #450a0a; border: 2px solid {exp_info['color']}; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+            <div style="background-color: #450a0a; border: 2px solid {exp_info['color']}; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 800; color: #fca5a5; font-size: 16px;">🚀 Option 1: Press the Attack</span>
-                    <span style="background-color: {exp_info['color']}; color: white; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800;">{exp_info['level']}</span>
+                    <span style="font-weight: 800; color: #fca5a5; font-size: 18px;">🚀 Option 1: Press the Attack</span>
+                    <span style="background-color: {exp_info['color']}; color: white; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 800;">{exp_info['level']}</span>
                 </div>
-                <div style="color: #fecaca; font-size: 13px; margin-top: 6px;">
+                <div style="color: #fecaca; font-size: 15px; margin-top: 8px; line-height: 1.4;">
                     Execute secondary exploits against payment endpoints and customer transaction ledgers.
                 </div>
-                <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
+                <div style="margin-top: 10px; font-size: 14px; color: #ffffff; line-height: 1.5;">
                     <strong>Target Payload:</strong> Unchecked exfiltration of transactional reserves<br/>
                     <strong>⚠️ SOC Detection Warning:</strong> {exp_info['description']}<br/>
-                    <em style="color: #cbd5e1; font-size: 11px;">*If intercepted, payloads are neutralized with zero additional damage while investigators recover enterprise assets.*</em>
+                    <em style="color: #cbd5e1; font-size: 13px;">*If intercepted, payloads are neutralized with zero additional damage while investigators recover enterprise assets.*</em>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -187,12 +187,12 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 
         with g_cols[1]:
             st.markdown("""
-            <div style="background-color: #0f172a; border: 2px solid #64748b; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                <div style="font-weight: 800; color: #cbd5e1; font-size: 16px;">🛑 Option 2: Safe Strategic Retreat</div>
-                <div style="color: #94a3b8; font-size: 13px; margin-top: 6px;">
+            <div style="background-color: #0f172a; border: 2px solid #64748b; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+                <div style="font-weight: 800; color: #cbd5e1; font-size: 18px;">🛑 Option 2: Safe Strategic Retreat</div>
+                <div style="color: #cbd5e1; font-size: 15px; margin-top: 8px; line-height: 1.4;">
                     Sever Command & Control (C2) beacons, wipe forensic trails, and withdraw into the dark web.
                 </div>
-                <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
+                <div style="margin-top: 10px; font-size: 14px; color: #ffffff; line-height: 1.5;">
                     <strong>Campaign Outcome:</strong> Conclude intrusion campaign with current progress<br/>
                     <strong>Detection Risk:</strong> Zero risk. Clean adversary escape guaranteed.
                 </div>
@@ -213,10 +213,10 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         if game.selected_attack_data:
             att = game.selected_attack_data
             st.markdown(f"""
-            <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 14px; border-radius: 8px; margin-bottom: 12px;">
-                <div style="font-weight: 800; color: #ffffff;">ACTIVE PAYLOAD: {att.get('icon', '🚨')} {att.get('name')}</div>
-                <div style="color: #c7d2fe; font-size: 13px; margin-top: 4px;">{att.get('description')}</div>
-                <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: #e0e7ff;">
+            <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 16px; border-radius: 10px; margin-bottom: 14px;">
+                <div style="font-weight: 800; color: #ffffff; font-size: 17px;">ACTIVE PAYLOAD: {att.get('icon', '🚨')} {att.get('name')}</div>
+                <div style="color: #c7d2fe; font-size: 15px; margin-top: 6px;">{att.get('description')}</div>
+                <div style="display: flex; gap: 18px; margin-top: 10px; font-size: 14px; color: #e0e7ff;">
                     <span>🧩 Complexity: <strong>{att.get('complexity', 'Medium')}</strong></span>
                     <span>💥 Damage Potential: <strong>{att.get('damage_potential', 'High')}</strong></span>
                     <span>🕶️ Anonymity: <strong>{att.get('anonymity', 'Moderate')}</strong></span>
@@ -258,7 +258,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
             st.write(att.get("description", ""))
 
             st.markdown(f"""
-            <div style="background-color: #111827; padding: 8px 12px; border-radius: 8px; border: 1px solid #1f2937; margin: 8px 0; font-size: 12px; color: #cbd5e1;">
+            <div style="background-color: #111827; padding: 10px 14px; border-radius: 8px; border: 1px solid #1f2937; margin: 10px 0; font-size: 14px; color: #f1f5f9; line-height: 1.6;">
                 <div>🧩 <strong>Complexity:</strong> {att.get('complexity', 'Medium')}</div>
                 <div>💥 <strong>Damage Potential:</strong> {att.get('damage_potential', 'High')}</div>
                 <div>🕶️ <strong>Anonymity:</strong> {att.get('anonymity', 'Moderate')}</div>
@@ -337,10 +337,10 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
                 detail = "The Board rejected system isolations to avoid panic. Threat mitigation collapsed to 0%!"
 
             st.markdown(f"""
-            <div style="background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 12px; padding: 16px; margin: 12px 0;">
-                <div style="font-size: 11px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;">🏢 EXECUTIVE BOARD DIRECTIVE ISSUED</div>
-                <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 4px;">{badge}</div>
-                <div style="font-size: 13px; color: #f8fafc; margin-top: 6px;">{detail}</div>
+            <div style="background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 12px; padding: 18px; margin: 14px 0;">
+                <div style="font-size: 14px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;">🏢 EXECUTIVE BOARD DIRECTIVE ISSUED</div>
+                <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">{badge}</div>
+                <div style="font-size: 15px; color: #f8fafc; margin-top: 6px; line-height: 1.4;">{detail}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -366,13 +366,13 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
     for opt in options:
         opt_id = opt["id"]
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 16px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 12px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
+        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 800; color: #f8fafc; font-size: 16px;">Option {opt_id}: {opt['label']}</span>
-                <span style="background-color: #0284c7; color: white; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
+                <span style="font-weight: 800; color: #f8fafc; font-size: 18px;">Option {opt_id}: {opt['label']}</span>
+                <span style="background-color: #0284c7; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
             </div>
-            <div style="color: #cbd5e1; font-size: 13px; margin-top: 6px;">{opt.get('desc', '')}</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;">
+            <div style="color: #f1f5f9; font-size: 15px; margin-top: 8px; line-height: 1.4;">{opt.get('desc', '')}</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; font-size: 14px; line-height: 1.5;">
                 <span style="color: #38bdf8;">⚙️ <strong>Complexity of Fix:</strong> {opt.get('complexity', 'Moderate')}</span>
                 <span style="color: #f87171;">⏱️ <strong>Projected Downtime:</strong> {opt.get('downtime', 'Unknown')}</span>
                 <span style="color: #fb923c;">👥 <strong>Impact on Customers:</strong> {opt.get('customer_impact', 'Noticeable')}</span>
@@ -434,21 +434,21 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     # Strategic Information Briefing: Execs focus on Stock Price Outlook & Customer Reputation
     st.markdown(f"""
-    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; padding: 18px; border-radius: 12px; margin: 12px 0;">
-        <div style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">IT PROPOSAL STRATEGIC IMPACT ASSESSMENT</div>
-        <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 4px;">Proposed Action: {it_plan.get('label', 'Emergency Plan')}</div>
-        <div style="color: #e0e7ff; font-size: 14px; margin-top: 8px;">{it_plan.get('exec_view', '')}</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding: 12px; background-color: #312e81; border-radius: 8px;">
+    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; padding: 22px; border-radius: 14px; margin: 14px 0;">
+        <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">IT PROPOSAL STRATEGIC IMPACT ASSESSMENT</div>
+        <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">Proposed Action: {it_plan.get('label', 'Emergency Plan')}</div>
+        <div style="color: #f1f5f9; font-size: 15px; margin-top: 8px; line-height: 1.4;">{it_plan.get('exec_view', '')}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; padding: 14px; background-color: #312e81; border-radius: 10px;">
             <div>
-                <div style="color: #93c5fd; font-weight: 800; font-size: 12px;">📈 STOCK PRICE OUTLOOK</div>
-                <div style="color: #ffffff; font-size: 12px; margin-top: 2px; line-height: 1.4;">{it_plan.get('stock_outlook', 'Equities market reaction subject to operational duration.')}</div>
+                <div style="color: #93c5fd; font-weight: 800; font-size: 14px; letter-spacing: 0.05em;">📈 STOCK PRICE OUTLOOK</div>
+                <div style="color: #ffffff; font-size: 14px; margin-top: 4px; line-height: 1.5;">{it_plan.get('stock_outlook', 'Equities market reaction subject to operational duration.')}</div>
             </div>
             <div>
-                <div style="color: #fca5a5; font-weight: 800; font-size: 12px;">🤝 CUSTOMER REPUTATION RISK</div>
-                <div style="color: #ffffff; font-size: 12px; margin-top: 2px; line-height: 1.4;">{it_plan.get('reputation_risk', 'Public brand trust contingent on data protection integrity.')}</div>
+                <div style="color: #fca5a5; font-weight: 800; font-size: 14px; letter-spacing: 0.05em;">🤝 CUSTOMER REPUTATION RISK</div>
+                <div style="color: #ffffff; font-size: 14px; margin-top: 4px; line-height: 1.5;">{it_plan.get('reputation_risk', 'Public brand trust contingent on data protection integrity.')}</div>
             </div>
         </div>
-        <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #c7d2fe;">
+        <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 14px; color: #c7d2fe;">
             <span>⏱️ <strong>Est. Downtime:</strong> {it_plan.get('downtime', 'Pending')}</span>
             <span>👥 <strong>Customer Impact:</strong> {it_plan.get('customer_impact', 'Pending')}</span>
         </div>
@@ -477,9 +477,9 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
     for opt in options:
         opt_id = opt["id"]
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 14px; border-radius: 12px; border-left: 4px solid #818cf8; margin-bottom: 10px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
-            <div style="font-weight: 800; color: #f8fafc; font-size: 15px;">{opt['label']}</div>
-            <div style="color: #cbd5e1; font-size: 13px; margin-top: 4px;">{opt['desc']}</div>
+        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #818cf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
+            <div style="font-weight: 800; color: #f8fafc; font-size: 17px;">{opt['label']}</div>
+            <div style="color: #f1f5f9; font-size: 15px; margin-top: 6px; line-height: 1.4;">{opt['desc']}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -532,10 +532,10 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     att = game.selected_attack_data or {}
     exec_act = (game.exec_action or "pending").upper()
     st.markdown(f"""
-    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-        <div style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">📡 BREAKING INTELLIGENCE WIRE</div>
-        <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-top: 2px;">Incident: {att.get('icon', '🚨')} {att.get('name', 'Breach In Progress')}</div>
-        <div style="font-size: 13px; color: #c7d2fe; margin-top: 4px;">Executive Board Directive: <strong>{exec_act}</strong></div>
+    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+        <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">📡 BREAKING INTELLIGENCE WIRE</div>
+        <div style="font-size: 18px; font-weight: 800; color: #ffffff; margin-top: 4px;">Incident: {att.get('icon', '🚨')} {att.get('name', 'Breach In Progress')}</div>
+        <div style="font-size: 15px; color: #c7d2fe; margin-top: 6px;">Executive Board Directive: <strong>{exec_act}</strong></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -553,13 +553,13 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
         disp_color = "#ef4444" if disp == "Negative" else "#10b981" if disp == "Positive" else "#38bdf8"
 
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 14px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="flex-grow: 1; margin-right: 12px;">
-                <span style="font-size: 12px; font-weight: 800; color: {disp_color}; text-transform: uppercase;">{head_label} &bull; {disp} Tone ({item.get('tier', 'News')})</span><br/>
-                <span style="font-size: 15px; font-weight: 800; color: #f8fafc;">\"{item['headline']}\"</span>
-                <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">{item.get('desc', '')}</div>
+        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex-grow: 1; margin-right: 14px;">
+                <span style="font-size: 14px; font-weight: 800; color: {disp_color}; text-transform: uppercase;">{head_label} &bull; {disp} Tone ({item.get('tier', 'News')})</span><br/>
+                <span style="font-size: 18px; font-weight: 800; color: #f8fafc;">\"{item['headline']}\"</span>
+                <div style="font-size: 14px; color: #cbd5e1; margin-top: 4px;">{item.get('desc', '')}</div>
             </div>
-            <span style="background-color: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap;">📡 Virality: Unpredictable</span>
+            <span style="background-color: #1e293b; border: 1px solid #334155; color: #f1f5f9; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap;">📡 Virality: Unpredictable</span>
         </div>
         """, unsafe_allow_html=True)
 

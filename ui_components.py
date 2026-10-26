@@ -44,8 +44,8 @@ def render_threatening_clock(remaining_secs: int, total_secs: int, phase_name: s
         status_label = "⚠️ THREAT WINDOW RAPIDLY CLOSING"
         anim_css = "animation: pulse-urgent 1.2s infinite;"
     elif is_paused:
-        border_color = "#64748b"
-        glow_color = "rgba(100, 116, 139, 0.3)"
+        border_color = "#475569"
+        glow_color = "rgba(71, 85, 105, 0.3)"
         clock_color = "#94a3b8"
         status_label = "⏸️ SIMULATION PAUSED BY GAME MASTER"
         anim_css = ""
@@ -77,28 +77,28 @@ def render_threatening_clock(remaining_secs: int, total_secs: int, phase_name: s
     }}
     .clock-title {{
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 800;
         color: {clock_color};
-        letter-spacing: 0.15em;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }}
     .clock-digits {{
         font-family: "Courier New", Courier, monospace;
-        font-size: 38px;
+        font-size: 46px;
         font-weight: 900;
         color: #ffffff;
         letter-spacing: 0.08em;
-        text-shadow: 0 0 12px {glow_color};
-        line-height: 1.1;
+        text-shadow: 0 0 14px {glow_color};
+        line-height: 1.15;
     }}
     .clock-bar-bg {{
         background-color: #1e293b;
-        height: 6px;
+        height: 10px;
         border-radius: 999px;
         overflow: hidden;
-        margin-top: 8px;
+        margin-top: 10px;
     }}
     .clock-bar-fill {{
         background: linear-gradient(90deg, {border_color}, {clock_color});
@@ -136,19 +136,19 @@ def render_health_gauge(health: float, bankrupt_cutoff: int, win_cutoff: int):
         glow = "rgba(239, 68, 68, 0.6)"
 
     html = f"""
-    <div style="background-color: #030712; padding: 18px; border-radius: 14px; border: 1px solid #1e293b; box-shadow: 0 4px 18px {glow}; margin-bottom: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 13px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">🏢 Unified Enterprise Health</span>
-            <span style="font-size: 12px; font-weight: 800; color: {bar_color}; letter-spacing: 0.05em;">{status_text}</span>
+    <div style="background-color: #030712; padding: 20px 22px; border-radius: 14px; border: 1px solid #1e293b; box-shadow: 0 4px 18px {glow}; margin-bottom: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 15px; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em;">🏢 Unified Enterprise Health</span>
+            <span style="font-size: 14px; font-weight: 800; color: {bar_color}; letter-spacing: 0.05em;">{status_text}</span>
         </div>
-        <div style="display: flex; align-items: baseline; gap: 8px;">
-            <span style="font-size: 40px; font-weight: 900; color: #f8fafc; font-family: monospace;">{val:.1f}</span>
-            <span style="font-size: 16px; color: #64748b;">/ 100.0 HP</span>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+            <span style="font-size: 46px; font-weight: 900; color: #f8fafc; font-family: monospace;">{val:.1f}</span>
+            <span style="font-size: 18px; font-weight: 700; color: #94a3b8;">/ 100.0 HP</span>
         </div>
-        <div style="background-color: #1e293b; height: 12px; border-radius: 999px; overflow: hidden; margin-top: 10px; position: relative;">
+        <div style="background-color: #1e293b; height: 16px; border-radius: 999px; overflow: hidden; margin-top: 12px; position: relative;">
             <div style="background-color: {bar_color}; width: {val}%; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-top: 6px;">
+        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #cbd5e1; margin-top: 8px;">
             <span>💥 Bankrupt (&lt; {bankrupt_cutoff})</span>
             <span>🛡️ Survive ({bankrupt_cutoff} - {win_cutoff - 1})</span>
             <span>🏆 Win (&ge; {win_cutoff})</span>
@@ -178,34 +178,34 @@ def render_round_recap_card(game):
 
     surprise_html = ""
     if it_surprise or media_surprise:
-        it_line = f'<div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">🛡️ <strong>IT Defense:</strong> {it_surprise}</div>' if it_surprise else ''
-        media_line = f'<div style="font-size: 12px; color: #cbd5e1;">📰 <strong>Media Resonance:</strong> {media_surprise}</div>' if media_surprise else ''
+        it_line = f'<div style="font-size: 14px; color: #f1f5f9; margin-bottom: 6px; line-height: 1.4;">🛡️ <strong>IT Defense:</strong> {it_surprise}</div>' if it_surprise else ''
+        media_line = f'<div style="font-size: 14px; color: #f1f5f9; line-height: 1.4;">📰 <strong>Media Resonance:</strong> {media_surprise}</div>' if media_surprise else ''
         surprise_html = (
-            f'<div style="background-color: #0f172a; border-radius: 8px; padding: 12px; margin: 12px 0; border: 1px solid #1e293b;">'
-            f'<div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">🔍 Surprise & Reality Check (Outcome Analysis)</div>'
+            f'<div style="background-color: #0f172a; border-radius: 10px; padding: 14px; margin: 14px 0; border: 1px solid #1e293b;">'
+            f'<div style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">🔍 Surprise & Reality Check (Outcome Analysis)</div>'
             f'{it_line}'
             f'{media_line}'
             f'</div>'
         )
 
     recap_html = (
-        f'<div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 18px; margin: 16px 0;">'
-        f'<div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry["round"]} INCIDENT DEBRIEF</div>'
-        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">'
-        f'<span style="font-size: 20px; font-weight: 900; color: #ffffff;">{entry["attack_name"]}</span>'
-        f'<span style="font-size: 22px; font-weight: 900; color: {delta_color};">{entry["net_delta"]:+g} HP</span>'
+        f'<div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 22px; margin: 18px 0;">'
+        f'<div style="font-size: 14px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry["round"]} INCIDENT DEBRIEF</div>'
+        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">'
+        f'<span style="font-size: 22px; font-weight: 900; color: #ffffff;">{entry["attack_name"]}</span>'
+        f'<span style="font-size: 26px; font-weight: 900; color: {delta_color};">{entry["net_delta"]:+g} HP</span>'
         f'</div>'
-        f'<div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Adversary Vector Profile: <em>{attack_meta}</em></div>'
-        f'<div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">Breaking Headline: <em>"{entry["headline"]}"</em> ({entry["media_delta"]:+g} HP)</div>'
+        f'<div style="font-size: 14px; color: #cbd5e1; margin-top: 4px;">Adversary Vector Profile: <em>{attack_meta}</em></div>'
+        f'<div style="font-size: 15px; color: #f1f5f9; margin-top: 6px;">Breaking Headline: <em>"{entry["headline"]}"</em> ({entry["media_delta"]:+g} HP)</div>'
         f'{surprise_html}'
-        f'<hr style="border-color: #1e293b; margin: 10px 0;" />'
-        f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #cbd5e1;">'
+        f'<hr style="border-color: #1e293b; margin: 14px 0;" />'
+        f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; color: #f1f5f9; line-height: 1.5;">'
         f'<div><strong>Threat Exploit:</strong> {entry["attack_damage"]:+g} HP</div>'
         f'<div><strong>IT Defense Mitigated:</strong> +{entry["it_mitigated"]:g} HP ({entry.get("it_mit_pct", 60)}%)</div>'
         f'<div><strong>Operational Disruption:</strong> {entry["disruption_penalty"]:+g} HP</div>'
         f'<div><strong>Governance:</strong> {entry["exec_decision"]}</div>'
         f'</div>'
-        f'<div style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #f8fafc;">'
+        f'<div style="margin-top: 14px; font-size: 16px; font-weight: 800; color: #f8fafc;">'
         f'Enterprise Health: {entry["health_before"]:.1f} → <span style="color: {delta_color};">{entry["health_after"]:.1f} / 100.0 HP</span>'
         f'</div>'
         f'</div>'
@@ -229,18 +229,18 @@ def render_final_hacker_action_card(game):
         badge = f"🚨 ADVERSARY PRESSED THE ATTACK &bull; EXPOSURE: {exposure.upper()}"
     else:
         card_bg = "#0f172a"
-        card_border = "#64748b"
+        card_border = "#475569"
         badge = "🛑 ADVERSARY RETREATED INTO THE SHADOWS"
 
     card_html = (
-        f'<div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 18px; margin: 16px 0;">'
-        f'<div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>'
-        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">'
-        f'<span style="font-size: 18px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>'
-        f'<span style="font-size: 20px; font-weight: 900; color: {delta_color};">{delta:+g} HP</span>'
+        f'<div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 22px; margin: 18px 0;">'
+        f'<div style="font-size: 14px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>'
+        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">'
+        f'<span style="font-size: 20px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>'
+        f'<span style="font-size: 24px; font-weight: 900; color: {delta_color};">{delta:+g} HP</span>'
         f'</div>'
-        f'<div style="color: #f8fafc; font-size: 14px; margin-top: 6px; line-height: 1.4;">{data.get("summary", "")}</div>'
-        f'<div style="margin-top: 8px; font-size: 12px; color: #cbd5e1;">Enterprise Health Shift: {data.get("health_before", 0):.1f} → <strong style="color: {delta_color};">{data.get("health_after", 0):.1f} HP</strong></div>'
+        f'<div style="color: #f8fafc; font-size: 15px; margin-top: 8px; line-height: 1.5;">{data.get("summary", "")}</div>'
+        f'<div style="margin-top: 10px; font-size: 14px; color: #cbd5e1;">Enterprise Health Shift: {data.get("health_before", 0):.1f} → <strong style="color: {delta_color};">{data.get("health_after", 0):.1f} HP</strong></div>'
         f'</div>'
     )
     st.markdown(card_html, unsafe_allow_html=True)

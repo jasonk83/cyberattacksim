@@ -89,7 +89,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
             st.markdown(
                 """
                 <div style="text-align: right; margin-top: 10px;">
-                    <span style="display: inline-flex; align-items: center; gap: 8px; background-color: #0f172a; border: 1px solid #10b981; border-radius: 9999px; padding: 6px 16px; font-size: 13px; font-weight: 700; color: #34d399;">
+                    <span style="display: inline-flex; align-items: center; gap: 8px; background-color: #0f172a; border: 1px solid #10b981; border-radius: 9999px; padding: 6px 16px; font-size: 14px; font-weight: 700; color: #34d399;">
                         <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #10b981;"></span>
                         Live Telemetry Auto-Sync
                     </span>
@@ -161,7 +161,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
         # Manual Company HP Adjustments (Authorized GM / Admin Only)
         if is_admin:
             st.markdown(
-                "<div style='font-size: 13px; font-weight: 700; color: #94a3b8; margin: 10px 0 4px 0; letter-spacing: 0.05em;'>"
+                "<div style='font-size: 14px; font-weight: 800; color: #cbd5e1; margin: 12px 0 6px 0; letter-spacing: 0.06em;'>"
                 "⚖️ MANUAL COMPANY HP ADJUSTMENT (PENALTY / BONUS)"
                 "</div>",
                 unsafe_allow_html=True
@@ -248,11 +248,11 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
             badge = "💥 CATASTROPHIC FAILURE — BANKRUPTCY DECLARED"
 
         st.markdown(f"""
-        <div style="background-color: {box_color}; border: 3px solid {border_color}; border-radius: 16px; padding: 24px; text-align: center; margin: 20px 0;">
-            <div style="font-size: 14px; font-weight: 800; color: #ffffff; letter-spacing: 0.15em;">{badge}</div>
-            <div style="font-size: 32px; font-weight: 900; color: #ffffff; margin-top: 6px;">{title}</div>
-            <div style="font-size: 16px; color: #f8fafc; max-width: 750px; margin: 12px auto 0 auto; line-height: 1.5;">{desc}</div>
-            <div style="font-size: 20px; font-weight: 800; color: #fde68a; margin-top: 14px;">Final Company Health: {game.company_health:.1f} / 100.0 HP</div>
+        <div style="background-color: {box_color}; border: 3px solid {border_color}; border-radius: 16px; padding: 26px; text-align: center; margin: 20px 0;">
+            <div style="font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: 0.15em;">{badge}</div>
+            <div style="font-size: 34px; font-weight: 900; color: #ffffff; margin-top: 6px;">{title}</div>
+            <div style="font-size: 17px; color: #f8fafc; max-width: 780px; margin: 12px auto 0 auto; line-height: 1.55;">{desc}</div>
+            <div style="font-size: 22px; font-weight: 800; color: #fde68a; margin-top: 16px;">Final Company Health: {game.company_health:.1f} / 100.0 HP</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -261,10 +261,10 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
     # Adversary Final Action In Progress Alert
     if game.phase == "final_hacker_action":
         st.markdown("""
-        <div style="background-color: #3b0764; border: 2px solid #a855f7; border-radius: 12px; padding: 18px; margin: 12px 0;">
-            <div style="font-size: 11px; font-weight: 800; color: #f3e8ff; text-transform: uppercase; letter-spacing: 0.1em;">ADVERSARY FINAL GAMBIT IN PROGRESS</div>
-            <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">💀 Threat Actors Deliberating: Press Attack or Retreat</div>
-            <div style="font-size: 14px; color: #e9d5ff; margin-top: 6px;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems (75% chance of inflicting 15–30 HP damage, or a 1-in-4 chance of being caught inflicting 0 damage while company recovers 3–15 HP) or execute a clean retreat into the shadows.</div>
+        <div style="background-color: #3b0764; border: 2px solid #a855f7; border-radius: 12px; padding: 20px; margin: 14px 0;">
+            <div style="font-size: 14px; font-weight: 800; color: #f3e8ff; text-transform: uppercase; letter-spacing: 0.1em;">ADVERSARY FINAL GAMBIT IN PROGRESS</div>
+            <div style="font-size: 24px; font-weight: 800; color: #ffffff; margin-top: 4px;">💀 Threat Actors Deliberating: Press Attack or Retreat</div>
+            <div style="font-size: 16px; color: #e9d5ff; margin-top: 8px; line-height: 1.5;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems (75% chance of inflicting 15–30 HP damage, or a 1-in-4 chance of being caught inflicting 0 damage while company recovers 3–15 HP) or execute a clean retreat into the shadows.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -272,10 +272,10 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
     if game.selected_attack_data:
         att = game.selected_attack_data
         st.markdown(f"""
-        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 18px; margin: 12px 0;">
-            <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">ACTIVE ENTERPRISE BREACH</div>
-            <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">{att.get('icon', '🚨')} {att.get('name', 'Incident Alert')}</div>
-            <div style="font-size: 14px; color: #fecaca; margin-top: 6px;">{att.get('description', '')}</div>
+        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; margin: 14px 0;">
+            <div style="font-size: 14px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">ACTIVE ENTERPRISE BREACH</div>
+            <div style="font-size: 24px; font-weight: 800; color: #ffffff; margin-top: 4px;">{att.get('icon', '🚨')} {att.get('name', 'Incident Alert')}</div>
+            <div style="font-size: 16px; color: #fecaca; margin-top: 8px; line-height: 1.5;">{att.get('description', '')}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -293,7 +293,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
                     st.caption(f"Real-World Execution Friction Roll: {entry['friction']:+g} HP")
                 with c2:
                     delta_color = "green" if entry['net_delta'] >= 0 else "red"
-                    st.markdown(f"**Net Health Change:** <span style='font-size: 22px; font-weight: 800; color:{delta_color};'>{entry['net_delta']:+g} HP</span>", unsafe_allow_html=True)
+                    st.markdown(f"**Net Health Change:** <span style='font-size: 24px; font-weight: 800; color:{delta_color};'>{entry['net_delta']:+g} HP</span>", unsafe_allow_html=True)
                     st.write(f"Health Before: **{entry['health_before']:.1f}** &nbsp;→&nbsp; Health After: **{entry['health_after']:.1f}**")
                     st.caption(f"Threat Multiplier: {entry['multiplier']}x")
 
@@ -436,6 +436,81 @@ def main():
         page_icon="🛡️",
         layout="wide",
         initial_sidebar_state="expanded"
+    )
+
+    # Global Responsive & Accessible Viewport Stylesheet
+    st.markdown(
+        """
+        <style>
+        /* Responsive Viewport & Max-Width Optimization (Laptops & Tablets) */
+        section.main > div {
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            padding-top: 1.2rem !important;
+            padding-bottom: 2.5rem !important;
+        }
+
+        @media (max-width: 1024px) {
+            section.main > div {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+
+        /* Base Typography & Minimum Accessible Font Sizing */
+        html, body, [class*="css"], .stMarkdown {
+            font-size: 15px !important;
+            line-height: 1.5 !important;
+        }
+
+        /* Accessible Captions: readable 14px size & WCAG AA/AAA compliant contrast */
+        .stCaption, [data-testid="stCaptionContainer"] {
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+            color: #cbd5e1 !important;
+        }
+
+        /* Touch Targets & Button Sizing: 48px minimum touch height */
+        button[data-testid="baseButton-secondary"],
+        button[data-testid="baseButton-primary"] {
+            min-height: 48px !important;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+        }
+
+        /* Keyboard Navigation & Focus Accessibility */
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #38bdf8 !important;
+            outline-offset: 2px !important;
+        }
+
+        /* Accessible Expanders & Summaries */
+        [data-testid="stExpander"] details summary {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            color: #f1f5f9 !important;
+            padding-top: 6px !important;
+            padding-bottom: 6px !important;
+        }
+
+        [data-testid="stExpander"] details {
+            border-color: #334155 !important;
+            border-radius: 8px !important;
+        }
+
+        /* Accessible System Alerts */
+        [data-testid="stAlert"] {
+            font-size: 15px !important;
+            line-height: 1.5 !important;
+            border-radius: 8px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
     )
 
     game = get_global_game()
