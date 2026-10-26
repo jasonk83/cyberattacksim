@@ -38,20 +38,37 @@ def calculate_round_impact(
         
     it_disrupt = it_choice.get("disruption_penalty", -2)
 
-    # Executive Governance Impact on IT Containment
+    # 1. IT Inaction Backfire Penalty:
+    # If IT chose Option 3 / passive monitoring (mitigation <= 35% or opt_id "3"),
+    # uncontained adversary activity adds a random +5% to +25% damage multiplier.
+    it_opt_id = str(it_choice.get("id", ""))
+    backfire_pct = 0.0
+    if it_opt_id == "3" or it_mit <= 0.35:
+        backfire_pct = random.uniform(0.05, 0.25)
+
+    # 2. Executive Override Penalty:
+    # If the Executive team overrides IT, threat mitigation drops to 0% and
+    # the enterprise suffers a +10% to +35% damage penalty for ignoring IT advice.
     exec_action_norm = str(exec_action).lower().strip()
+    override_pct = 0.0
     if exec_action_norm == "approve":
         effective_mitigation = abs(raw_hacker_dmg) * it_mit
         effective_disruption = it_disrupt
-        exec_summary = "Approved IT Directive (Full Containment Authorized)"
+        exec_summary = "Agreed with IT Directive (Full Containment Authorized)"
     elif exec_action_norm == "downgrade":
         effective_mitigation = abs(raw_hacker_dmg) * (it_mit * 0.50)
         effective_disruption = int(it_disrupt * 0.50)
-        exec_summary = "Downgraded IT Directive (Compromise: 50% Containment, 50% Disruption)"
+        exec_summary = "Compromised IT Directive (50% Containment, 50% Disruption)"
     else:  # overrule
-        effective_mitigation = abs(raw_hacker_dmg) * 0.05
+        effective_mitigation = 0.0
         effective_disruption = 0
-        exec_summary = "Overruled IT Directive (Business Continuity Prioritized, 5% Containment)"
+        override_pct = random.uniform(0.10, 0.35)
+        exec_summary = "Overruled IT Directive (Business Continuity Prioritized, 0% Mitigation)"
+
+    # 3. Additive Penalty Combination with 45% Safety Cap:
+    total_penalty_pct = min(0.45, backfire_pct + override_pct)
+    total_penalty_dmg = abs(raw_hacker_dmg) * total_penalty_pct
+    scaled_hacker_dmg = raw_hacker_dmg - total_penalty_dmg
 
     # Randomized Media Resonance Roll
     delta_range = media_headline.get("health_delta_range")
@@ -63,11 +80,13 @@ def calculate_round_impact(
     # Real-world execution friction roll (stochastic variance ±3)
     friction = random.randint(-3, 3)
 
-    net_delta = round(raw_hacker_dmg + effective_mitigation + effective_disruption + media_delta + friction, 1)
+    net_delta = round(scaled_hacker_dmg + effective_mitigation + effective_disruption + media_delta + friction, 1)
 
     # Generate Surprise & Reality Check narrative callouts
-    it_pct_display = int(round(it_mit * 100))
-    if it_mit >= 0.85:
+    it_pct_display = int(round(it_mit * 100)) if exec_action_norm != "overrule" else 0
+    if exec_action_norm == "overrule":
+        it_surprise = f"Defenses Overruled (0% effective): Board dismissed technical containment; adversaries struck unimpeded."
+    elif it_mit >= 0.85:
         it_surprise = f"Containment Success ({it_pct_display}% effective): Decisive isolation neutralized nearly all attacker lateral spread."
     elif it_mit >= 0.60:
         it_surprise = f"Substantial Defense ({it_pct_display}% effective): Containment blocked core threat, but minor persistence survived."
@@ -75,6 +94,12 @@ def calculate_round_impact(
         it_surprise = f"Contingent Mitigation ({it_pct_display}% effective): Partial defenses slowed the adversary, though secondary payloads executed."
     else:
         it_surprise = f"Severe Defense Gap ({it_pct_display}% effective): Minimal barrier; threat actors operated almost unimpeded."
+
+    # Add narrative for penalties
+    if override_pct > 0:
+        it_surprise += f" 🚨 Executive Override Penalty (+{int(round(override_pct * 100))}% damage): Ignoring IT counsel accelerated unchecked network spread."
+    elif backfire_pct > 0:
+        it_surprise += f" ⚠️ Inaction Backfire (+{int(round(backfire_pct * 100))}% damage): Low-mitigation posture allowed adversaries to deepen penetration."
 
     if media_delta <= -10:
         media_surprise = f"Viral Panic ({media_delta:+d} HP): Headline sparked national outrage, compounding consumer anxiety and market volatility."
@@ -90,7 +115,14 @@ def calculate_round_impact(
     return {
         "net_delta": net_delta,
         "breakdown": {
-            "hacker_damage": round(raw_hacker_dmg, 1),
+            "hacker_damage": round(scaled_hacker_dmg, 1),
+            "raw_hacker_damage": round(raw_hacker_dmg, 1),
+            "backfire_pct": round(backfire_pct * 100, 1),
+            "backfire_dmg": round(abs(raw_hacker_dmg) * backfire_pct, 1),
+            "override_pct": round(override_pct * 100, 1),
+            "override_dmg": round(abs(raw_hacker_dmg) * override_pct, 1),
+            "total_penalty_pct": round(total_penalty_pct * 100, 1),
+            "total_penalty_dmg": round(total_penalty_dmg, 1),
             "it_mitigated": round(effective_mitigation, 1),
             "it_mit_pct": it_pct_display,
             "disruption_penalty": effective_disruption,
@@ -111,9 +143,9 @@ def get_outcome_thresholds(total_rounds: int) -> Tuple[int, int]:
     Calibrated for 2 rounds of incident response followed by the Adversary Final Gambit.
     """
     if total_rounds == 2:
-        return 39, 75
+        return 32, 71
     else:
-        return 30, 60
+        return 17, 54
 
 def evaluate_final_outcome(final_health: float, total_rounds: int) -> Tuple[str, str, str]:
     """

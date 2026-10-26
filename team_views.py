@@ -21,7 +21,7 @@ if "game_data" in sys.modules and not hasattr(sys.modules["game_data"], "ATTACKS
     importlib.invalidate_caches()
 
 from state_manager import GameState
-from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices
+from game_data import ATTACKS, IT_CHOICES, EXEC_GOVERNANCE_OPTIONS, DYNAMIC_HEADLINES, get_it_choices, get_exec_governance_options
 from ui_components import (
     render_threatening_clock,
     render_briefing_card,
@@ -429,8 +429,8 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     st.error(f"🚨 **ENTERPRISE CRISIS ALERT:** {att.get('icon', '🚨')} **{att.get('name', 'Breach')}** — {att.get('description', '')}")
 
-    # Educational Executive Risk Dossier
-    render_briefing_card("exec", att.get("md_file", ""), f"Executive Risk Briefing: {att.get('name', 'Incident')}", "Review projected stock impact, customer sentiment, and regulatory compliance liabilities.")
+    # Educational Executive Risk Dossier (Dynamically incorporates chosen IT plan)
+    render_briefing_card("exec", att.get("md_file", ""), f"Executive Risk Briefing: {att.get('name', 'Incident')}", "Review projected stock impact, customer sentiment, and regulatory compliance liabilities.", it_plan=it_plan)
 
     # Strategic Information Briefing: Execs focus on Stock Price Outlook & Customer Reputation
     st.markdown(f"""
@@ -466,18 +466,70 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
             render_acronym_glossary()
             return
 
-    st.subheader("Select Binding Corporate Governance Directive")
-    st.caption("Decide whether to authorize IT's disruptive system shutdown or overrule them to preserve business operations:")
+    # Executive Pushback Pressure Alert based on IT choice severity
+    it_opt_id = str(it_plan.get("id", "1"))
+    disruption_pen = it_plan.get("disruption_penalty", 0)
+    downtime_str = it_plan.get("downtime", "Operational Downtime")
+    impact_str = it_plan.get("customer_impact", "Noticeable Disruption")
 
-    options = EXEC_GOVERNANCE_OPTIONS
+    if it_opt_id == "1" or disruption_pen <= -3:
+        st.markdown(f"""
+        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 18px; margin: 14px 0;">
+            <div style="font-size: 13px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">
+                ⚠️ EXECUTIVE PUSHBACK PRESSURE &bull; BOARDROOM CRISIS DILEMMA
+            </div>
+            <div style="font-size: 17px; font-weight: 800; color: #ffffff; margin-top: 4px;">
+                Commercial & Shareholder Pushback: Severe Alarm Over Proposed System Lockdown
+            </div>
+            <div style="font-size: 15px; color: #fecaca; margin-top: 6px; line-height: 1.5;">
+                IT's recommended plan imposes <strong>{downtime_str}</strong> and <strong>{impact_str}</strong>. Shareholder representatives and retail executives are fiercely urging the Board to push back against a full freeze, warning of immediate quarterly revenue collapse, credit downgrades, and public panic. The Board must decide whether to absorb the financial hit to guarantee threat containment, force a compromise, or overrule IT to protect business continuity.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    elif it_opt_id == "3" or it_plan.get("mitigation_pct", 0.6) <= 0.35:
+        st.markdown(f"""
+        <div style="background-color: #78350f; border: 2px solid #f59e0b; border-radius: 12px; padding: 18px; margin: 14px 0;">
+            <div style="font-size: 13px; font-weight: 800; color: #fde68a; text-transform: uppercase; letter-spacing: 0.1em;">
+                ⚠️ BOARD COMPLACENCY WARNING &bull; INACTION BACKFIRE RISK
+            </div>
+            <div style="font-size: 17px; font-weight: 800; color: #ffffff; margin-top: 4px;">
+                IT Recommends Passive Monitoring: Minimal Containment Posture
+            </div>
+            <div style="font-size: 15px; color: #fef3c7; margin-top: 6px; line-height: 1.5;">
+                IT proposes zero downtime and silent observation ({it_plan.get('label', 'Passive Approach')}). While storefront transactions continue uninterrupted, adversaries operate almost unhindered. Endorsing this low-mitigation strategy risks an <strong>Inaction Backfire Penalty (+5% to +25% damage)</strong> as the uncontained breach deepens.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin: 14px 0;">
+            <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">
+                ⚖️ BOARDROOM DELIBERATION &bull; TARGETED MITIGATION TRADE-OFF
+            </div>
+            <div style="font-size: 17px; font-weight: 800; color: #ffffff; margin-top: 4px;">
+                Targeted Quarantine Proposed: Moderate Operational Disruption
+            </div>
+            <div style="font-size: 15px; color: #c7d2fe; margin-top: 6px; line-height: 1.5;">
+                IT recommends targeted quarantine ({downtime_str}). The Board must evaluate whether to fully back IT's technical isolation, push for faster reconnection to preserve revenue, or overrule containment entirely.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.subheader("Select Binding Corporate Governance Directive")
+    st.caption("Decide whether to authorize IT's technical recommendation, force an operational compromise, or overrule IT to protect continuity:")
+
+    options = get_exec_governance_options(it_plan)
 
     # Poll UI
     _render_poll_ui(game, "exec", is_captain, voter_id, options)
 
     for opt in options:
         opt_id = opt["id"]
+        tagline = opt.get("tagline", "")
+        tagline_html = f"<div style='font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 4px;'>{tagline}</div>" if tagline else ""
         st.markdown(f"""
         <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #818cf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
+            {tagline_html}
             <div style="font-weight: 800; color: #f8fafc; font-size: 17px;">{opt['label']}</div>
             <div style="color: #f1f5f9; font-size: 15px; margin-top: 6px; line-height: 1.4;">{opt['desc']}</div>
         </div>

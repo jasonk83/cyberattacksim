@@ -203,11 +203,11 @@ def test_blue_team_deep():
 
         # Exec Viewer votes
         ex_view1.run()
-        # Directives: R1 -> Approve, R2 -> Downgrade, R3 -> Overrule
+        # Directives: R1 -> Approve ("Agree with IT"), R2 -> Downgrade ("Compromise"), R3 -> Overrule ("Override IT")
         decision_map = {1: "approve", 2: "downgrade", 3: "overrule"}
         target_directive = decision_map[current_round]
 
-        vote_directive_btn = next((b for b in ex_view1.button if target_directive in b.label.lower()), None)
+        vote_directive_btn = next((b for b in ex_view1.button if target_directive in b.label.lower() or target_directive in str(b.key)), None)
         assert vote_directive_btn is not None, f"Vote button for {target_directive} not found"
         vote_directive_btn.click().run()
         print(f"  [Exec Polling] Exec Viewer voted to: {target_directive.upper()}.")
@@ -218,7 +218,15 @@ def test_blue_team_deep():
         assert "1 total votes" in capt_exec_poll_text
         print(f"  [Exec Polling Tally] Live results verified: 1 vote tracked.")
 
-        auth_btn = next((b for b in ex_capt.button if "Authorize Directive" in b.label and target_directive in b.label.lower()), None)
+        # Verify dynamic pressure / deliberation banner
+        if current_round == 1:
+            assert any("PUSHBACK" in m.value.upper() for m in ex_capt.markdown), "Pushback pressure banner missing for Option 1!"
+            print("  [Exec Pushback Pressure] ⚠️ Pushback banner verified: Board under shareholder pressure.")
+        elif current_round == 2:
+            assert any("DELIBERATION" in m.value.upper() for m in ex_capt.markdown), "Deliberation banner missing for Option 2!"
+            print("  [Exec Deliberation] ⚖️ Targeted deliberation banner verified.")
+
+        auth_btn = next((b for b in ex_capt.button if (b.key == f"btn_exec_{target_directive}") or ("Authorize Directive" in b.label and (target_directive in b.label.lower() or target_directive in str(b.key)))), None)
         assert auth_btn is not None, f"Authorize button for {target_directive} not found"
         auth_btn.click().run()
         print(f"  [Exec Directive Issued] Captain authorized: {target_directive.upper()}.")

@@ -1,13 +1,12 @@
 ### 💼 Executive Crisis Briefing: Spear Phishing & Credential Compromise
-Adversaries compromised internal employee credentials via spear phishing. The Board of Directors must weigh immediate operational disruption against enterprise data security and SEC regulatory liability.
 
-**Executive Governance Directives:**
-* **✅ Approve IT Recommendation (Full Containment Directive):**  
-  *Stock Outlook: Short-term share price drop due to frozen operations, but Wall Street stabilizes as containment is confirmed &bull; Reputation: Temporary customer complaints about downtime, but prevents customer data theft and long-term brand erosion.*  
-  Authorizes IT to execute an emergency 24-hour company-wide lockout and workstation reset. Accepts severe business disruption to provide a high likelihood of breach containment and eliminate lateral movement.
-* **⚖️ Downgrade to Business Compromise (Balanced):**  
-  *Stock Outlook: Moderate market nervousness; analysts question partial disruptions and lingering vulnerabilities &bull; Reputation: Customer friction over checkout errors; moderate risk of negative social media sentiment.*  
-  Directs IT to cut downtime to a 6-hour targeted isolation of suspect workstations. Preserves general corporate productivity, but carries moderate containment likelihood as threat actors may possess secondary credentials.
-* **🚫 Overrule IT Plan (Protect Business Continuity):**  
-  *Stock Outlook: Maintains short-term earnings guidance, but creates immense catastrophe risk if uncontained breach goes public &bull; Reputation: Zero immediate customer complaints, but catastrophic brand destruction if accounts are compromised.*  
-  Rejects workstation lockouts to prevent employee panic and stock speculation. Zero operational downtime, but leaves compromised credentials active with low likelihood of containing adversary privilege escalation.
+#### 1. Strategic Incident Assessment
+Threat actors have successfully breached CloudStore's corporate perimeter using targeted spear phishing against internal employees. Adversaries have harvested administrative credentials and session tokens, providing unauthorized access to corporate subnets and internal management portals.
+
+#### 2. SEC Materiality & Regulatory Exposure
+* **SEC 4-Day Disclosure (Item 1.05 Form 8-K)**: If administrative credentials permit access to customer financial records or core transaction systems, this incident reaches material threshold, requiring public disclosure within four business days.
+* **Customer PII & Class-Action Liability**: Compromised corporate accounts frequently serve as staging grounds for mass customer data harvesting. Failing to contain lateral movement exposes the firm to FTC enforcement actions and shareholder derivative lawsuits.
+* **Capital Markets Sentiment**: Wall Street rewards swift, decisive containment while heavily penalizing corporate concealment or repeated breach escalation.
+
+#### 3. Boardroom Governance Mandate
+The Board of Directors must evaluate the **specific containment strategy submitted by the IT Department** (summarized below). The Board must balance the operational downtime required for IT's credential reset against the catastrophic long-term corporate liability of unchecked lateral spread.

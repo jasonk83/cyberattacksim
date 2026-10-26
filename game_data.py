@@ -691,26 +691,114 @@ def get_it_choices(round_num: int, attack_key: Optional[str] = None) -> List[Dic
             return ATTACK_SPECIFIC_IT_CHOICES[pair]
     return IT_CHOICES.get(int(round_num), IT_CHOICES.get(1, []))
 
-# Executive Governance Directives (Executives review IT's proposed plan blindly)
+def get_exec_governance_options(it_choice: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    """
+    Returns contextualized Executive Governance directives tailored to the specific IT recommendation.
+    Enforces the uniform triad: 'Agree with IT', 'Compromise', and 'Override IT'.
+    """
+    if not it_choice:
+        return EXEC_GOVERNANCE_OPTIONS
+
+    opt_id = str(it_choice.get("id", "1"))
+    it_label = it_choice.get("label", "IT Technical Plan")
+    it_short = it_choice.get("label_short", it_label)
+    downtime = it_choice.get("downtime", "operational downtime")
+    customer_impact = it_choice.get("customer_impact", "customer impact")
+    disruption = it_choice.get("disruption", "operational disruption")
+
+    if opt_id == "1":
+        # Aggressive, safest, highest downtime/disruption
+        agree_desc = (
+            f"Authorize IT's full containment directive ({it_short}). Accept {downtime} and {disruption} "
+            f"to guarantee maximum threat containment, protect customer data, and prevent regulatory fines."
+        )
+        comp_desc = (
+            f"Direct IT to cut {downtime} in half. Push IT to restore customer storefronts faster, "
+            f"accepting 50% threat mitigation and leaving secondary channels exposed."
+        )
+        override_desc = (
+            f"Reject IT's shutdown directive completely. Keep all systems online to avoid revenue loss. "
+            f"Provides 0% mitigation and triggers an Executive Override penalty (+10% to +35% damage multiplier) for ignoring IT security counsel."
+        )
+    elif opt_id == "2":
+        # Targeted isolation, moderate disruption
+        agree_desc = (
+            f"Authorize IT's targeted quarantine directive ({it_short}). Accept {downtime} and {customer_impact} "
+            f"to balance threat containment with business continuity."
+        )
+        comp_desc = (
+            f"Expedite IT's targeted quarantine. Instruct IT to reconnect systems after minimal testing, "
+            f"halving threat mitigation to protect immediate quarterly revenue."
+        )
+        override_desc = (
+            f"Reject targeted isolations completely to maintain normal business-as-usual operations. "
+            f"Provides 0% mitigation and triggers an Executive Override penalty (+10% to +35% damage multiplier) for ignoring IT security counsel."
+        )
+    else:
+        # Passive monitoring / zero downtime (Option 3)
+        agree_desc = (
+            f"Endorse IT's passive monitoring strategy ({it_short}). Maintain zero downtime and uninterrupted revenue, "
+            f"accepting the severe risk that uncontained adversary activity backfires (+5% to +25% damage multiplier)."
+        )
+        comp_desc = (
+            f"Request limited security safeguards while keeping operations running. "
+            f"Provides minimal defensive containment (halving the already low mitigation)."
+        )
+        override_desc = (
+            f"Overrule IT's passive approach to enforce zero security intervention or logging. "
+            f"Provides 0% mitigation and triggers an Executive Override penalty (+10% to +35% damage multiplier)."
+        )
+
+    return [
+        {
+            "id": "approve",
+            "action": "approve",
+            "label": "✅ Agree with IT",
+            "label_short": "Agree with IT",
+            "tagline": f"Authorize: {it_short}",
+            "desc": agree_desc
+        },
+        {
+            "id": "downgrade",
+            "action": "downgrade",
+            "label": "⚖️ Compromise",
+            "label_short": "Compromise",
+            "tagline": "Halve Operational Downtime & Mitigation",
+            "desc": comp_desc
+        },
+        {
+            "id": "overrule",
+            "action": "overrule",
+            "label": "🚫 Override IT",
+            "label_short": "Override IT",
+            "tagline": "Enforce Business Continuity (0% Mitigation)",
+            "desc": override_desc
+        }
+    ]
+
+# Executive Governance Directives (Fallback / Baseline)
 EXEC_GOVERNANCE_OPTIONS = [
     {
         "id": "approve",
         "action": "approve",
-        "label": "✅ Approve IT Containment Directive",
+        "label": "✅ Agree with IT",
+        "label_short": "Agree with IT",
         "tagline": "Prioritize Long-Term Security & Brand Trust",
         "desc": "Accept operational downtime and immediate stock dip to guarantee threat containment, protect customer PII, and prevent regulatory fines."
     },
     {
         "id": "downgrade",
         "action": "downgrade",
-        "label": "⚖️ Downgrade to Business Compromise",
+        "label": "⚖️ Compromise",
+        "label_short": "Compromise",
         "tagline": "Balance Quarterly Revenue with Threat Control",
         "desc": "Order IT to cut downtime in half to keep primary storefronts operating. Preserves sales channels but leaves secondary vulnerabilities open to continued exploitation."
     },
     {
         "id": "overrule",
         "action": "overrule",
-        "label": "🚫 Overrule IT Plan (Protect Continuity)",
+        "label": "🚫 Override IT",
+        "label_short": "Override IT",
         "tagline": "Prioritize Immediate Earnings Guidance & Market Valuation",
         "desc": "Reject system shutdowns to maintain uninterrupted sales and prevent investor panic. Leaves networks vulnerable to catastrophic lateral movement and severe legal exposure."
     }

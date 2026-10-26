@@ -157,9 +157,35 @@ def render_health_gauge(health: float, bankrupt_cutoff: int, win_cutoff: int):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-def render_briefing_card(role: str, filename: str, fallback_title: str, fallback_desc: str):
+def render_briefing_card(role: str, filename: str, fallback_title: str, fallback_desc: str, it_plan: Optional[Dict[str, Any]] = None):
     """Renders markdown scenario briefing from content/ with clean formatting."""
     md_content = load_markdown_content(role, filename)
+    if role == "exec" and it_plan:
+        downtime = it_plan.get("downtime", "Operational Downtime")
+        cust_impact = it_plan.get("customer_impact", "Noticeable Latency")
+        mit_like = it_plan.get("mitigation_likelihood", "Moderate")
+        stock = it_plan.get("stock_outlook", "Market reaction dependent on duration.")
+        rep = it_plan.get("reputation_risk", "Brand perception contingent on containment integrity.")
+        plan_label = it_plan.get("label", "Proposed Technical Action")
+        plan_short = it_plan.get("label_short", plan_label)
+
+        exec_it_summary = f"""
+---
+#### 🛡️ Active IT Department Recommendation Under Board Review
+* **Recommended Containment Plan**: **{plan_label}**
+* **Projected System Downtime**: {downtime}
+* **Customer & Operations Impact**: {cust_impact}
+* **Threat Mitigation Likelihood**: {mit_like}
+* **📈 Stock Price Outlook**: {stock}
+* **🤝 Customer Reputation Risk**: {rep}
+
+**Corporate Governance Directives Under Deliberation:**
+* **✅ Agree with IT**: Authorize {plan_short}. Accept operational downtime to ensure maximum threat containment and protect enterprise data.
+* **⚖️ Compromise**: Order IT to cut downtime in half, halving containment to keep customer storefronts operating.
+* **🚫 Override IT**: Reject IT's shutdown to maintain business continuity (0% mitigation; triggers an Executive Override penalty of +10% to +35% damage).
+"""
+        md_content = (md_content or "") + exec_it_summary
+
     with st.expander(f"📖 Intelligence Dossier: {fallback_title}", expanded=True):
         if md_content:
             st.markdown(md_content)
@@ -188,6 +214,13 @@ def render_round_recap_card(game):
             f'</div>'
         )
 
+    penalty_badges = []
+    if entry.get("backfire_pct", 0) > 0:
+        penalty_badges.append(f"+{entry['backfire_pct']:.0f}% Inaction Backfire")
+    if entry.get("override_pct", 0) > 0:
+        penalty_badges.append(f"+{entry['override_pct']:.0f}% Exec Override Penalty")
+    penalty_str = f" <span style='color: #fca5a5; font-size: 13px;'>({', '.join(penalty_badges)})</span>" if penalty_badges else ""
+
     recap_html = (
         f'<div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 22px; margin: 18px 0;">'
         f'<div style="font-size: 14px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry["round"]} INCIDENT DEBRIEF</div>'
@@ -200,7 +233,7 @@ def render_round_recap_card(game):
         f'{surprise_html}'
         f'<hr style="border-color: #1e293b; margin: 14px 0;" />'
         f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; color: #f1f5f9; line-height: 1.5;">'
-        f'<div><strong>Threat Exploit:</strong> {entry["attack_damage"]:+g} HP</div>'
+        f'<div><strong>Threat Exploit:</strong> {entry["attack_damage"]:+g} HP{penalty_str}</div>'
         f'<div><strong>IT Defense Mitigated:</strong> +{entry["it_mitigated"]:g} HP ({entry.get("it_mit_pct", 60)}%)</div>'
         f'<div><strong>Operational Disruption:</strong> {entry["disruption_penalty"]:+g} HP</div>'
         f'<div><strong>Governance:</strong> {entry["exec_decision"]}</div>'

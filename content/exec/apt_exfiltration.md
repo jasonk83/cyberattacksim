@@ -1,13 +1,12 @@
 ### 💼 Executive Crisis Briefing: Mass Customer PII & Card Exfiltration
-A severe regulatory and corporate brand crisis. An Advanced Persistent Threat (APT) group is exfiltrating Personally Identifiable Information (PII) and payment credentials. SEC disclosure requirements and FTC privacy penalties loom.
 
-**Executive Governance Directives:**
-* **✅ Approve IT Recommendation (Full Containment Directive):**  
-  *Stock Outlook: Heavy immediate market selloff from transactional freeze; long-term solvency protected against regulatory fines &bull; Reputation: Major customer backlash during multi-day downtime; crucial to preserving customer PII and card safety.*  
-  Authorizes an emergency 36-hour database outage and credential revocation. Inflicts immediate checkout downtime, but delivers a high likelihood of halting exfiltration and proving proactive fiduciary responsibility.
-* **⚖️ Downgrade to Business Compromise (Balanced):**  
-  *Stock Outlook: Mixed market sentiment; investors wonder if customer card data remains exposed &bull; Reputation: Noticeable payment errors during key rotation; elevated risk of social media backlash.*  
-  Authorizes an 8-hour partial maintenance outage to restrict outbound data ports. Moderates revenue loss, but carries moderate mitigation likelihood as attackers may pivot across alternate egress channels.
-* **🚫 Overrule IT Plan (Protect Business Continuity):**  
-  *Stock Outlook: Avoids immediate revenue hit, but guarantees astronomical GDPR / PCI regulatory fines if exfiltration continues &bull; Reputation: Superficial stability masking catastrophic breach; severe risk of permanent loss of customer trust.*  
-  Rejects database outages to prevent stock panic. Zero immediate downtime, but provides low likelihood of containment, ensuring dark web disclosure and severe regulatory sanctions.
+#### 1. Strategic Incident Assessment
+An Advanced Persistent Threat (APT) group is actively exfiltrating millions of customer transaction ledgers, hashed credentials, and Personally Identifiable Information (PII) to bulletproof command-and-control servers. This represents CloudStore's most severe regulatory and existential brand crisis.
+
+#### 2. SEC Materiality & Regulatory Exposure
+* **Mandatory SEC Materiality**: Mass exfiltration of customer records constitutes an unambiguous material event under SEC rules, necessitating formal Form 8-K disclosure within 96 hours.
+* **Global Regulatory Enforcement**: European GDPR regulations mandate up to 4% of annual global turnover in administrative penalties for gross data protection failures; state-level CCPA and FTC actions carry severe statutory damage claims.
+* **Capital Markets Contagion**: Breaches involving stolen payment data trigger catastrophic equity downgrades, immediate merchant transaction rate penalties, and severe institutional divestment.
+
+#### 3. Boardroom Governance Mandate
+The Board of Directors must review the **containment recommendation issued by the IT Department** (summarized below). The Board must decide whether to authorize emergency database outages and token wipes to halt exfiltration, negotiate a partial maintenance compromise, or overrule IT to maintain commerce.

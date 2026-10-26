@@ -140,9 +140,9 @@ def test_full_game_lifecycle():
 
     # 9. Test Outcome Thresholds for 2 and 3 rounds
     b2, w2 = get_outcome_thresholds(2)
-    assert b2 == 39 and w2 == 75
+    assert b2 == 32 and w2 == 71
     b3, w3 = get_outcome_thresholds(3)
-    assert b3 == 30 and w3 == 60
+    assert b3 == 17 and w3 == 54
 
     tier_win, _, _ = evaluate_final_outcome(78.0, 2)
     assert tier_win == "Win"

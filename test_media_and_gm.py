@@ -62,7 +62,7 @@ def helper_advance_to_media(round_mult=1.0, it_choice_opt="1", exec_choice_opt="
     ex.sidebar.text_input[0].input("board123")
     ex.sidebar.button[0].click().run()
     for b in ex.button:
-        if exec_choice_opt.lower() in b.label.lower():
+        if (exec_choice_opt.lower() in b.label.lower()) or (b.key == f"btn_exec_{exec_choice_opt.lower()}"):
             b.click().run()
             break
 
@@ -284,7 +284,7 @@ def test_gm_projector_and_fragment_sync():
     ex.sidebar.text_input[0].input("board123")
     ex.sidebar.button[0].click().run()
     for b in ex.button:
-        if "Approve" in b.label:
+        if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
             b.click().run()
             break
 
@@ -407,7 +407,7 @@ def test_gm_console_controls():
     ex.sidebar.text_input[0].input("board123")
     ex.sidebar.button[0].click().run()
     for b in ex.button:
-        if "Approve" in b.label:
+        if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
             b.click().run()
             break
 
@@ -439,20 +439,20 @@ def test_game_over_and_outcome_assessment():
 
     # 1. Calibrated Threshold Verification
     b2, w2 = get_outcome_thresholds(2)
-    assert (b2, w2) == (39, 75)
-    assert evaluate_final_outcome(75.0, 2)[0] == "Win"
-    assert evaluate_final_outcome(74.9, 2)[0] == "Survive"
-    assert evaluate_final_outcome(39.0, 2)[0] == "Survive"
-    assert evaluate_final_outcome(38.9, 2)[0] == "Bankrupt"
-    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-74 | Win >= 75).")
+    assert (b2, w2) == (32, 71)
+    assert evaluate_final_outcome(71.0, 2)[0] == "Win"
+    assert evaluate_final_outcome(70.9, 2)[0] == "Survive"
+    assert evaluate_final_outcome(32.0, 2)[0] == "Survive"
+    assert evaluate_final_outcome(31.9, 2)[0] == "Bankrupt"
+    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 32 | Survive 32-70 | Win >= 71).")
 
     b3, w3 = get_outcome_thresholds(3)
-    assert (b3, w3) == (30, 60)
-    assert evaluate_final_outcome(60.0, 3)[0] == "Win"
-    assert evaluate_final_outcome(59.9, 3)[0] == "Survive"
-    assert evaluate_final_outcome(30.0, 3)[0] == "Survive"
-    assert evaluate_final_outcome(29.9, 3)[0] == "Bankrupt"
-    print("  ✓ 3-round outcome thresholds verified (Bankrupt < 30 | Survive 30-59 | Win >= 60).")
+    assert (b3, w3) == (17, 54)
+    assert evaluate_final_outcome(54.0, 3)[0] == "Win"
+    assert evaluate_final_outcome(53.9, 3)[0] == "Survive"
+    assert evaluate_final_outcome(17.0, 3)[0] == "Survive"
+    assert evaluate_final_outcome(16.9, 3)[0] == "Bankrupt"
+    print("  ✓ 3-round outcome thresholds verified (Bankrupt < 17 | Survive 17-53 | Win >= 54).")
 
     # 2. Simulate 2-Round Game Completion to Game Over Screen
     gm = AppTest.from_file("app.py")
@@ -503,7 +503,7 @@ def test_game_over_and_outcome_assessment():
     ex.sidebar.text_input[0].input("board123")
     ex.sidebar.button[0].click().run()
     for b in ex.button:
-        if "Approve" in b.label:
+        if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
             b.click().run()
             break
 
@@ -542,7 +542,7 @@ def test_game_over_and_outcome_assessment():
     # Exec R2
     ex.run()
     for b in ex.button:
-        if "Approve" in b.label:
+        if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
             b.click().run()
             break
 
