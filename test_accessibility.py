@@ -71,9 +71,32 @@ def test_apptest_responsive_views():
         print(f"  ✓ Verified '?team={role}' rendered cleanly with 0 exceptions.")
 
 
+def test_theme_responsive_color_tokens():
+    """Verify that text colors adapt to light and dark themes rather than using hardcoded light gray."""
+    print("\n--- [TEST 5] Verify Theme-Responsive Color Tokens (Light & Dark Mode) ---")
+    app_file = ROOT_DIR / "app.py"
+    with open(app_file, "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # Verify CSS variables for theme responsiveness
+    assert "var(--text-color" in app_content, "Missing var(--text-color) in app.py CSS"
+    assert "prefers-color-scheme: dark" in app_content, "Missing prefers-color-scheme in app.py"
+    assert "data-theme=\"light\"" in app_content, "Missing data-theme light token in app.py"
+    assert "data-theme=\"dark\"" in app_content, "Missing data-theme dark token in app.py"
+
+    # Verify team_views.py does not hardcode light gray on uncontained header subtitles
+    views_file = ROOT_DIR / "team_views.py"
+    with open(views_file, "r", encoding="utf-8") as f:
+        views_content = f.read()
+
+    assert "var(--text-color" in views_content, "Missing theme-responsive var(--text-color) in team_views.py headers/polling"
+    print("  ✓ Verified: Theme-responsive color tokens and CSS variables implemented for light/dark adaptability.")
+
+
 if __name__ == "__main__":
     test_no_sub_micro_font_sizes()
     test_high_contrast_legend_colors()
     test_global_responsive_css_present()
     test_apptest_responsive_views()
-    print("\n🎉 ALL ACCESSIBILITY & RESPONSIVE VIEWPORT TESTS PASSED!")
+    test_theme_responsive_color_tokens()
+    print("\n🎉 ALL ACCESSIBILITY & THEME-RESPONSIVE VIEWPORT TESTS PASSED!")

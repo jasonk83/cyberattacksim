@@ -161,7 +161,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
         # Manual Company HP Adjustments (Authorized GM / Admin Only)
         if is_admin:
             st.markdown(
-                "<div style='font-size: 14px; font-weight: 800; color: #cbd5e1; margin: 12px 0 6px 0; letter-spacing: 0.06em;'>"
+                "<div style='font-size: 14px; font-weight: 800; color: var(--text-color, #334155); opacity: 0.85; margin: 12px 0 6px 0; letter-spacing: 0.06em;'>"
                 "⚖️ MANUAL COMPANY HP ADJUSTMENT (PENALTY / BONUS)"
                 "</div>",
                 unsafe_allow_html=True
@@ -442,6 +442,37 @@ def main():
     st.markdown(
         """
         <style>
+        /* Responsive Theme Color Tokens */
+        :root {
+            --app-text: var(--text-color, #1e293b);
+            --app-muted: #475569;
+            --app-border: rgba(100, 116, 139, 0.35);
+            --app-summary: var(--text-color, #0f172a);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --app-text: var(--text-color, #f8fafc);
+                --app-muted: #cbd5e1;
+                --app-border: #334155;
+                --app-summary: var(--text-color, #f1f5f9);
+            }
+        }
+
+        [data-theme="dark"], .stApp[data-theme="dark"] {
+            --app-text: var(--text-color, #f8fafc);
+            --app-muted: #cbd5e1;
+            --app-border: #334155;
+            --app-summary: var(--text-color, #f1f5f9);
+        }
+
+        [data-theme="light"], .stApp[data-theme="light"] {
+            --app-text: var(--text-color, #1e293b);
+            --app-muted: #475569;
+            --app-border: rgba(100, 116, 139, 0.35);
+            --app-summary: var(--text-color, #0f172a);
+        }
+
         /* Responsive Viewport & Max-Width Optimization (Laptops & Tablets) */
         section.main > div {
             max-width: 1400px !important;
@@ -457,17 +488,27 @@ def main():
             }
         }
 
-        /* Base Typography & Minimum Accessible Font Sizing */
+        /* Base Typography: Follows theme color */
         html, body, [class*="css"], .stMarkdown {
             font-size: 15px !important;
             line-height: 1.5 !important;
         }
 
-        /* Accessible Captions: readable 14px size & WCAG AA/AAA compliant contrast */
+        /* Accessible Captions: responsive to light and dark themes */
         .stCaption, [data-testid="stCaptionContainer"] {
             font-size: 14px !important;
             line-height: 1.4 !important;
-            color: #cbd5e1 !important;
+            color: var(--text-color, var(--app-muted)) !important;
+            opacity: 0.85 !important;
+        }
+
+        /* Sidebar Captions & Text */
+        section[data-testid="stSidebar"] .stCaption,
+        section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+            color: var(--text-color, var(--app-muted)) !important;
+            opacity: 0.85 !important;
         }
 
         /* Touch Targets & Button Sizing: 48px minimum touch height */
@@ -488,17 +529,17 @@ def main():
             outline-offset: 2px !important;
         }
 
-        /* Accessible Expanders & Summaries */
+        /* Accessible Expanders & Summaries: responsive to theme */
         [data-testid="stExpander"] details summary {
             font-size: 15px !important;
             font-weight: 700 !important;
-            color: #f1f5f9 !important;
+            color: var(--text-color, var(--app-summary)) !important;
             padding-top: 6px !important;
             padding-bottom: 6px !important;
         }
 
         [data-testid="stExpander"] details {
-            border-color: #334155 !important;
+            border-color: var(--app-border) !important;
             border-radius: 8px !important;
         }
 

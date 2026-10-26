@@ -79,7 +79,7 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
 
     # Live Bar Chart of Votes (Visible to everyone)
     if stats["total_votes"] > 0:
-        st.markdown(f"<div style='font-size: 16px; font-weight: 800; color: #f8fafc; margin-top: 10px; margin-bottom: 6px;'>📊 Live Polling Results ({stats['total_votes']} total votes):</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 16px; font-weight: 800; color: var(--text-color, #0f172a); margin-top: 10px; margin-bottom: 6px;'>📊 Live Polling Results ({stats['total_votes']} total votes):</div>", unsafe_allow_html=True)
         for opt in options:
             opt_id = str(opt.get("id"))
             stat = stats["tallies"].get(opt_id, {"count": 0, "percent": 0.0})
@@ -91,7 +91,7 @@ def _render_poll_ui(game: GameState, role: str, is_captain: bool, voter_id: str,
             else:
                 display_label = f"{opt_id}: {label}"
 
-            st.markdown(f"<div style='font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;'>{display_label} &mdash; <span style='color: #38bdf8;'>{cnt} votes ({pct:.1f}%)</span></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 15px; font-weight: 700; color: var(--text-color, #1e293b); margin-bottom: 4px;'>{display_label} &mdash; <span style='color: #0284c7; font-weight: 800;'>{cnt} votes ({pct:.1f}%)</span></div>", unsafe_allow_html=True)
             st.progress(pct / 100.0)
 
     st.markdown("---")
@@ -102,7 +102,7 @@ def _render_top_header(title: str, subtitle: str, role_key: str):
     col1, col2 = st.columns([4, 1])
     with col1:
         st.title(title)
-        st.markdown(f"<div style='font-size: 15px; color: #cbd5e1; margin-top: -10px; margin-bottom: 14px;'>{subtitle}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='font-size: 15px; color: var(--text-color, #475569); opacity: 0.85; margin-top: -10px; margin-bottom: 14px;'>{subtitle}</div>", unsafe_allow_html=True)
     with col2:
         st.write("")
         if st.button("🔄 Refresh View", key=f"top_refresh_{role_key}", use_container_width=True):
@@ -187,8 +187,8 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 
         with g_cols[1]:
             st.markdown("""
-            <div style="background-color: #0f172a; border: 2px solid #64748b; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
-                <div style="font-weight: 800; color: #cbd5e1; font-size: 18px;">🛑 Option 2: Safe Strategic Retreat</div>
+            <div style="background-color: #0f172a; border: 2px solid #475569; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+                <div style="font-weight: 800; color: #f8fafc; font-size: 18px;">🛑 Option 2: Safe Strategic Retreat</div>
                 <div style="color: #cbd5e1; font-size: 15px; margin-top: 8px; line-height: 1.4;">
                     Sever Command & Control (C2) beacons, wipe forensic trails, and withdraw into the dark web.
                 </div>
