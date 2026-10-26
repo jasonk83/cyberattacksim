@@ -76,6 +76,8 @@ class GameState:
             "media": "Standby in Lobby"
         }
 
+        self.hacker_anonymity_history: List[str] = []
+        self.hacker_exposure_score: int = 0
         self.history: List[Dict[str, Any]] = []
         self.snapshots: List[Dict[str, Any]] = []
 
@@ -207,9 +209,42 @@ class GameState:
         self.selected_attack_key = choice_key
         round_attacks = ATTACKS.get(self.current_round, {})
         self.selected_attack_data = round_attacks.get(choice_key, {})
+        anonymity = self.selected_attack_data.get("anonymity", "Moderate (Standard)")
+        exp_penalty = self.selected_attack_data.get("exposure_penalty", 1)
+        self.hacker_anonymity_history.append(anonymity)
+        self.hacker_exposure_score += exp_penalty
         self.team_status["hackers"] = f"✅ Launched {self.selected_attack_data.get('name', 'Attack')}"
         # Advance to IT Defense phase
         self.start_phase("it")
+
+    def get_hacker_exposure_level(self) -> Dict[str, Any]:
+        """
+        Calculates operational exposure level and Final Gambit detection risk
+        based on prior attack anonymity.
+        """
+        score = getattr(self, "hacker_exposure_score", 0)
+        if score <= 1:
+            level = "Low Risk"
+            catch_chance = 0.20
+            color = "#10b981"
+            description = "Adversaries operated with disciplined stealth. SOC perimeter sensors have minimal forensic indicators."
+        elif score in [2, 3]:
+            level = "Elevated Risk"
+            catch_chance = 0.35
+            color = "#f59e0b"
+            description = "Prior attacks generated noticeable telemetry noise. Threat hunting teams are actively monitoring egress routes."
+        else:
+            level = "Extreme Risk"
+            catch_chance = 0.55
+            color = "#ef4444"
+            description = "Intrusions relied on loud, high-impact vectors. Federal task forces and automated honeynets have locked onto adversary C2."
+        return {
+            "level": level,
+            "catch_chance": catch_chance,
+            "color": color,
+            "description": description,
+            "score": score
+        }
 
     def submit_it_choice(self, choice_id: str):
         self.create_snapshot()
@@ -265,13 +300,24 @@ class GameState:
             "attack_name": attack.get("name", "Unknown Threat"),
             "attack_key": self.selected_attack_key,
             "attack_damage": impact["breakdown"]["hacker_damage"],
+            "attack_complexity": attack.get("complexity", "Medium"),
+            "attack_anonymity": attack.get("anonymity", "Moderate"),
+            "attack_potential": attack.get("damage_potential", "High"),
             "it_plan": it_choice.get("label", "Unknown Action"),
             "it_mitigated": impact["breakdown"]["it_mitigated"],
+            "it_mit_pct": impact["breakdown"].get("it_mit_pct", 60),
+            "it_likelihood": it_choice.get("mitigation_likelihood", "Moderate"),
+            "it_complexity": it_choice.get("complexity", "Moderate"),
+            "customer_impact": it_choice.get("customer_impact", "Noticeable Latency"),
             "disruption_penalty": impact["breakdown"]["disruption_penalty"],
             "exec_decision": impact["breakdown"]["exec_action"],
             "headline": media_choice.get("headline", "News Release"),
             "media_delta": impact["breakdown"]["media_delta"],
+            "media_tier": media_choice.get("tier", "News"),
+            "media_disposition": media_choice.get("disposition", "Neutral"),
             "friction": impact["breakdown"]["friction"],
+            "it_surprise": impact["breakdown"].get("it_surprise", ""),
+            "media_surprise": impact["breakdown"].get("media_surprise", ""),
             "net_delta": net_delta,
             "health_before": prev_health,
             "health_after": self.company_health,
@@ -301,33 +347,35 @@ class GameState:
     def submit_final_hacker_action(self, action: str) -> Dict[str, Any]:
         """
         Executes the final adversary gambit:
-        - 'press': 1 in 4 chance (25%) caught.
-          - If not caught: 15 to 30 HP damage, 0 recovery.
-          - If caught: 0 damage, +3 to +15 HP company recovery.
+        - Catch probability dynamically scaled by prior attack anonymity via get_hacker_exposure_level().
+        - If not caught: 15 to 30 HP damage, 0 recovery.
+        - If caught: 0 damage, +3 to +15 HP company recovery.
         - 'retreat': 0 damage, clean escape.
         """
         self.create_snapshot()
         self.close_poll("hackers")
         action_clean = action.lower().strip()
+        exposure_info = self.get_hacker_exposure_level()
 
         if action_clean == "press":
-            caught = (random.random() < 0.25)
+            catch_chance = exposure_info["catch_chance"]
+            caught = (random.random() < catch_chance)
             if caught:
                 damage = 0
                 recovery = random.randint(3, 15)
                 net_delta = recovery
-                summary = (f"🚨 HACKERS PRESSED THE ATTACK BUT WERE CAUGHT! SOC perimeter defenses and federal authorities intercepted the intrusion node before payloads executed—inflicting 0 additional damage while investigators recovered critical enterprise assets (+{recovery} HP recovered for the company!) (Net Impact: {net_delta:+g} HP)")
+                summary = (f"🚨 HACKERS PRESSED THE ATTACK BUT WERE CAUGHT! Facing {exposure_info['level']} detection risk from earlier attack telemetry, federal authorities and SOC perimeter defenses intercepted the intrusion node before payloads executed—inflicting 0 additional damage while investigators recovered critical enterprise assets (+{recovery} HP recovered for the company!) (Net Impact: {net_delta:+g} HP)")
             else:
                 damage = random.randint(15, 30)
                 recovery = 0
                 net_delta = -damage
-                summary = (f"💥 HACKERS PRESSED THE ATTACK UNDETECTED! Threat actors exploited secondary payment APIs and siphoned database archives completely undetected, inflicting -{damage} HP catastrophic damage! (Net Impact: {net_delta:+g} HP)")
+                summary = (f"💥 HACKERS PRESSED THE ATTACK UNDETECTED! Overcoming {exposure_info['level']} surveillance, threat actors exploited secondary payment APIs and siphoned database archives completely undetected, inflicting -{damage} HP catastrophic damage! (Net Impact: {net_delta:+g} HP)")
         else:  # retreat
             damage = 0
             caught = False
             recovery = 0
             net_delta = 0
-            summary = "🛑 HACKERS RETREATED SAFELY: Threat actors severed C2 beacons and withdrew into the dark web. Zero additional damage inflicted."
+            summary = "🛑 HACKERS RETREATED SAFELY: Threat actors severed C2 beacons, purged traces, and withdrew into the dark web. Zero additional damage inflicted."
 
         prev_health = self.company_health
         self.company_health = max(0.0, min(100.0, round(self.company_health + net_delta, 1)))
@@ -337,6 +385,8 @@ class GameState:
             "damage": damage,
             "caught": caught,
             "recovery": recovery,
+            "exposure_level": exposure_info["level"],
+            "exposure_score": exposure_info["score"],
             "net_delta": net_delta,
             "health_before": prev_health,
             "health_after": self.company_health,
@@ -361,6 +411,8 @@ class GameState:
             "media_headline_idx": self.media_headline_idx,
             "media_headline_data": copy.deepcopy(self.media_headline_data),
             "final_hacker_action_data": copy.deepcopy(self.final_hacker_action_data),
+            "hacker_anonymity_history": copy.deepcopy(self.hacker_anonymity_history),
+            "hacker_exposure_score": self.hacker_exposure_score,
             "history": copy.deepcopy(self.history),
             "team_status": copy.deepcopy(self.team_status)
         }
@@ -383,7 +435,8 @@ class GameState:
         self.media_headline_idx = snap["media_headline_idx"]
         self.media_headline_data = copy.deepcopy(snap["media_headline_data"])
         self.final_hacker_action_data = copy.deepcopy(snap.get("final_hacker_action_data"))
-        self.media_headline_data = copy.deepcopy(snap["media_headline_data"])
+        self.hacker_anonymity_history = copy.deepcopy(snap.get("hacker_anonymity_history", []))
+        self.hacker_exposure_score = snap.get("hacker_exposure_score", 0)
         self.history = copy.deepcopy(snap["history"])
         self.team_status = copy.deepcopy(snap["team_status"])
         self.start_phase(self.phase)

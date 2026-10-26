@@ -130,14 +130,14 @@ def test_media_straw_polling_and_headlines():
     # Verify headline clarity and impact indicators in Captain view
     capt_markdown_text = " ".join(m.value for m in m_capt.markdown)
     assert "Headline 1" in capt_markdown_text and "Sensationalist" in capt_markdown_text
-    assert "Health -12" in capt_markdown_text
+    assert "Negative Tone" in capt_markdown_text
     assert "Headline 2" in capt_markdown_text and "Critical" in capt_markdown_text
-    assert "Health -5" in capt_markdown_text
     assert "Headline 3" in capt_markdown_text and "Balanced" in capt_markdown_text
-    assert "Health +2" in capt_markdown_text
+    assert "Neutral Tone" in capt_markdown_text
     assert "Headline 4" in capt_markdown_text and "Favorable" in capt_markdown_text
-    assert "Health +8" in capt_markdown_text
-    print("  ✓ Headline UI clearly displays Tiers (Sensationalist/Critical/Balanced/Favorable) and Health Deltas (-12, -5, +2, +8).")
+    assert "Positive Tone" in capt_markdown_text
+    assert "Virality: Unpredictable" in capt_markdown_text
+    print("  ✓ Headline UI clearly displays Tiers (Sensationalist/Critical/Balanced/Favorable), Dispositions (Negative/Neutral/Positive), and Virality indicators.")
 
     # 2. Test Straw Polling
     # Captain launches poll
@@ -439,20 +439,20 @@ def test_game_over_and_outcome_assessment():
 
     # 1. Calibrated Threshold Verification
     b2, w2 = get_outcome_thresholds(2)
-    assert (b2, w2) == (39, 76)
-    assert evaluate_final_outcome(76.0, 2)[0] == "Win"
-    assert evaluate_final_outcome(75.9, 2)[0] == "Survive"
+    assert (b2, w2) == (39, 75)
+    assert evaluate_final_outcome(75.0, 2)[0] == "Win"
+    assert evaluate_final_outcome(74.9, 2)[0] == "Survive"
     assert evaluate_final_outcome(39.0, 2)[0] == "Survive"
     assert evaluate_final_outcome(38.9, 2)[0] == "Bankrupt"
-    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-75 | Win >= 76).")
+    print("  ✓ 2-round outcome thresholds verified (Bankrupt < 39 | Survive 39-74 | Win >= 75).")
 
     b3, w3 = get_outcome_thresholds(3)
-    assert (b3, w3) == (30, 62)
-    assert evaluate_final_outcome(62.0, 3)[0] == "Win"
-    assert evaluate_final_outcome(61.9, 3)[0] == "Survive"
+    assert (b3, w3) == (30, 60)
+    assert evaluate_final_outcome(60.0, 3)[0] == "Win"
+    assert evaluate_final_outcome(59.9, 3)[0] == "Survive"
     assert evaluate_final_outcome(30.0, 3)[0] == "Survive"
     assert evaluate_final_outcome(29.9, 3)[0] == "Bankrupt"
-    print("  ✓ 3-round outcome thresholds verified (Bankrupt < 30 | Survive 30-61 | Win >= 62).")
+    print("  ✓ 3-round outcome thresholds verified (Bankrupt < 30 | Survive 30-59 | Win >= 60).")
 
     # 2. Simulate 2-Round Game Completion to Game Over Screen
     gm = AppTest.from_file("app.py")

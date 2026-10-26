@@ -140,18 +140,20 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.subheader("⚡ Adversary Final Gambit: Press Attack or Retreat")
         st.caption("Your initial intrusion compromised CloudStore's perimeter. Decide whether to press the attack or retreat into the shadows:")
 
+        exp_info = game.get_hacker_exposure_level()
+
         gambit_options = [
             {
                 "id": "press",
-                "label": "🚀 Press the Attack (-15 to -30 HP | 1-in-4 Catch Risk)",
+                "label": f"🚀 Press the Attack (Secondary Exploit | {exp_info['level']} Catch Risk)",
                 "label_short": "Press Attack",
-                "desc": "Execute secondary exploit payloads against payment APIs. If undetected (75%), inflicts 15 to 30 HP damage. If caught (25%), inflicts 0 damage and the company recovers 3 to 15 HP."
+                "desc": f"Execute secondary exploit payloads against payment APIs. Facing {exp_info['level']} detection risk due to cumulative attack signatures."
             },
             {
                 "id": "retreat",
-                "label": "🛑 Safe Strategic Retreat (0 HP | Zero Risk)",
+                "label": "🛑 Safe Strategic Retreat (Zero Risk Clean Escape)",
                 "label_short": "Safe Retreat",
-                "desc": "Sever C2 beacons, purge logs, and withdraw safely with existing spoils. 0 HP damage, 0 risk of capture."
+                "desc": "Sever C2 beacons, purge logs, and withdraw safely with existing spoils. Zero additional damage, clean adversary escape."
             }
         ]
 
@@ -160,15 +162,19 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 
         g_cols = st.columns(2)
         with g_cols[0]:
-            st.markdown("""
-            <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                <div style="font-weight: 800; color: #fca5a5; font-size: 16px;">🚀 Option 1: Press the Attack</div>
+            st.markdown(f"""
+            <div style="background-color: #450a0a; border: 2px solid {exp_info['color']}; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 800; color: #fca5a5; font-size: 16px;">🚀 Option 1: Press the Attack</span>
+                    <span style="background-color: {exp_info['color']}; color: white; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800;">{exp_info['level']}</span>
+                </div>
                 <div style="color: #fecaca; font-size: 13px; margin-top: 6px;">
                     Execute secondary exploits against payment endpoints and customer transaction ledgers.
                 </div>
                 <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
-                    <strong>Undetected (75%):</strong> -15 to -30 Enterprise HP damage<br/>
-                    <strong>Detection Risk (25% - 1 in 4 chance):</strong> 0 damage inflicted & company recovers +3 to +15 HP
+                    <strong>Target Payload:</strong> Unchecked exfiltration of transactional reserves<br/>
+                    <strong>⚠️ SOC Detection Warning:</strong> {exp_info['description']}<br/>
+                    <em style="color: #cbd5e1; font-size: 11px;">*If intercepted, payloads are neutralized with zero additional damage while investigators recover enterprise assets.*</em>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -187,8 +193,8 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
                     Sever Command & Control (C2) beacons, wipe forensic trails, and withdraw into the dark web.
                 </div>
                 <div style="margin-top: 8px; font-size: 12px; color: #ffffff;">
-                    <strong>Threat Damage:</strong> 0 HP damage<br/>
-                    <strong>Detection Risk:</strong> Zero risk. Clean adversary escape.
+                    <strong>Campaign Outcome:</strong> Conclude intrusion campaign with current progress<br/>
+                    <strong>Detection Risk:</strong> Zero risk. Clean adversary escape guaranteed.
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -210,7 +216,11 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
             <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 14px; border-radius: 8px; margin-bottom: 12px;">
                 <div style="font-weight: 800; color: #ffffff;">ACTIVE PAYLOAD: {att.get('icon', '🚨')} {att.get('name')}</div>
                 <div style="color: #c7d2fe; font-size: 13px; margin-top: 4px;">{att.get('description')}</div>
-                <div style="color: #f87171; font-weight: 700; font-size: 13px; margin-top: 6px;">Inflicted Threat Damage: {att.get('damage')} Enterprise HP</div>
+                <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px; color: #e0e7ff;">
+                    <span>🧩 Complexity: <strong>{att.get('complexity', 'Medium')}</strong></span>
+                    <span>💥 Damage Potential: <strong>{att.get('damage_potential', 'High')}</strong></span>
+                    <span>🕶️ Anonymity: <strong>{att.get('anonymity', 'Moderate')}</strong></span>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -246,8 +256,15 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
             st.markdown(f"### {att.get('icon', '🅰️')} Vector {att_id}")
             st.markdown(f"**{att.get('name')}**")
             st.write(att.get("description", ""))
-            st.caption(f"**Threat Damage:** {att.get('damage')} Enterprise HP")
-            
+
+            st.markdown(f"""
+            <div style="background-color: #111827; padding: 8px 12px; border-radius: 8px; border: 1px solid #1f2937; margin: 8px 0; font-size: 12px; color: #cbd5e1;">
+                <div>🧩 <strong>Complexity:</strong> {att.get('complexity', 'Medium')}</div>
+                <div>💥 <strong>Damage Potential:</strong> {att.get('damage_potential', 'High')}</div>
+                <div>🕶️ <strong>Anonymity:</strong> {att.get('anonymity', 'Moderate')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
             # Educational Dossier
             render_briefing_card("hackers", att.get("md_file", ""), att.get("name", ""), att.get("assessment", ""))
 
@@ -339,7 +356,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
                 return
 
     st.subheader(f"Round {game.current_round}: Select Technical Containment Strategy")
-    st.caption("⚠️ **Operational Trade-Off Rule:** Aggressive options with severe downtime provide the highest threat mitigation!")
+    st.caption("⚠️ **Operational Trade-Off:** Strategic choices balance technical complexity, operational downtime, customer impact, and damage mitigation likelihood.")
 
     options = get_it_choices(game.current_round, game.selected_attack_key)
 
@@ -348,17 +365,18 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     for opt in options:
         opt_id = opt["id"]
-        mit_pct = int(opt["mitigation_pct"] * 100)
         st.markdown(f"""
         <div style="background-color: #030712; padding: 16px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 12px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-weight: 800; color: #f8fafc; font-size: 16px;">Option {opt_id}: {opt['label']}</span>
-                <span style="background-color: #0369a1; color: white; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 800;">Mitigates {mit_pct}% Damage</span>
+                <span style="background-color: #0284c7; color: white; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
             </div>
             <div style="color: #cbd5e1; font-size: 13px; margin-top: 6px;">{opt.get('desc', '')}</div>
-            <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 12px;">
-                <span style="color: #f87171; font-weight: 700;">⏱️ Est. Downtime: {opt.get('downtime', 'Unknown')}</span>
-                <span style="color: #fb923c; font-weight: 700;">📉 {opt.get('disruption', '')}</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px;">
+                <span style="color: #38bdf8;">⚙️ <strong>Complexity of Fix:</strong> {opt.get('complexity', 'Moderate')}</span>
+                <span style="color: #f87171;">⏱️ <strong>Projected Downtime:</strong> {opt.get('downtime', 'Unknown')}</span>
+                <span style="color: #fb923c;">👥 <strong>Impact on Customers:</strong> {opt.get('customer_impact', 'Noticeable')}</span>
+                <span style="color: #a78bfa;">📉 <strong>Disruption:</strong> {opt.get('disruption', 'Disruption')}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -414,14 +432,25 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
     # Educational Executive Risk Dossier
     render_briefing_card("exec", att.get("md_file", ""), f"Executive Risk Briefing: {att.get('name', 'Incident')}", "Review projected stock impact, customer sentiment, and regulatory compliance liabilities.")
 
-    # Asymmetric Information Briefing: Execs see IT downtime & disruption, but NOT protection %!
+    # Strategic Information Briefing: Execs focus on Stock Price Outlook & Customer Reputation
     st.markdown(f"""
     <div style="background-color: #1e1b4b; border: 2px solid #818cf8; padding: 18px; border-radius: 12px; margin: 12px 0;">
-        <div style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">IT DEPARTMENT DIRECTIVE PROPOSAL</div>
+        <div style="font-size: 11px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">IT PROPOSAL STRATEGIC IMPACT ASSESSMENT</div>
         <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 4px;">Proposed Action: {it_plan.get('label', 'Emergency Plan')}</div>
         <div style="color: #e0e7ff; font-size: 14px; margin-top: 8px;">{it_plan.get('exec_view', '')}</div>
-        <div style="margin-top: 10px; padding: 8px 12px; background-color: #312e81; border-radius: 6px; font-size: 12px; color: #c7d2fe;">
-            🔒 <strong>Technical Security Effectiveness:</strong> <em>[CLASSIFIED BY IT — HIDDEN FROM BOARD]</em>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding: 12px; background-color: #312e81; border-radius: 8px;">
+            <div>
+                <div style="color: #93c5fd; font-weight: 800; font-size: 12px;">📈 STOCK PRICE OUTLOOK</div>
+                <div style="color: #ffffff; font-size: 12px; margin-top: 2px; line-height: 1.4;">{it_plan.get('stock_outlook', 'Equities market reaction subject to operational duration.')}</div>
+            </div>
+            <div>
+                <div style="color: #fca5a5; font-weight: 800; font-size: 12px;">🤝 CUSTOMER REPUTATION RISK</div>
+                <div style="color: #ffffff; font-size: 12px; margin-top: 2px; line-height: 1.4;">{it_plan.get('reputation_risk', 'Public brand trust contingent on data protection integrity.')}</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #c7d2fe;">
+            <span>⏱️ <strong>Est. Downtime:</strong> {it_plan.get('downtime', 'Pending')}</span>
+            <span>👥 <strong>Customer Impact:</strong> {it_plan.get('customer_impact', 'Pending')}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -511,7 +540,7 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     """, unsafe_allow_html=True)
 
     st.subheader(f"Round {game.current_round}: Select Breaking News Headline")
-    st.caption("Choose which journalistic angle leads the front page (helps or hurts the enterprise):")
+    st.caption("Choose which journalistic angle leads the front page. Real-world public resonance and viral reach remain unpredictable until news breaks.")
 
     headlines = DYNAMIC_HEADLINES.get(game.current_round, [])
 
@@ -520,18 +549,17 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     for idx, item in enumerate(headlines):
         head_label = item.get("id", f"Headline {idx + 1}")
-        delta = item.get("health_delta", 0)
-        delta_str = f"+{delta}" if delta > 0 else f"{delta}"
-        badge_color = "#10b981" if delta > 0 else "#64748b" if delta == 0 else "#ef4444"
+        disp = item.get("disposition", "Neutral")
+        disp_color = "#ef4444" if disp == "Negative" else "#10b981" if disp == "Positive" else "#38bdf8"
 
         st.markdown(f"""
         <div style="background-color: #030712; padding: 14px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase;">{head_label} &bull; {item.get('tier', 'News')}</span><br/>
+            <div style="flex-grow: 1; margin-right: 12px;">
+                <span style="font-size: 12px; font-weight: 800; color: {disp_color}; text-transform: uppercase;">{head_label} &bull; {disp} Tone ({item.get('tier', 'News')})</span><br/>
                 <span style="font-size: 15px; font-weight: 800; color: #f8fafc;">\"{item['headline']}\"</span>
                 <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">{item.get('desc', '')}</div>
             </div>
-            <span style="background-color: {badge_color}; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap;">Health {delta_str}</span>
+            <span style="background-color: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap;">📡 Virality: Unpredictable</span>
         </div>
         """, unsafe_allow_html=True)
 

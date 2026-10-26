@@ -91,11 +91,11 @@ def test_blue_team_deep():
         assert len(view_deploy_btns) == 0, "Viewers must not see deployment buttons"
         print("  [IT Security] Verified: Viewers strictly prohibited from submitting containment proposals.")
 
-        # Audit IT Option details (Downtime vs Disruption vs Mitigation %)
+        # Audit IT Option details (Downtime vs Disruption vs Likelihood)
         all_it_md = " ".join([m.value for m in it_capt.markdown])
         round_options = get_it_choices(current_round, "A")
         for opt in round_options:
-            mit_badge = f"Mitigates {int(opt['mitigation_pct']*100)}% Damage"
+            mit_badge = f"Likelihood: {opt['mitigation_likelihood']}"
             downtime_text = opt['downtime']
             disrupt_text = opt['disruption']
             assert mit_badge in all_it_md, f"Missing {mit_badge} in IT terminal"
@@ -165,16 +165,17 @@ def test_blue_team_deep():
         # CHECK ASYMMETRIC INFORMATION ISOLATION:
         # Technical protection % must be CLASSIFIED/HIDDEN from the Board
         # Find the IT proposal markdown card
-        it_proposal_md = next((m.value for m in ex_view1.markdown if "IT DEPARTMENT DIRECTIVE PROPOSAL" in m.value), "")
+        it_proposal_md = next((m.value for m in ex_view1.markdown if "IT PROPOSAL STRATEGIC IMPACT ASSESSMENT" in m.value or "IT DEPARTMENT DIRECTIVE PROPOSAL" in m.value), "")
         assert it_proposal_md != "", "IT Department Proposal card not found in Exec view!"
-        assert "[CLASSIFIED BY IT — HIDDEN FROM BOARD]" in it_proposal_md, "Classified redaction badge missing!"
+        assert "STOCK PRICE OUTLOOK" in it_proposal_md, "Stock Price Outlook missing!"
+        assert "CUSTOMER REPUTATION RISK" in it_proposal_md, "Customer Reputation Risk missing!"
         
         # Verify technical protection numbers are NOT leaked in Exec view
         chosen_it_data = next((c for c in round_options if str(c['id']) == target_opt_id), {})
         leak_str = f"{int(chosen_it_data['mitigation_pct']*100)}%"
         assert leak_str not in it_proposal_md, f"LEAK DETECTED: IT mitigation {leak_str} exposed to Executive Board!"
         assert "Mitigates" not in it_proposal_md, "LEAK DETECTED: 'Mitigates' keyword exposed in proposal card!"
-        print(f"  [Exec Asymmetry Verified] 🛡️ Technical mitigation % ({leak_str}) successfully HIDDEN from Board.")
+        print(f"  [Exec Asymmetry Verified] 🛡️ Strategic outlook visible; technical mitigation % ({leak_str}) successfully HIDDEN from Board.")
 
         # Verify Business Downtime & Disruption ARE visible to Exec
         assert chosen_it_data["exec_view"] in it_proposal_md, "Business downtime/disruption description missing from proposal card!"

@@ -17,42 +17,45 @@ def run_distribution_test(rounds=3, n_trials=20000):
     ]
 
     it_choices = [
-        {"id": "1", "mitigation_pct": 0.90, "disruption_penalty": -4},
-        {"id": "2", "mitigation_pct": 0.60, "disruption_penalty": -2},
-        {"id": "3", "mitigation_pct": 0.25, "disruption_penalty": 0}
+        {"id": "1", "mitigation_range": (0.75, 0.95), "disruption_penalty": -4},
+        {"id": "2", "mitigation_range": (0.45, 0.70), "disruption_penalty": -2},
+        {"id": "3", "mitigation_range": (0.15, 0.35), "disruption_penalty": 0}
     ]
 
     exec_actions = ["approve", "downgrade", "overrule"]
 
     media_headlines = [
-        {"health_delta": 8},
-        {"health_delta": 2},
-        {"health_delta": -5},
-        {"health_delta": -12}
+        {"health_delta_range": (1, 12)},
+        {"health_delta_range": (-3, 4)},
+        {"health_delta_range": (-9, -2)},
+        {"health_delta_range": (-15, -4)}
     ]
 
     outcomes = {"Win": 0, "Survive": 0, "Bankrupt": 0}
 
     for _ in range(n_trials):
         health = 100.0
+        exposure_score = 0
         for _ in range(rounds):
             att = random.choice(attacks)
             it = random.choice(it_choices)
             ex = random.choice(exec_actions)
             m = random.choice(media_headlines)
 
+            # Accumulate exposure penalty based on attack
+            exposure_score += 0 if att["id"] == "A" else 1 if att["id"] == "B" else 2
+
             res = calculate_round_impact(att, it, ex, m)
             health = max(0.0, min(100.0, health + res["net_delta"]))
 
         if rounds == 2:
             # Adversary Final Gambit: Press Attack (70%) or Retreat (30%)
-            # Press: 1-in-4 chance (25%) caught. If caught: 0 dmg, +3 to +15 recovery.
-            # If not caught: -15 to -30 dmg, 0 recovery. Retreat: 0 dmg.
             if random.random() < 0.70:
-                if random.random() < 0.25:  # caught (1 in 4)
+                catch_chance = 0.20 if exposure_score <= 1 else 0.35 if exposure_score in [2, 3] else 0.55
+                if random.random() < catch_chance:
                     dmg = 0
                     rec = random.randint(3, 15)
-                else:  # not caught
+                else:
                     dmg = random.randint(15, 30)
                     rec = 0
                 health = max(0.0, min(100.0, health - dmg + rec))

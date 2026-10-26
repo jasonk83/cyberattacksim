@@ -172,6 +172,24 @@ def render_round_recap_card(game):
         return
     entry = game.history[-1]
     delta_color = "#10b981" if entry['net_delta'] >= 0 else "#ef4444"
+    it_surprise = entry.get('it_surprise', '')
+    media_surprise = entry.get('media_surprise', '')
+    attack_meta = f"Complexity: {entry.get('attack_complexity', 'Medium')} | Anonymity: {entry.get('attack_anonymity', 'Moderate')}"
+
+    surprise_html = ""
+    if it_surprise or media_surprise:
+        it_line = f'<div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">🛡️ <strong>IT Defense:</strong> {it_surprise}</div>' if it_surprise else ''
+        media_line = f'<div style="font-size: 12px; color: #cbd5e1;">📰 <strong>Media Resonance:</strong> {media_surprise}</div>' if media_surprise else ''
+        surprise_html = f"""
+        <div style="background-color: #0f172a; border-radius: 8px; padding: 12px; margin: 12px 0; border: 1px solid #1e293b;">
+            <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                🔍 Surprise & Reality Check (Outcome Analysis)
+            </div>
+            {it_line}
+            {media_line}
+        </div>
+        """
+
     st.markdown(f"""
     <div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 18px; margin: 16px 0;">
         <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry['round']} INCIDENT DEBRIEF</div>
@@ -179,13 +197,19 @@ def render_round_recap_card(game):
             <span style="font-size: 20px; font-weight: 900; color: #ffffff;">{entry['attack_name']}</span>
             <span style="font-size: 22px; font-weight: 900; color: {delta_color};">{entry['net_delta']:+g} HP</span>
         </div>
-        <div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">
-            Headline: <em>"{entry['headline']}"</em> ({entry['media_delta']:+g} HP)
+        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">
+            Adversary Vector Profile: <em>{attack_meta}</em>
         </div>
+        <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">
+            Breaking Headline: <em>"{entry['headline']}"</em> ({entry['media_delta']:+g} HP)
+        </div>
+
+        {surprise_html}
+
         <hr style="border-color: #1e293b; margin: 10px 0;" />
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #cbd5e1;">
             <div><strong>Threat Exploit:</strong> {entry['attack_damage']:+g} HP</div>
-            <div><strong>IT Defense Mitigated:</strong> +{entry['it_mitigated']:g} HP</div>
+            <div><strong>IT Defense Mitigated:</strong> +{entry['it_mitigated']:g} HP ({entry.get('it_mit_pct', 60)}%)</div>
             <div><strong>Operational Disruption:</strong> {entry['disruption_penalty']:+g} HP</div>
             <div><strong>Governance:</strong> {entry['exec_decision']}</div>
         </div>
@@ -204,11 +228,12 @@ def render_final_hacker_action_card(game):
     action = data.get("action", "retreat")
     delta = data.get("net_delta", 0)
     delta_color = "#10b981" if delta > 0 else "#ef4444" if delta < 0 else "#94a3b8"
+    exposure = data.get("exposure_level", "Standard")
 
     if action == "press":
         card_bg = "#450a0a" if not data.get("caught") else "#3b0764"
         card_border = "#ef4444" if not data.get("caught") else "#a855f7"
-        badge = "🚨 ADVERSARY PRESSED THE ATTACK"
+        badge = f"🚨 ADVERSARY PRESSED THE ATTACK &bull; EXPOSURE: {exposure.upper()}"
     else:
         card_bg = "#0f172a"
         card_border = "#64748b"
