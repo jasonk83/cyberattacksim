@@ -164,7 +164,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         g_cols = st.columns(2)
         with g_cols[0]:
             st.markdown(f"""
-            <div style="background-color: #450a0a; border: 2px solid {exp_info['color']}; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+            <div class="dark-info-card" style="background-color: #450a0a; color: #fecaca; border: 2px solid {exp_info['color']}; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 800; color: #fca5a5; font-size: 18px;">🚀 Option 1: Press the Attack</span>
                     <span style="background-color: {exp_info['color']}; color: white; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 800;">{exp_info['level']}</span>
@@ -173,8 +173,8 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
                     Execute secondary exploits against payment endpoints and customer transaction ledgers.
                 </div>
                 <div style="margin-top: 10px; font-size: 14px; color: #ffffff; line-height: 1.5;">
-                    <strong>Target Payload:</strong> Unchecked exfiltration of transactional reserves<br/>
-                    <strong>⚠️ SOC Detection Warning:</strong> {exp_info['description']}<br/>
+                    <strong style="color: #ffffff;">Target Payload:</strong> Unchecked exfiltration of transactional reserves<br/>
+                    <strong style="color: #ffffff;">⚠️ SOC Detection Warning:</strong> {exp_info['description']}<br/>
                     <em style="color: #cbd5e1; font-size: 13px;">*If intercepted, payloads are neutralized with zero additional damage while investigators recover enterprise assets.*</em>
                 </div>
             </div>
@@ -188,14 +188,14 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
 
         with g_cols[1]:
             st.markdown("""
-            <div style="background-color: #0f172a; border: 2px solid #475569; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+            <div class="dark-info-card" style="background-color: #0f172a; color: #cbd5e1; border: 2px solid #475569; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
                 <div style="font-weight: 800; color: #f8fafc; font-size: 18px;">🛑 Option 2: Safe Strategic Retreat</div>
                 <div style="color: #cbd5e1; font-size: 15px; margin-top: 8px; line-height: 1.4;">
                     Sever Command & Control (C2) beacons, wipe forensic trails, and withdraw into the dark web.
                 </div>
                 <div style="margin-top: 10px; font-size: 14px; color: #ffffff; line-height: 1.5;">
-                    <strong>Campaign Outcome:</strong> Conclude intrusion campaign with current progress<br/>
-                    <strong>Detection Risk:</strong> Zero risk. Clean adversary escape guaranteed.
+                    <strong style="color: #ffffff;">Campaign Outcome:</strong> Conclude intrusion campaign with current progress<br/>
+                    <strong style="color: #ffffff;">Detection Risk:</strong> Zero risk. Clean adversary escape guaranteed.
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -214,13 +214,13 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         if game.selected_attack_data:
             att = game.selected_attack_data
             st.markdown(f"""
-            <div style="background-color: #1e1b4b; border-left: 4px solid #818cf8; padding: 16px; border-radius: 10px; margin-bottom: 14px;">
+            <div class="dark-info-card" style="background-color: #1e1b4b; color: #e0e7ff; border-left: 4px solid #818cf8; padding: 16px; border-radius: 10px; margin-bottom: 14px;">
                 <div style="font-weight: 800; color: #ffffff; font-size: 17px;">ACTIVE PAYLOAD: {att.get('icon', '🚨')} {att.get('name')}</div>
                 <div style="color: #c7d2fe; font-size: 15px; margin-top: 6px;">{att.get('description')}</div>
                 <div style="display: flex; gap: 18px; margin-top: 10px; font-size: 14px; color: #e0e7ff;">
-                    <span>🧩 Complexity: <strong>{att.get('complexity', 'Medium')}</strong></span>
-                    <span>💥 Damage Potential: <strong>{att.get('damage_potential', 'High')}</strong></span>
-                    <span>🕶️ Anonymity: <strong>{att.get('anonymity', 'Moderate')}</strong></span>
+                    <span>🧩 Complexity: <strong style="color: #ffffff;">{att.get('complexity', 'Medium')}</strong></span>
+                    <span>💥 Damage Potential: <strong style="color: #ffffff;">{att.get('damage_potential', 'High')}</strong></span>
+                    <span>🕶️ Anonymity: <strong style="color: #ffffff;">{att.get('anonymity', 'Moderate')}</strong></span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -259,10 +259,10 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
             st.write(att.get("description", ""))
 
             st.markdown(f"""
-            <div style="background-color: #111827; padding: 10px 14px; border-radius: 8px; border: 1px solid #1f2937; margin: 10px 0; font-size: 14px; color: #f1f5f9; line-height: 1.6;">
-                <div>🧩 <strong>Complexity:</strong> {att.get('complexity', 'Medium')}</div>
-                <div>💥 <strong>Damage Potential:</strong> {att.get('damage_potential', 'High')}</div>
-                <div>🕶️ <strong>Anonymity:</strong> {att.get('anonymity', 'Moderate')}</div>
+            <div class="dark-info-card" style="background-color: #111827; padding: 10px 14px; border-radius: 8px; border: 1px solid #1f2937; margin: 10px 0; font-size: 14px; color: #f1f5f9; line-height: 1.6;">
+                <div>🧩 <strong style="color: #ffffff;">Complexity:</strong> {att.get('complexity', 'Medium')}</div>
+                <div>💥 <strong style="color: #ffffff;">Damage Potential:</strong> {att.get('damage_potential', 'High')}</div>
+                <div>🕶️ <strong style="color: #ffffff;">Anonymity:</strong> {att.get('anonymity', 'Moderate')}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -338,7 +338,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
                 detail = "The Board rejected system isolations to avoid panic. Threat mitigation collapsed to 0%!"
 
             st.markdown(f"""
-            <div style="background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 12px; padding: 18px; margin: 14px 0;">
+            <div class="dark-info-card" style="background-color: {bg_color}; color: #f8fafc; border: 2px solid {border_color}; border-radius: 12px; padding: 18px; margin: 14px 0;">
                 <div style="font-size: 14px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em;">🏢 EXECUTIVE BOARD DIRECTIVE ISSUED</div>
                 <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">{badge}</div>
                 <div style="font-size: 15px; color: #f8fafc; margin-top: 6px; line-height: 1.4;">{detail}</div>
@@ -368,17 +368,17 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
     for opt in options:
         opt_id = opt["id"]
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
+        <div class="dark-info-card" style="background-color: #030712; color: #f1f5f9; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-weight: 800; color: #f8fafc; font-size: 18px;">Option {opt_id}: {opt['label']}</span>
                 <span style="background-color: #0369a1; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
             </div>
             <div style="color: #f1f5f9; font-size: 15px; margin-top: 8px; line-height: 1.4;">{opt.get('desc', '')}</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; font-size: 14px; line-height: 1.5;">
-                <span style="color: #38bdf8;">⚙️ <strong>Complexity of Fix:</strong> {opt.get('complexity', 'Moderate')}</span>
-                <span style="color: #f87171;">⏱️ <strong>Projected Downtime:</strong> {opt.get('downtime', 'Unknown')}</span>
-                <span style="color: #fb923c;">👥 <strong>Impact on Customers:</strong> {opt.get('customer_impact', 'Noticeable')}</span>
-                <span style="color: #a78bfa;">📉 <strong>Disruption:</strong> {opt.get('disruption', 'Disruption')}</span>
+                <span style="color: #38bdf8;">⚙️ <strong style="color: #38bdf8;">Complexity of Fix:</strong> {opt.get('complexity', 'Moderate')}</span>
+                <span style="color: #f87171;">⏱️ <strong style="color: #f87171;">Projected Downtime:</strong> {opt.get('downtime', 'Unknown')}</span>
+                <span style="color: #fb923c;">👥 <strong style="color: #fb923c;">Impact on Customers:</strong> {opt.get('customer_impact', 'Noticeable')}</span>
+                <span style="color: #a78bfa;">📉 <strong style="color: #a78bfa;">Disruption:</strong> {opt.get('disruption', 'Disruption')}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -449,11 +449,11 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     # Strategic Information Briefing: Execs focus on Stock Price Outlook & Customer Reputation
     st.markdown(f"""
-    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; padding: 22px; border-radius: 14px; margin: 14px 0;">
+    <div class="dark-info-card" style="background-color: #1e1b4b; color: #f1f5f9; border: 2px solid #818cf8; padding: 22px; border-radius: 14px; margin: 14px 0;">
         <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">IT PROPOSAL STRATEGIC IMPACT ASSESSMENT</div>
         <div style="font-size: 22px; font-weight: 800; color: #ffffff; margin-top: 4px;">Proposed Action: {it_plan.get('label', 'Emergency Plan')}</div>
         <div style="color: #f1f5f9; font-size: 15px; margin-top: 8px; line-height: 1.4;">{it_plan.get('exec_view', '')}</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; padding: 14px; background-color: #312e81; border-radius: 10px;">
+        <div class="dark-info-card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; padding: 14px; background-color: #312e81; color: #ffffff; border-radius: 10px;">
             <div>
                 <div style="color: #93c5fd; font-weight: 800; font-size: 14px; letter-spacing: 0.05em;">📈 STOCK PRICE OUTLOOK</div>
                 <div style="color: #ffffff; font-size: 14px; margin-top: 4px; line-height: 1.5;">{it_plan.get('stock_outlook', 'Equities market reaction subject to operational duration.')}</div>
@@ -464,8 +464,8 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
             </div>
         </div>
         <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 14px; color: #c7d2fe;">
-            <span>⏱️ <strong>Est. Downtime:</strong> {it_plan.get('downtime', 'Pending')}</span>
-            <span>👥 <strong>Customer Impact:</strong> {it_plan.get('customer_impact', 'Pending')}</span>
+            <span>⏱️ <strong style="color: #ffffff;">Est. Downtime:</strong> {it_plan.get('downtime', 'Pending')}</span>
+            <span>👥 <strong style="color: #ffffff;">Customer Impact:</strong> {it_plan.get('customer_impact', 'Pending')}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -489,7 +489,7 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
 
     if it_opt_id == "1" or disruption_pen <= -3:
         st.markdown(f"""
-        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 18px; margin: 14px 0;">
+        <div class="dark-info-card" style="background-color: #450a0a; color: #fecaca; border: 2px solid #ef4444; border-radius: 12px; padding: 18px; margin: 14px 0;">
             <div style="font-size: 13px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">
                 ⚠️ EXECUTIVE PUSHBACK PRESSURE &bull; BOARDROOM CRISIS DILEMMA
             </div>
@@ -497,13 +497,13 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
                 Commercial & Shareholder Pushback: Severe Alarm Over Proposed System Lockdown
             </div>
             <div style="font-size: 15px; color: #fecaca; margin-top: 6px; line-height: 1.5;">
-                IT's recommended plan imposes <strong>{downtime_str}</strong> and <strong>{impact_str}</strong>. Shareholder representatives and retail executives are fiercely urging the Board to push back against a full freeze, warning of immediate quarterly revenue collapse, credit downgrades, and public panic. The Board must decide whether to absorb the financial hit to guarantee threat containment, force a compromise, or overrule IT to protect business continuity.
+                IT's recommended plan imposes <strong style="color: #ffffff;">{downtime_str}</strong> and <strong style="color: #ffffff;">{impact_str}</strong>. Shareholder representatives and retail executives are fiercely urging the Board to push back against a full freeze, warning of immediate quarterly revenue collapse, credit downgrades, and public panic. The Board must decide whether to absorb the financial hit to guarantee threat containment, force a compromise, or overrule IT to protect business continuity.
             </div>
         </div>
         """, unsafe_allow_html=True)
     elif it_opt_id == "3" or it_plan.get("mitigation_pct", 0.6) <= 0.35:
         st.markdown(f"""
-        <div style="background-color: #78350f; border: 2px solid #f59e0b; border-radius: 12px; padding: 18px; margin: 14px 0;">
+        <div class="dark-info-card" style="background-color: #78350f; color: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 18px; margin: 14px 0;">
             <div style="font-size: 13px; font-weight: 800; color: #fde68a; text-transform: uppercase; letter-spacing: 0.1em;">
                 ⚠️ BOARD COMPLACENCY WARNING &bull; INACTION BACKFIRE RISK
             </div>
@@ -511,13 +511,13 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
                 IT Recommends Passive Monitoring: Minimal Containment Posture
             </div>
             <div style="font-size: 15px; color: #fef3c7; margin-top: 6px; line-height: 1.5;">
-                IT proposes zero downtime and silent observation ({it_plan.get('label', 'Passive Approach')}). While storefront transactions continue uninterrupted, adversaries operate almost unhindered. Endorsing this low-mitigation strategy risks an <strong>Inaction Backfire Penalty (+5% to +25% damage)</strong> as the uncontained breach deepens.
+                IT proposes zero downtime and silent observation ({it_plan.get('label', 'Passive Approach')}). While storefront transactions continue uninterrupted, adversaries operate almost unhindered. Endorsing this low-mitigation strategy risks an <strong style="color: #ffffff;">Inaction Backfire Penalty (+5% to +25% damage)</strong> as the uncontained breach deepens.
             </div>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
-        <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin: 14px 0;">
+        <div class="dark-info-card" style="background-color: #1e1b4b; color: #c7d2fe; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin: 14px 0;">
             <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">
                 ⚖️ BOARDROOM DELIBERATION &bull; TARGETED MITIGATION TRADE-OFF
             </div>
@@ -543,7 +543,7 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         tagline = opt.get("tagline", "")
         tagline_html = f"<div style='font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 4px;'>{tagline}</div>" if tagline else ""
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #818cf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
+        <div class="dark-info-card" style="background-color: #030712; color: #f1f5f9; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #818cf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
             {tagline_html}
             <div style="font-weight: 800; color: #f8fafc; font-size: 17px;">{opt['label']}</div>
             <div style="color: #f1f5f9; font-size: 15px; margin-top: 6px; line-height: 1.4;">{opt['desc']}</div>
@@ -600,10 +600,10 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     att = game.selected_attack_data or {}
     exec_act = (game.exec_action or "pending").upper()
     st.markdown(f"""
-    <div style="background-color: #1e1b4b; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+    <div class="dark-info-card" style="background-color: #1e1b4b; color: #c7d2fe; border: 2px solid #818cf8; border-radius: 12px; padding: 18px; margin-bottom: 14px;">
         <div style="font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em;">📡 BREAKING INTELLIGENCE WIRE</div>
         <div style="font-size: 18px; font-weight: 800; color: #ffffff; margin-top: 4px;">Incident: {att.get('icon', '🚨')} {att.get('name', 'Breach In Progress')}</div>
-        <div style="font-size: 15px; color: #c7d2fe; margin-top: 6px;">Executive Board Directive: <strong>{exec_act}</strong></div>
+        <div style="font-size: 15px; color: #c7d2fe; margin-top: 6px;">Executive Board Directive: <strong style="color: #ffffff;">{exec_act}</strong></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -621,7 +621,7 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
         disp_color = "#ef4444" if disp == "Negative" else "#10b981" if disp == "Positive" else "#38bdf8"
 
         st.markdown(f"""
-        <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="dark-info-card" style="background-color: #030712; color: #f1f5f9; padding: 18px 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
             <div style="flex-grow: 1; margin-right: 14px;">
                 <span style="font-size: 14px; font-weight: 800; color: {disp_color}; text-transform: uppercase;">{head_label} &bull; {disp} Tone ({item.get('tier', 'News')})</span><br/>
                 <span style="font-size: 18px; font-weight: 800; color: #f8fafc;">\"{item['headline']}\"</span>

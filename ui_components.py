@@ -136,7 +136,7 @@ def render_health_gauge(health: float, bankrupt_cutoff: int, win_cutoff: int):
         glow = "rgba(239, 68, 68, 0.6)"
 
     html = f"""
-    <div style="background-color: #030712; padding: 20px 22px; border-radius: 14px; border: 1px solid #1e293b; box-shadow: 0 4px 18px {glow}; margin-bottom: 18px;">
+    <div class="dark-info-card" style="background-color: #030712; color: #f8fafc; padding: 20px 22px; border-radius: 14px; border: 1px solid #1e293b; box-shadow: 0 4px 18px {glow}; margin-bottom: 18px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 15px; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.1em;">🏢 Unified Enterprise Health</span>
             <span style="font-size: 14px; font-weight: 800; color: {bar_color}; letter-spacing: 0.05em;">{status_text}</span>
@@ -204,10 +204,10 @@ def render_round_recap_card(game):
 
     surprise_html = ""
     if it_surprise or media_surprise:
-        it_line = f'<div style="font-size: 14px; color: #f1f5f9; margin-bottom: 6px; line-height: 1.4;">🛡️ <strong>IT Defense:</strong> {it_surprise}</div>' if it_surprise else ''
-        media_line = f'<div style="font-size: 14px; color: #f1f5f9; line-height: 1.4;">📰 <strong>Media Resonance:</strong> {media_surprise}</div>' if media_surprise else ''
+        it_line = f'<div style="font-size: 14px; color: #f1f5f9; margin-bottom: 6px; line-height: 1.4;">🛡️ <strong style="color: #ffffff;">IT Defense:</strong> <span style="color: #f1f5f9;">{it_surprise}</span></div>' if it_surprise else ''
+        media_line = f'<div style="font-size: 14px; color: #f1f5f9; line-height: 1.4;">📰 <strong style="color: #ffffff;">Media Resonance:</strong> <span style="color: #f1f5f9;">{media_surprise}</span></div>' if media_surprise else ''
         surprise_html = (
-            f'<div style="background-color: #0f172a; border-radius: 10px; padding: 14px; margin: 14px 0; border: 1px solid #1e293b;">'
+            f'<div class="dark-info-card" style="background-color: #0f172a; color: #f1f5f9; border-radius: 10px; padding: 14px; margin: 14px 0; border: 1px solid #1e293b;">'
             f'<div style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">🔍 Surprise & Reality Check (Outcome Analysis)</div>'
             f'{it_line}'
             f'{media_line}'
@@ -222,21 +222,21 @@ def render_round_recap_card(game):
     penalty_str = f" <span style='color: #fca5a5; font-size: 13px;'>({', '.join(penalty_badges)})</span>" if penalty_badges else ""
 
     recap_html = (
-        f'<div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 22px; margin: 18px 0;">'
+        f'<div class="dark-info-card" style="background-color: #030712; color: #f1f5f9; border: 2px solid #38bdf8; border-radius: 14px; padding: 22px; margin: 18px 0;">'
         f'<div style="font-size: 14px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry["round"]} INCIDENT DEBRIEF</div>'
         f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">'
         f'<span style="font-size: 22px; font-weight: 900; color: #ffffff;">{entry["attack_name"]}</span>'
         f'<span style="font-size: 26px; font-weight: 900; color: {delta_color};">{entry["net_delta"]:+g} HP</span>'
         f'</div>'
-        f'<div style="font-size: 14px; color: #cbd5e1; margin-top: 4px;">Adversary Vector Profile: <em>{attack_meta}</em></div>'
-        f'<div style="font-size: 15px; color: #f1f5f9; margin-top: 6px;">Breaking Headline: <em>"{entry["headline"]}"</em> ({entry["media_delta"]:+g} HP)</div>'
+        f'<div style="font-size: 14px; color: #cbd5e1; margin-top: 4px;">Adversary Vector Profile: <em style="color: #cbd5e1;">{attack_meta}</em></div>'
+        f'<div style="font-size: 15px; color: #f1f5f9; margin-top: 6px;">Breaking Headline: <em style="color: #f1f5f9;">"{entry["headline"]}"</em> ({entry["media_delta"]:+g} HP)</div>'
         f'{surprise_html}'
         f'<hr style="border-color: #1e293b; margin: 14px 0;" />'
         f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; color: #f1f5f9; line-height: 1.5;">'
-        f'<div><strong>Threat Exploit:</strong> {entry["attack_damage"]:+g} HP{penalty_str}</div>'
-        f'<div><strong>IT Defense Mitigated:</strong> +{entry["it_mitigated"]:g} HP ({entry.get("it_mit_pct", 60)}%)</div>'
-        f'<div><strong>Operational Disruption:</strong> {entry["disruption_penalty"]:+g} HP</div>'
-        f'<div><strong>Governance:</strong> {entry["exec_decision"]}</div>'
+        f'<div><strong style="color: #ffffff;">Threat Exploit:</strong> <span style="color: #f1f5f9;">{entry["attack_damage"]:+g} HP{penalty_str}</span></div>'
+        f'<div><strong style="color: #ffffff;">IT Defense Mitigated:</strong> <span style="color: #f1f5f9;">+{entry["it_mitigated"]:g} HP ({entry.get("it_mit_pct", 60)}%)</span></div>'
+        f'<div><strong style="color: #ffffff;">Operational Disruption:</strong> <span style="color: #f1f5f9;">{entry["disruption_penalty"]:+g} HP</span></div>'
+        f'<div><strong style="color: #ffffff;">Governance:</strong> <span style="color: #f1f5f9;">{entry["exec_decision"]}</span></div>'
         f'</div>'
         f'<div style="margin-top: 14px; font-size: 16px; font-weight: 800; color: #f8fafc;">'
         f'Enterprise Health: {entry["health_before"]:.1f} → <span style="color: {delta_color};">{entry["health_after"]:.1f} / 100.0 HP</span>'
@@ -266,7 +266,7 @@ def render_final_hacker_action_card(game):
         badge = "🛑 ADVERSARY RETREATED INTO THE SHADOWS"
 
     card_html = (
-        f'<div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 22px; margin: 18px 0;">'
+        f'<div class="dark-info-card" style="background-color: {card_bg}; color: #f8fafc; border: 2px solid {card_border}; border-radius: 14px; padding: 22px; margin: 18px 0;">'
         f'<div style="font-size: 14px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>'
         f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px;">'
         f'<span style="font-size: 20px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>'

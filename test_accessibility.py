@@ -118,6 +118,41 @@ def test_dossier_header_high_contrast():
     print("  ✓ Verified: Dossier headers, expanders, and markdown subheaders enforce high contrast across light/dark themes.")
 
 
+def test_dark_information_cards_high_contrast():
+    """Verify that information cards with black, dark blue, or purple backgrounds enforce high-contrast readable typography."""
+    print("\n--- [TEST 7] Verify Dark Information Cards (Black, Dark Blue, Purple) High-Contrast Typography ---")
+    app_file = ROOT_DIR / "app.py"
+    with open(app_file, "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # 1. Verify dark card CSS classes and dark background selectors exist in app.py
+    assert ".dark-info-card" in app_content, "Missing .dark-info-card CSS class rule in app.py"
+    assert '[style*="background-color: #030712"]' in app_content, "Missing black background card selector in app.py"
+    assert '[style*="background-color: #1e1b4b"]' in app_content, "Missing dark blue background card selector in app.py"
+    assert '[style*="background-color: #3b0764"]' in app_content, "Missing purple background card selector in app.py"
+
+    # 2. Verify strong, em, and text tags inside dark cards enforce white/light colors
+    assert ".dark-info-card strong" in app_content
+    assert ".dark-info-card em" in app_content
+    assert '[style*="background-color: #030712"] strong' in app_content
+    assert '[style*="background-color: #1e1b4b"] strong' in app_content
+    assert '[style*="background-color: #3b0764"] strong' in app_content
+
+    # 3. Verify team_views.py and ui_components.py use dark-info-card class and explicit light styling
+    ui_comp_file = ROOT_DIR / "ui_components.py"
+    with open(ui_comp_file, "r", encoding="utf-8") as f:
+        ui_content = f.read()
+    assert "dark-info-card" in ui_content, "Missing dark-info-card class in ui_components.py"
+    assert 'strong style="color: #ffffff;"' in ui_content or "strong style='color: #ffffff;'" in ui_content
+
+    views_file = ROOT_DIR / "team_views.py"
+    with open(views_file, "r", encoding="utf-8") as f:
+        views_content = f.read()
+    assert "dark-info-card" in views_content, "Missing dark-info-card class in team_views.py"
+    assert 'strong style="color: #ffffff;"' in views_content or "strong style='color: #ffffff;'" in views_content
+    print("  ✓ Verified: All cards with black, dark blue, or purple backgrounds enforce high-contrast readable typography.")
+
+
 if __name__ == "__main__":
     test_no_sub_micro_font_sizes()
     test_high_contrast_legend_colors()
@@ -125,4 +160,5 @@ if __name__ == "__main__":
     test_apptest_responsive_views()
     test_theme_responsive_color_tokens()
     test_dossier_header_high_contrast()
+    test_dark_information_cards_high_contrast()
     print("\n🎉 ALL ACCESSIBILITY & THEME-RESPONSIVE VIEWPORT TESTS PASSED!")

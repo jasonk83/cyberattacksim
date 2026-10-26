@@ -69,7 +69,7 @@ def render_projector_view(game: GameState):
             padding-right: 2rem !important;
         }
         </style>
-        <div style="background-color: #0f172a; border-left: 4px solid #38bdf8; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="dark-info-card" style="background-color: #0f172a; color: #f8fafc; border-left: 4px solid #38bdf8; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">
                 📽️ CLASSROOM PROJECTOR DISPLAY &bull; CLEAN PRESENTATION FEED
             </span>
@@ -254,7 +254,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
             badge = "💥 CATASTROPHIC FAILURE — BANKRUPTCY DECLARED"
 
         st.markdown(f"""
-        <div style="background-color: {box_color}; border: 3px solid {border_color}; border-radius: 16px; padding: 26px; text-align: center; margin: 20px 0;">
+        <div class="dark-info-card" style="background-color: {box_color}; color: #f8fafc; border: 3px solid {border_color}; border-radius: 16px; padding: 26px; text-align: center; margin: 20px 0;">
             <div style="font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: 0.15em;">{badge}</div>
             <div style="font-size: 34px; font-weight: 900; color: #ffffff; margin-top: 6px;">{title}</div>
             <div style="font-size: 17px; color: #f8fafc; max-width: 780px; margin: 12px auto 0 auto; line-height: 1.55;">{desc}</div>
@@ -267,7 +267,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
     # Adversary Final Action In Progress Alert
     if game.phase == "final_hacker_action":
         st.markdown("""
-        <div style="background-color: #3b0764; border: 2px solid #a855f7; border-radius: 12px; padding: 20px; margin: 14px 0;">
+        <div class="dark-info-card" style="background-color: #3b0764; color: #f3e8ff; border: 2px solid #a855f7; border-radius: 12px; padding: 20px; margin: 14px 0;">
             <div style="font-size: 14px; font-weight: 800; color: #f3e8ff; text-transform: uppercase; letter-spacing: 0.1em;">ADVERSARY FINAL GAMBIT IN PROGRESS</div>
             <div style="font-size: 24px; font-weight: 800; color: #ffffff; margin-top: 4px;">💀 Threat Actors Deliberating: Press Attack or Retreat</div>
             <div style="font-size: 16px; color: #e9d5ff; margin-top: 8px; line-height: 1.5;">The Threat Actor group is deciding whether to press their attack deeper into secondary payment systems (75% chance of inflicting 15–30 HP damage, or a 1-in-4 chance of being caught inflicting 0 damage while company recovers 3–15 HP) or execute a clean retreat into the shadows.</div>
@@ -278,7 +278,7 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
     if game.selected_attack_data:
         att = game.selected_attack_data
         st.markdown(f"""
-        <div style="background-color: #450a0a; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; margin: 14px 0;">
+        <div class="dark-info-card" style="background-color: #450a0a; color: #fecaca; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; margin: 14px 0;">
             <div style="font-size: 14px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">ACTIVE ENTERPRISE BREACH</div>
             <div style="font-size: 24px; font-weight: 800; color: #ffffff; margin-top: 4px;">{att.get('icon', '🚨')} {att.get('name', 'Incident Alert')}</div>
             <div style="font-size: 16px; color: #fecaca; margin-top: 8px; line-height: 1.5;">{att.get('description', '')}</div>
@@ -640,6 +640,74 @@ def main():
         [data-testid="stExpander"] p,
         [data-testid="stExpander"] li {
             color: var(--app-text, var(--text-color, #1e293b)) !important;
+        }
+
+        /* High-Contrast Typography for Dark Information Cards (Black, Dark Blue, Purple, Dark Red, Dark Amber) */
+        .dark-info-card,
+        .dark-card,
+        .info-card-dark,
+        [style*="background-color: #030712"],
+        [style*="background-color: #0f172a"],
+        [style*="background-color: #1e1b4b"],
+        [style*="background-color: #312e81"],
+        [style*="background-color: #3b0764"],
+        [style*="background-color: #450a0a"],
+        [style*="background-color: #7f1d1d"],
+        [style*="background-color: #78350f"],
+        [style*="background-color: #111827"],
+        [style*="background-color: #065f46"],
+        [style*="background: linear-gradient(180deg, #090d16"] {
+            color: #f1f5f9 !important;
+        }
+
+        .dark-info-card strong, .dark-info-card b,
+        .dark-card strong, .dark-card b,
+        .info-card-dark strong, .info-card-dark b,
+        [style*="background-color: #030712"] strong, [style*="background-color: #030712"] b,
+        [style*="background-color: #0f172a"] strong, [style*="background-color: #0f172a"] b,
+        [style*="background-color: #1e1b4b"] strong, [style*="background-color: #1e1b4b"] b,
+        [style*="background-color: #312e81"] strong, [style*="background-color: #312e81"] b,
+        [style*="background-color: #3b0764"] strong, [style*="background-color: #3b0764"] b,
+        [style*="background-color: #450a0a"] strong, [style*="background-color: #450a0a"] b,
+        [style*="background-color: #7f1d1d"] strong, [style*="background-color: #7f1d1d"] b,
+        [style*="background-color: #78350f"] strong, [style*="background-color: #78350f"] b,
+        [style*="background-color: #111827"] strong, [style*="background-color: #111827"] b,
+        [style*="background-color: #065f46"] strong, [style*="background-color: #065f46"] b {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        .dark-info-card em, .dark-info-card i,
+        .dark-card em, .dark-card i,
+        .info-card-dark em, .info-card-dark i,
+        [style*="background-color: #030712"] em, [style*="background-color: #030712"] i,
+        [style*="background-color: #0f172a"] em, [style*="background-color: #0f172a"] i,
+        [style*="background-color: #1e1b4b"] em, [style*="background-color: #1e1b4b"] i,
+        [style*="background-color: #312e81"] em, [style*="background-color: #312e81"] i,
+        [style*="background-color: #3b0764"] em, [style*="background-color: #3b0764"] i,
+        [style*="background-color: #450a0a"] em, [style*="background-color: #450a0a"] i,
+        [style*="background-color: #7f1d1d"] em, [style*="background-color: #7f1d1d"] i,
+        [style*="background-color: #78350f"] em, [style*="background-color: #78350f"] i,
+        [style*="background-color: #111827"] em, [style*="background-color: #111827"] i,
+        [style*="background-color: #065f46"] em, [style*="background-color: #065f46"] i {
+            color: #cbd5e1 !important;
+            font-style: italic !important;
+        }
+
+        .dark-info-card p, .dark-info-card li,
+        .dark-card p, .dark-card li,
+        .info-card-dark p, .info-card-dark li,
+        [style*="background-color: #030712"] p, [style*="background-color: #030712"] li,
+        [style*="background-color: #0f172a"] p, [style*="background-color: #0f172a"] li,
+        [style*="background-color: #1e1b4b"] p, [style*="background-color: #1e1b4b"] li,
+        [style*="background-color: #312e81"] p, [style*="background-color: #312e81"] li,
+        [style*="background-color: #3b0764"] p, [style*="background-color: #3b0764"] li,
+        [style*="background-color: #450a0a"] p, [style*="background-color: #450a0a"] li,
+        [style*="background-color: #7f1d1d"] p, [style*="background-color: #7f1d1d"] li,
+        [style*="background-color: #78350f"] p, [style*="background-color: #78350f"] li,
+        [style*="background-color: #111827"] p, [style*="background-color: #111827"] li,
+        [style*="background-color: #065f46"] p, [style*="background-color: #065f46"] li {
+            color: #f1f5f9 !important;
         }
 
         /* Accessible System Alerts */
