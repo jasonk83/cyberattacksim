@@ -95,13 +95,13 @@ def test_2_threat_actor_ui_and_privilege_separation():
     print("  [PASS] Invalid passcodes ('', '1234', 'admin123', 'root', etc.) rejected cleanly.")
     
     # Unlock with valid passcode
-    viewer.sidebar.text_input[0].input("hacker123")
+    viewer.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     unlock_btn = next((b for b in viewer.sidebar.button if "Unlock Captain Role" in b.label), None)
     unlock_btn.click().run()
     assert len(viewer.sidebar.error) == 0
     sidebar_successes = [s.value for s in viewer.sidebar.success if hasattr(s, "value")]
     assert any("CAPTAIN MODE UNLOCKED" in s for s in sidebar_successes)
-    print("  [PASS] Authenticated successfully with 'hacker123' -> CAPTAIN MODE UNLOCKED.")
+    print(f"  [PASS] Authenticated successfully with '{TEAM_CODES['hackers']}' -> CAPTAIN MODE UNLOCKED.")
     
     # Relinquish Captain Role
     relinquish_btn = next((b for b in viewer.sidebar.button if "Relinquish Captain Role" in b.label), None)
@@ -138,7 +138,7 @@ def test_3_straw_polling_and_vector_deployment():
     capt = AppTest.from_file("app.py")
     capt.query_params["team"] = "hackers"
     capt.run()
-    capt.sidebar.text_input[0].input("hacker123")
+    capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     next(b for b in capt.sidebar.button if "Unlock Captain Role" in b.label).click().run()
     
     # Viewer 1 and Viewer 2 sessions

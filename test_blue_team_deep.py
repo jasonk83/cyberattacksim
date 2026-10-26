@@ -51,7 +51,7 @@ def test_blue_team_deep():
         h_capt = AppTest.from_file("app.py")
         h_capt.query_params["team"] = "hackers"
         h_capt.run()
-        h_capt.sidebar.text_input[0].input("hacker123")
+        h_capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
         h_capt.sidebar.button[0].click().run()
         
         deploy_btn = next((b for b in h_capt.button if "Deploy Vector" in b.label), None)
@@ -70,10 +70,10 @@ def test_blue_team_deep():
         it_capt.run()
         
         # Verify IT Captain Authentication
-        it_capt.sidebar.text_input[0].input("tech123")
+        it_capt.sidebar.text_input[0].input(TEAM_CODES["it"])
         it_capt.sidebar.button[0].click().run()
         assert any("CAPTAIN MODE UNLOCKED" in s.value for s in it_capt.sidebar.success)
-        print("  [IT Captain Auth] Passcode 'tech123' successfully verified.")
+        print(f"  [IT Captain Auth] Passcode '{TEAM_CODES['it']}' successfully verified.")
 
         # Verify IT Phase clock duration in HTML
         clock_md = next((m.value for m in it_capt.markdown if "threat-clock-container" in m.value), "")
@@ -185,10 +185,10 @@ def test_blue_team_deep():
         ex_capt = AppTest.from_file("app.py")
         ex_capt.query_params["team"] = "exec"
         ex_capt.run()
-        ex_capt.sidebar.text_input[0].input("board123")
+        ex_capt.sidebar.text_input[0].input(TEAM_CODES["exec"])
         ex_capt.sidebar.button[0].click().run()
         assert any("CAPTAIN MODE UNLOCKED" in s.value for s in ex_capt.sidebar.success)
-        print("  [Exec Captain Auth] Passcode 'board123' successfully verified.")
+        print(f"  [Exec Captain Auth] Passcode '{TEAM_CODES['exec']}' successfully verified.")
 
         # Check Exec Timer in Clock
         clock_exec_md = next((m.value for m in ex_capt.markdown if "threat-clock-container" in m.value), "")
@@ -244,7 +244,7 @@ def test_blue_team_deep():
         m_capt = AppTest.from_file("app.py")
         m_capt.query_params["team"] = "media"
         m_capt.run()
-        m_capt.sidebar.text_input[0].input("press123")
+        m_capt.sidebar.text_input[0].input(TEAM_CODES["media"])
         m_capt.sidebar.button[0].click().run()
         
         # Publish headline
@@ -273,7 +273,7 @@ def test_blue_team_deep():
     h_capt = AppTest.from_file("app.py")
     h_capt.query_params["team"] = "hackers"
     h_capt.run()
-    h_capt.sidebar.text_input[0].input("hacker123")
+    h_capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h_capt.sidebar.button[0].click().run()
     retreat_btn = next((b for b in h_capt.button if b.label and "Safe Retreat" in b.label), None)
     assert retreat_btn is not None, "Could not find Safe Retreat button"

@@ -16,7 +16,7 @@ import time
 from streamlit.testing.v1 import AppTest
 from state_manager import GameState
 import game_data
-from game_data import ATTACKS, load_markdown_content
+from game_data import ATTACKS, load_markdown_content, TEAM_CODES
 
 def test_markdown_content_integrity():
     print("\n--- 1. Testing Hacker Educational Dossier Content Integrity ---")
@@ -74,7 +74,7 @@ def test_red_team_authentication():
     print("  [OK] Rejected invalid passcode 'wrongpassword'.")
 
     # Try correct password
-    hacker.sidebar.text_input[0].input("hacker123")
+    hacker.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     for b in hacker.sidebar.button:
         if "Unlock Captain Role" in b.label:
             unlock_btn = b
@@ -84,8 +84,8 @@ def test_red_team_authentication():
     # Check captain status
     elements_capt = list(hacker.sidebar.success) + list(hacker.sidebar.caption) + list(hacker.sidebar.markdown)
     has_captain_mode = any("CAPTAIN MODE" in str(getattr(s, "value", "")) for s in elements_capt)
-    assert has_captain_mode, "Captain mode did not activate with hacker123"
-    print("  [OK] Authenticated successfully with 'hacker123' -> CAPTAIN MODE UNLOCKED.")
+    assert has_captain_mode, f"Captain mode did not activate with {TEAM_CODES['hackers']}"
+    print(f"  [OK] Authenticated successfully with '{TEAM_CODES['hackers']}' -> CAPTAIN MODE UNLOCKED.")
 
     # Test Relinquish Captain Role
     relinquish_btn = None
@@ -118,7 +118,7 @@ def test_red_team_straw_polling_multi_viewer():
     capt = AppTest.from_file("app.py")
     capt.query_params["team"] = "hackers"
     capt.run()
-    capt.sidebar.text_input[0].input("hacker123")
+    capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     for b in capt.sidebar.button:
         if "Unlock Captain Role" in b.label:
             b.click().run()
@@ -240,7 +240,7 @@ def test_full_three_round_attack_lifecycle():
         capt.query_params["team"] = "hackers"
         capt.run()
         # Authenticate captain
-        capt.sidebar.text_input[0].input("hacker123")
+        capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
         capt.sidebar.button[0].click().run()
 
         # Check phase is hacker
@@ -275,7 +275,7 @@ def test_full_three_round_attack_lifecycle():
         it_capt = AppTest.from_file("app.py")
         it_capt.query_params["team"] = "it"
         it_capt.run()
-        it_capt.sidebar.text_input[0].input("tech123")
+        it_capt.sidebar.text_input[0].input(TEAM_CODES["it"])
         it_capt.sidebar.button[0].click().run()
         it_deploy_btn = next((b for b in it_capt.button if b.label and "Deploy & Recommend Option" in b.label), None)
         assert it_deploy_btn is not None
@@ -284,7 +284,7 @@ def test_full_three_round_attack_lifecycle():
         exec_capt = AppTest.from_file("app.py")
         exec_capt.query_params["team"] = "exec"
         exec_capt.run()
-        exec_capt.sidebar.text_input[0].input("board123")
+        exec_capt.sidebar.text_input[0].input(TEAM_CODES["exec"])
         exec_capt.sidebar.button[0].click().run()
         exec_auth_btn = next((b for b in exec_capt.button if b.label and "Authorize Directive" in b.label), None)
         assert exec_auth_btn is not None
@@ -293,7 +293,7 @@ def test_full_three_round_attack_lifecycle():
         med_capt = AppTest.from_file("app.py")
         med_capt.query_params["team"] = "media"
         med_capt.run()
-        med_capt.sidebar.text_input[0].input("press123")
+        med_capt.sidebar.text_input[0].input(TEAM_CODES["media"])
         med_capt.sidebar.button[0].click().run()
         med_pub_btn = next((b for b in med_capt.button if b.label and "Publish Headline" in b.label), None)
         assert med_pub_btn is not None
@@ -315,7 +315,7 @@ def test_full_three_round_attack_lifecycle():
     capt = AppTest.from_file("app.py")
     capt.query_params["team"] = "hackers"
     capt.run()
-    capt.sidebar.text_input[0].input("hacker123")
+    capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     capt.sidebar.button[0].click().run()
     assert any("FINAL_HACKER_ACTION" in c.value for c in capt.sidebar.caption)
 

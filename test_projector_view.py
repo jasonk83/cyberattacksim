@@ -23,6 +23,7 @@ Verifies:
 
 from streamlit.testing.v1 import AppTest
 from state_manager import GameState
+from game_data import TEAM_CODES
 
 
 def test_projector_view_clean_layout():
@@ -101,7 +102,7 @@ def test_projector_live_synchronization():
     h = AppTest.from_file("app.py")
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     deploy_btn = next((b for b in h.button if "Deploy Vector A" in b.label), None)
     assert deploy_btn is not None

@@ -7,7 +7,7 @@ Projector View, and Single-Player Instructor Sandbox on development branch.
 import sys
 from pathlib import Path
 
-_repo = str(Path(__file__).resolve().parent.parent)
+_repo = str(Path(__file__).resolve().parent)
 if _repo not in sys.path:
     sys.path.insert(0, _repo)
 
@@ -59,7 +59,7 @@ def run_deep_evaluation():
     h = AppTest.from_file(APP_PY)
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     dep_a = next(b for b in h.button if "Deploy Vector A" in b.label)
     dep_a.click().run()
@@ -74,7 +74,7 @@ def run_deep_evaluation():
     it = AppTest.from_file(APP_PY)
     it.query_params["team"] = "it"
     it.run()
-    it.sidebar.text_input[0].input("tech123")
+    it.sidebar.text_input[0].input(TEAM_CODES["it"])
     it.sidebar.button[0].click().run()
     dep_it = next(b for b in it.button if "Deploy & Recommend Option 1" in b.label)
     dep_it.click().run()
@@ -89,7 +89,7 @@ def run_deep_evaluation():
     ex = AppTest.from_file(APP_PY)
     ex.query_params["team"] = "exec"
     ex.run()
-    ex.sidebar.text_input[0].input("board123")
+    ex.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex.sidebar.button[0].click().run()
     auth_down = next(b for b in ex.button if getattr(b, "key", "") == "btn_exec_downgrade" or any(w in b.label for w in ["Compromise", "Downgrade"]))
     auth_down.click().run()
@@ -99,7 +99,7 @@ def run_deep_evaluation():
     m_capt.query_params["team"] = "media"
     m_capt.run()
     # Unlocked view shows breaking wire and headline choices
-    m_capt.sidebar.text_input[0].input("press123")
+    m_capt.sidebar.text_input[0].input(TEAM_CODES["media"])
     m_capt.sidebar.button[0].click().run()
 
     capt_markdown = " ".join(m.value for m in m_capt.markdown)
@@ -156,7 +156,7 @@ def run_deep_evaluation():
     pub_h4.click().run()
 
     assert any("Breaking story published" in s.value for s in m_capt.success)
-    print("  ✓ Media straw polling, vote tallies, viewer voting, and Captain publishing with 'press123' verified.")
+    print(f"  ✓ Media straw polling, vote tallies, viewer voting, and Captain publishing with '{TEAM_CODES['media']}' verified.")
 
     # -------------------------------------------------------------
     # SUITE 2: Game Master Console & Enterprise Health HP Bar

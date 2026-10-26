@@ -5,18 +5,35 @@ for CloudStore Command: Cyber Attack Simulation
 """
 
 import os
+import random
 from typing import Dict, Any, List, Optional, Tuple
 
+def _generate_team_codes() -> Dict[str, str]:
+    """
+    Generates team passcodes at application startup with randomized 3-digit suffixes for Captain roles.
+    Guarantees variation across launches while maintaining fixed admin and instructor passwords.
+    """
+    def rand_3digits() -> str:
+        return f"{random.randint(100, 999):03d}"
+
+    return {
+        "main": "admin123",                      # Game Master / Mission Control (always admin123)
+        "hackers": f"hacker{rand_3digits()}",    # Threat Actor Command Captain
+        "it": f"tech{rand_3digits()}",           # IT Defense Command Captain
+        "exec": f"board{rand_3digits()}",        # Executive Boardroom Captain
+        "media": f"press{rand_3digits()}",       # Media & PR Scrum Captain
+        "instructor": "tryit123",                # Single-Player Instructor Sandbox (fixed)
+        "solo": "tryit123"                       # Alias for instructor mode (fixed)
+    }
+
 # Team Passcodes (used by Team Captains to unlock decision & polling controls)
-TEAM_CODES = {
-    "main": "admin123",       # Game Master / Mission Control
-    "hackers": "hacker123",   # Threat Actor Command
-    "it": "tech123",          # IT Defense Command
-    "exec": "board123",       # Executive Boardroom
-    "media": "press123",      # Media & PR Scrum
-    "instructor": "tryit123", # Single-Player Instructor Sandbox
-    "solo": "tryit123"        # Alias for instructor mode
-}
+TEAM_CODES = _generate_team_codes()
+
+def reset_team_codes() -> Dict[str, str]:
+    """Regenerates randomized 3-digit passcodes for team captains."""
+    global TEAM_CODES
+    TEAM_CODES = _generate_team_codes()
+    return TEAM_CODES
 
 # Phase Timers in Seconds
 PHASE_DURATIONS = {

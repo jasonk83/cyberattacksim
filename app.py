@@ -69,6 +69,12 @@ def render_projector_view(game: GameState):
             padding-right: 2rem !important;
         }
         </style>
+        <div style="background-color: #0f172a; border-left: 4px solid #38bdf8; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">
+                📽️ CLASSROOM PROJECTOR DISPLAY &bull; CLEAN PRESENTATION FEED
+            </span>
+            <span style="font-size: 13px; color: #cbd5e1;">Live Read-Only View</span>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -360,9 +366,15 @@ def render_instructor_mode(voter_id: str):
         solo_game.reset(max_rounds=solo_game.max_rounds)
         st.rerun()
 
-    if st.sidebar.button("🎮 Switch to GM Projector", key="solo_switch_gm", use_container_width=True):
-        st.query_params["team"] = "main"
-        st.rerun()
+    col_sw1, col_sw2 = st.sidebar.columns(2)
+    with col_sw1:
+        if st.sidebar.button("📽️ Projector", key="solo_switch_projector", use_container_width=True, help="Switch to clean Class Projector view (?team=projector)"):
+            st.query_params["team"] = "projector"
+            st.rerun()
+    with col_sw2:
+        if st.sidebar.button("🎮 GM Console", key="solo_switch_gm", use_container_width=True, help="Switch to GM Mission Control Console (?team=main)"):
+            st.query_params["team"] = "main"
+            st.rerun()
 
     if st.sidebar.button("🔒 Lock Sandbox", key="solo_lock_sidebar", use_container_width=True):
         st.session_state["instructor_authenticated"] = False
@@ -848,7 +860,14 @@ def main():
         with st.sidebar.expander(header, expanded=False):
             full_link = f"{base_url}/?team={param}"
             st.code(full_link, language="text")
-            st.markdown(f"🔗 [Open Link (Relative)](/?team={param})")
+            col_l1, col_l2 = st.columns(2)
+            with col_l1:
+                if st.button("👁️ Switch View", key=f"btn_switch_to_{param}", use_container_width=True, help=f"Switch current browser view to {title}"):
+                    st.query_params["team"] = param
+                    st.rerun()
+            with col_l2:
+                st.link_button("↗️ New Tab", f"/?team={param}", use_container_width=True, help="Open in a fresh browser tab")
+            st.markdown(f'<a href="/?team={param}" target="_blank">🔗 Open Link (Relative: /?team={param})</a>', unsafe_allow_html=True)
 
     st.sidebar.caption("💡 **Tip:** In any browser tab, you can append `/?team=projector` directly to your active URL for the clean class display, or use the **👁️ Terminal Preview** dropdown below.")
 

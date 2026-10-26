@@ -37,7 +37,7 @@ def helper_advance_to_media(round_mult=1.0, it_choice_opt="1", exec_choice_opt="
     h = AppTest.from_file("app.py")
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     for b in h.button:
         if "Deploy Vector B" in b.label:
@@ -48,7 +48,7 @@ def helper_advance_to_media(round_mult=1.0, it_choice_opt="1", exec_choice_opt="
     it = AppTest.from_file("app.py")
     it.query_params["team"] = "it"
     it.run()
-    it.sidebar.text_input[0].input("tech123")
+    it.sidebar.text_input[0].input(TEAM_CODES["it"])
     it.sidebar.button[0].click().run()
     for b in it.button:
         if f"Deploy & Recommend Option {it_choice_opt}" in b.label:
@@ -59,7 +59,7 @@ def helper_advance_to_media(round_mult=1.0, it_choice_opt="1", exec_choice_opt="
     ex = AppTest.from_file("app.py")
     ex.query_params["team"] = "exec"
     ex.run()
-    ex.sidebar.text_input[0].input("board123")
+    ex.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex.sidebar.button[0].click().run()
     for b in ex.button:
         if (exec_choice_opt.lower() in b.label.lower()) or (b.key == f"btn_exec_{exec_choice_opt.lower()}"):
@@ -83,15 +83,15 @@ def test_media_authentication_and_viewers():
     assert any("Invalid Captain Passcode" in err.value for err in m_fail.sidebar.error)
     print("  ✓ Invalid passcode rejected with error message.")
 
-    # 2. Test Correct Passcode ('press123')
+    # 2. Test Correct Passcode (TEAM_CODES['media'])
     m_capt = AppTest.from_file("app.py")
     m_capt.query_params["team"] = "media"
     m_capt.run()
-    m_capt.sidebar.text_input[0].input("press123")
+    m_capt.sidebar.text_input[0].input(TEAM_CODES["media"])
     m_capt.sidebar.button[0].click().run()
     assert not m_capt.exception
     assert any("CAPTAIN MODE UNLOCKED" in s.value for s in m_capt.sidebar.success)
-    print("  ✓ Passcode 'press123' successfully unlocked Captain Mode.")
+    print(f"  ✓ Passcode '{TEAM_CODES['media']}' successfully unlocked Captain Mode.")
 
     # 3. Test Relinquish Captain Role
     relinq_btn = next((b for b in m_capt.sidebar.button if "Relinquish Captain Role" in b.label), None)
@@ -119,7 +119,7 @@ def test_media_straw_polling_and_headlines():
     m_capt = AppTest.from_file("app.py")
     m_capt.query_params["team"] = "media"
     m_capt.run()
-    m_capt.sidebar.text_input[0].input("press123")
+    m_capt.sidebar.text_input[0].input(TEAM_CODES["media"])
     m_capt.sidebar.button[0].click().run()
 
     # Verify Captain sees breaking wire & executive decision
@@ -248,7 +248,7 @@ def test_gm_projector_and_fragment_sync():
     h = AppTest.from_file("app.py")
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     for b in h.button:
         if "Deploy Vector A" in b.label:
@@ -265,7 +265,7 @@ def test_gm_projector_and_fragment_sync():
     it = AppTest.from_file("app.py")
     it.query_params["team"] = "it"
     it.run()
-    it.sidebar.text_input[0].input("tech123")
+    it.sidebar.text_input[0].input(TEAM_CODES["it"])
     it.sidebar.button[0].click().run()
     for b in it.button:
         if "Deploy & Recommend Option 2" in b.label:
@@ -281,7 +281,7 @@ def test_gm_projector_and_fragment_sync():
     ex = AppTest.from_file("app.py")
     ex.query_params["team"] = "exec"
     ex.run()
-    ex.sidebar.text_input[0].input("board123")
+    ex.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex.sidebar.button[0].click().run()
     for b in ex.button:
         if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
@@ -297,7 +297,7 @@ def test_gm_projector_and_fragment_sync():
     m = AppTest.from_file("app.py")
     m.query_params["team"] = "media"
     m.run()
-    m.sidebar.text_input[0].input("press123")
+    m.sidebar.text_input[0].input(TEAM_CODES["media"])
     m.sidebar.button[0].click().run()
     for b in m.button:
         if "Publish Headline 1" in b.label:
@@ -384,7 +384,7 @@ def test_gm_console_controls():
     h = AppTest.from_file("app.py")
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     for b in h.button:
         if "Deploy Vector C" in b.label:
@@ -394,7 +394,7 @@ def test_gm_console_controls():
     it = AppTest.from_file("app.py")
     it.query_params["team"] = "it"
     it.run()
-    it.sidebar.text_input[0].input("tech123")
+    it.sidebar.text_input[0].input(TEAM_CODES["it"])
     it.sidebar.button[0].click().run()
     for b in it.button:
         if "Deploy & Recommend Option 1" in b.label:
@@ -404,7 +404,7 @@ def test_gm_console_controls():
     ex = AppTest.from_file("app.py")
     ex.query_params["team"] = "exec"
     ex.run()
-    ex.sidebar.text_input[0].input("board123")
+    ex.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex.sidebar.button[0].click().run()
     for b in ex.button:
         if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
@@ -414,7 +414,7 @@ def test_gm_console_controls():
     m = AppTest.from_file("app.py")
     m.query_params["team"] = "media"
     m.run()
-    m.sidebar.text_input[0].input("press123")
+    m.sidebar.text_input[0].input(TEAM_CODES["media"])
     m.sidebar.button[0].click().run()
     for b in m.button:
         if "Publish Headline 2" in b.label:
@@ -478,7 +478,7 @@ def test_game_over_and_outcome_assessment():
     h = AppTest.from_file("app.py")
     h.query_params["team"] = "hackers"
     h.run()
-    h.sidebar.text_input[0].input("hacker123")
+    h.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h.sidebar.button[0].click().run()
     for b in h.button:
         if "Deploy Vector" in b.label:
@@ -489,7 +489,7 @@ def test_game_over_and_outcome_assessment():
     it = AppTest.from_file("app.py")
     it.query_params["team"] = "it"
     it.run()
-    it.sidebar.text_input[0].input("tech123")
+    it.sidebar.text_input[0].input(TEAM_CODES["it"])
     it.sidebar.button[0].click().run()
     for b in it.button:
         if "Deploy & Recommend Option 1" in b.label:
@@ -500,7 +500,7 @@ def test_game_over_and_outcome_assessment():
     ex = AppTest.from_file("app.py")
     ex.query_params["team"] = "exec"
     ex.run()
-    ex.sidebar.text_input[0].input("board123")
+    ex.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex.sidebar.button[0].click().run()
     for b in ex.button:
         if b.key == "btn_exec_approve" or "Agree" in b.label or "Approve" in b.label:
@@ -511,7 +511,7 @@ def test_game_over_and_outcome_assessment():
     m = AppTest.from_file("app.py")
     m.query_params["team"] = "media"
     m.run()
-    m.sidebar.text_input[0].input("press123")
+    m.sidebar.text_input[0].input(TEAM_CODES["media"])
     m.sidebar.button[0].click().run()
     for b in m.button:
         if "Publish Headline 4" in b.label:

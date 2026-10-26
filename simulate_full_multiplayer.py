@@ -46,7 +46,7 @@ def run_role_simulation(rounds=2):
     h_capt.query_params["team"] = "hackers"
     h_capt.run()
     # Enter captain passcode
-    h_capt.sidebar.text_input[0].input("hacker123")
+    h_capt.sidebar.text_input[0].input(game_data.TEAM_CODES["hackers"])
     h_capt.sidebar.button[0].click().run()
     print("  [Hackers] Captain authenticated.")
 
@@ -92,7 +92,7 @@ def run_role_simulation(rounds=2):
     it_capt = AppTest.from_file("app.py")
     it_capt.query_params["team"] = "it"
     it_capt.run()
-    it_capt.sidebar.text_input[0].input("tech123")
+    it_capt.sidebar.text_input[0].input(game_data.TEAM_CODES["it"])
     it_capt.sidebar.button[0].click().run()
 
     it_view = AppTest.from_file("app.py")
@@ -135,7 +135,7 @@ def run_role_simulation(rounds=2):
     ex_capt = AppTest.from_file("app.py")
     ex_capt.query_params["team"] = "exec"
     ex_capt.run()
-    ex_capt.sidebar.text_input[0].input("board123")
+    ex_capt.sidebar.text_input[0].input(game_data.TEAM_CODES["exec"])
     ex_capt.sidebar.button[0].click().run()
 
     ex_view = AppTest.from_file("app.py")
@@ -177,7 +177,7 @@ def run_role_simulation(rounds=2):
     m_capt = AppTest.from_file("app.py")
     m_capt.query_params["team"] = "media"
     m_capt.run()
-    m_capt.sidebar.text_input[0].input("press123")
+    m_capt.sidebar.text_input[0].input(game_data.TEAM_CODES["media"])
     m_capt.sidebar.button[0].click().run()
 
     m_view = AppTest.from_file("app.py")

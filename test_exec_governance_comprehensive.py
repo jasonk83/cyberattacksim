@@ -125,7 +125,7 @@ def test_apptest_full_exec_flow():
     h_capt = AppTest.from_file("app.py")
     h_capt.query_params["team"] = "hackers"
     h_capt.run()
-    h_capt.sidebar.text_input[0].input("hacker123")
+    h_capt.sidebar.text_input[0].input(TEAM_CODES["hackers"])
     h_capt.sidebar.button[0].click().run()
     deploy_btn = next((b for b in h_capt.button if "Deploy Vector" in b.label), None)
     assert deploy_btn is not None
@@ -143,7 +143,7 @@ def test_apptest_full_exec_flow():
     it_capt = AppTest.from_file("app.py")
     it_capt.query_params["team"] = "it"
     it_capt.run()
-    it_capt.sidebar.text_input[0].input("tech123")
+    it_capt.sidebar.text_input[0].input(TEAM_CODES["it"])
     it_capt.sidebar.button[0].click().run()
     opt1_btn = next((b for b in it_capt.button if "Deploy & Recommend Option 1" in b.label or "btn_it_1" in str(b.key)), None)
     assert opt1_btn is not None, f"Available IT buttons: {[b.label for b in it_capt.button]}"
@@ -188,10 +188,10 @@ def test_apptest_full_exec_flow():
     ex_capt = AppTest.from_file("app.py")
     ex_capt.query_params["team"] = "exec"
     ex_capt.run()
-    ex_capt.sidebar.text_input[0].input("board123")
+    ex_capt.sidebar.text_input[0].input(TEAM_CODES["exec"])
     ex_capt.sidebar.button[0].click().run()
     assert any("CAPTAIN MODE UNLOCKED" in s.value for s in ex_capt.sidebar.success)
-    print("  ✓ Passcode gate: 'board123' successfully unlocked Captain Mode.")
+    print(f"  ✓ Passcode gate: '{TEAM_CODES['exec']}' successfully unlocked Captain Mode.")
 
     # Captain opens Straw Poll
     poll_open_btn = next((b for b in ex_capt.button if "Launch Straw Poll" in b.label), None)
