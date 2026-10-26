@@ -96,7 +96,9 @@ def calculate_round_impact(
         it_surprise = f"Severe Defense Gap ({it_pct_display}% effective): Minimal barrier; threat actors operated almost unimpeded."
 
     # Add narrative for penalties
-    if override_pct > 0:
+    if override_pct > 0 and backfire_pct > 0:
+        it_surprise += f" 🚨 Compound Failure: Low-monitoring backfire (+{int(round(backfire_pct * 100))}% damage) and Board override penalty (+{int(round(override_pct * 100))}% damage) combined to accelerate destruction."
+    elif override_pct > 0:
         it_surprise += f" 🚨 Executive Override Penalty (+{int(round(override_pct * 100))}% damage): Ignoring IT counsel accelerated unchecked network spread."
     elif backfire_pct > 0:
         it_surprise += f" ⚠️ Inaction Backfire (+{int(round(backfire_pct * 100))}% damage): Low-mitigation posture allowed adversaries to deepen penetration."

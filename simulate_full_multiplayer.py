@@ -163,16 +163,15 @@ def run_role_simulation(rounds=2):
     vote_down.click().run()
     print("  [Exec] Viewer voted to Downgrade.")
 
-    # Exec Captain authorizes Downgrade
+    # Exec Captain authorizes Compromise (Option B)
     ex_capt.run()
-    auth_down = None
-    for b in ex_capt.button:
-        if "Authorize Directive" in b.label and "Downgrade" in b.label:
-            auth_down = b
-            break
-    assert auth_down is not None
+    auth_down = next(
+        (b for b in ex_capt.button if getattr(b, "key", "") == "btn_exec_downgrade" or ("Authorize Directive" in b.label and any(k in b.label for k in ["Compromise", "Downgrade", "Option B"]))),
+        None
+    )
+    assert auth_down is not None, f"Could not find Exec compromise/downgrade button. Available: {[b.label for b in ex_capt.button]}"
     auth_down.click().run()
-    print("  [Exec] Captain authorized Downgrade. Phase transitioned to Media Scrum.")
+    print("  [Exec] Captain authorized Compromise directive. Phase transitioned to Media Scrum.")
 
     # 5. Simulate Media Scrum
     m_capt = AppTest.from_file("app.py")

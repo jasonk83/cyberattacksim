@@ -119,16 +119,16 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.warning("⏳ Simulation is in the Lobby. Standby for the Game Master to initiate Round 1.")
         return
 
-    rem_secs = game.get_remaining_seconds()
-    phase_label = "Hacker Exploitation" if game.phase == "hacker" else f"{game.phase.upper()} Phase"
-    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
-
     if game.phase == "game_over":
         st.success("🏁 Simulation Concluded! Enterprise impact debrief:")
         render_round_recap_card(game)
         render_final_hacker_action_card(game)
         render_acronym_glossary()
         return
+
+    rem_secs = game.get_remaining_seconds()
+    phase_label = "Hacker Exploitation" if game.phase == "hacker" else f"{game.phase.upper()} Phase"
+    render_threatening_clock(rem_secs, game.phase_duration, phase_label, game.timer_paused)
 
     if game.phase == "recap":
         st.success("💥 Round Concluded! Enterprise impact debrief:")
@@ -371,7 +371,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
         <div style="background-color: #030712; padding: 18px 20px; border-radius: 12px; border-left: 4px solid #38bdf8; margin-bottom: 14px; border-top: 1px solid #1e293b; border-right: 1px solid #1e293b; border-bottom: 1px solid #1e293b;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-weight: 800; color: #f8fafc; font-size: 18px;">Option {opt_id}: {opt['label']}</span>
-                <span style="background-color: #0284c7; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
+                <span style="background-color: #0369a1; color: white; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 800;">Likelihood: {opt.get('mitigation_likelihood', 'Moderate')}</span>
             </div>
             <div style="color: #f1f5f9; font-size: 15px; margin-top: 8px; line-height: 1.4;">{opt.get('desc', '')}</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; font-size: 14px; line-height: 1.5;">
@@ -419,6 +419,12 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.success(f"✅ Governance directive issued: **{game.exec_action.upper() if game.exec_action else 'N/A'}**.")
         render_round_recap_card(game)
         render_final_hacker_action_card(game)
+        render_acronym_glossary()
+        return
+
+    if game.phase == "media":
+        st.success(f"✅ Governance directive issued: **{game.exec_action.upper() if game.exec_action else 'N/A'}**.")
+        st.info("⏳ Waiting for Media & PR Scrum to publish breaking news cycle...")
         render_acronym_glossary()
         return
 
