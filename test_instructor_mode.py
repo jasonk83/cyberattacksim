@@ -117,10 +117,16 @@ def test_instructor_mode_end_to_end():
 
     # STEP E: ROUND 1 RECAP & ADVANCE TO ROUND 2
     assert any("Round 1 Debrief" in info.value for info in inst.info)
+    # Verify Captain console does NOT have an advance button
+    assert not any(b.key == "solo_adv_recap_btn" for b in inst.button), "Advance button must NOT exist in Captain console!"
+    assert any("Only the Game Master can advance" in info.value for info in inst.info), "Missing GM advance notice in Captain view"
+    
+    # Advance simulation strictly via GM Mission Controls
     adv_r2_btn = next((b for b in inst.button if "Start Round 2" in b.label), None)
-    assert adv_r2_btn is not None, "Advance to Round 2 button missing"
+    assert adv_r2_btn is not None, "GM Mission Controls advance button missing"
+    assert adv_r2_btn.key == "main_btn_adv_r", "Advance button must belong to GM Mission Controls bar!"
     adv_r2_btn.click().run()
-    print("  ✓ Advanced to Round 2.")
+    print("  ✓ Verified: Captain console has NO advance button. Advanced to Round 2 strictly via GM Mission Controls.")
 
     # -------------------------------------------------------------
     # 5. ROUND 2 & ADVERSARY FINAL ACTION GAMBIT

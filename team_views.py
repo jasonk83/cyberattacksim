@@ -133,6 +133,7 @@ def render_hacker_terminal(game: GameState, is_captain: bool, voter_id: str):
     if game.phase == "recap":
         st.success("💥 Round Concluded! Enterprise impact debrief:")
         render_round_recap_card(game)
+        st.info("⏳ Waiting for the Game Master to review incident debrief and advance the simulation...")
         render_acronym_glossary()
         return
 
@@ -352,6 +353,7 @@ def render_it_terminal(game: GameState, is_captain: bool, voter_id: str):
             if game.phase == "recap":
                 st.success("🏁 Round Concluded! Incident debrief:")
                 render_round_recap_card(game)
+                st.info("⏳ Waiting for the Game Master to review incident debrief and advance the simulation...")
                 render_acronym_glossary()
                 return
 
@@ -417,6 +419,13 @@ def render_exec_terminal(game: GameState, is_captain: bool, voter_id: str):
         st.success(f"✅ Governance directive issued: **{game.exec_action.upper() if game.exec_action else 'N/A'}**.")
         render_round_recap_card(game)
         render_final_hacker_action_card(game)
+        render_acronym_glossary()
+        return
+
+    if game.phase == "recap":
+        st.success(f"✅ Governance directive issued: **{game.exec_action.upper() if game.exec_action else 'N/A'}**.")
+        render_round_recap_card(game)
+        st.info("⏳ Waiting for the Game Master to review incident debrief and advance to the next round...")
         render_acronym_glossary()
         return
 
@@ -577,6 +586,7 @@ def render_media_terminal(game: GameState, is_captain: bool, voter_id: str):
     if game.phase == "recap":
         st.success("📰 Breaking story published! Live impact debrief:")
         render_round_recap_card(game)
+        st.info("⏳ Waiting for the Game Master to review incident debrief and advance the simulation...")
         render_acronym_glossary()
         return
 

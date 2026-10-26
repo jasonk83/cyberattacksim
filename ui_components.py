@@ -171,7 +171,7 @@ def render_briefing_card(role: str, filename: str, fallback_title: str, fallback
 
         exec_it_summary = f"""
 ---
-#### 🛡️ Active IT Department Recommendation Under Board Review
+**🛡️ Active IT Department Recommendation Under Board Review:**
 * **Recommended Containment Plan**: **{plan_label}**
 * **Projected System Downtime**: {downtime}
 * **Customer & Operations Impact**: {cust_impact}

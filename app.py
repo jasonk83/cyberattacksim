@@ -119,11 +119,11 @@ def render_main_dashboard(game: GameState, is_admin: Optional[bool] = None, is_p
                     st.rerun()
             elif game.phase == "recap":
                 if game.current_round < game.max_rounds:
-                    if st.button(f"➡️ Advance to Round {game.current_round + 1}", key="main_btn_adv_r", type="primary", use_container_width=True):
+                    if st.button(f"➡️ Start Round {game.current_round + 1} (Advance)", key="main_btn_adv_r", type="primary", use_container_width=True):
                         game.advance_to_next_round()
                         st.rerun()
                 else:
-                    if st.button("💀 Advance to Adversary Final Action", key="main_btn_adv_gambit", type="primary", use_container_width=True):
+                    if st.button("💀 Advance to Final Threat Actor Gambit", key="main_btn_adv_gambit", type="primary", use_container_width=True):
                         game.advance_to_next_round()
                         st.rerun()
             elif game.phase == "final_hacker_action":
@@ -388,7 +388,7 @@ def render_instructor_mode(voter_id: str):
         "it": "Active Step: **🛡️ IT Defense Captain** — Deliberate containment options and recommend a plan to the Board.",
         "exec": "Active Step: **💼 Executive Boardroom Captain** — Review IT's proposal and issue a binding corporate governance directive.",
         "media": "Active Step: **🎤 Media & PR Captain** — Select and publish the breaking front-page headline.",
-        "recap": f"Active Step: **📊 Round {solo_game.current_round} Debrief** — Review incident metrics above and advance when ready.",
+        "recap": f"Active Step: **📊 Round {solo_game.current_round} Debrief** — Review incident metrics. Only the Game Master can advance the simulation via the Game Master Mission Controls above.",
         "final_hacker_action": "Active Step: **💀 Threat Actor Captain (Final Gambit)** — Decide whether to Press Attack further or safely Retreat.",
         "game_over": "🏁 **Simulation Concluded** — Final enterprise outcome and score evaluated above."
     }
@@ -409,16 +409,7 @@ def render_instructor_mode(voter_id: str):
         render_media_terminal(solo_game, is_captain=True, voter_id=voter_id)
     elif phase == "recap":
         render_round_recap_card(solo_game)
-        next_label = "💀 Advance to Final Threat Actor Gambit" if solo_game.current_round >= solo_game.max_rounds else f"➡️ Start Round {solo_game.current_round + 1}"
-        col_r1, col_r2 = st.columns(2)
-        with col_r1:
-            if st.button(next_label, key="solo_adv_recap_btn", type="primary", use_container_width=True):
-                solo_game.advance_to_next_round()
-                st.rerun()
-        with col_r2:
-            if st.button("🔄 Reset Test Simulation", key="solo_reset_recap_btn", use_container_width=True):
-                solo_game.reset(max_rounds=solo_game.max_rounds)
-                st.rerun()
+        st.info("⏳ **Round Concluded:** Captains review the incident debrief above. Only the Game Master can advance the simulation to the next round via the **Game Master Mission Controls** above (or the sidebar).")
     elif phase == "final_hacker_action":
         render_hacker_terminal(solo_game, is_captain=True, voter_id=voter_id)
     elif phase == "game_over":
@@ -488,10 +479,47 @@ def main():
             }
         }
 
-        /* Base Typography: Follows theme color */
+        /* Base Typography: Proportional scaling & follows theme color */
         html, body, [class*="css"], .stMarkdown {
             font-size: 15px !important;
             line-height: 1.5 !important;
+        }
+
+        .stMarkdown h1 {
+            font-size: 26px !important;
+            font-weight: 900 !important;
+            margin-top: 14px !important;
+            margin-bottom: 8px !important;
+            color: var(--text-color, #f8fafc) !important;
+        }
+
+        .stMarkdown h2 {
+            font-size: 22px !important;
+            font-weight: 800 !important;
+            margin-top: 14px !important;
+            margin-bottom: 8px !important;
+            color: var(--text-color, #f8fafc) !important;
+        }
+
+        .stMarkdown h3 {
+            font-size: 19px !important;
+            font-weight: 800 !important;
+            margin-top: 12px !important;
+            margin-bottom: 6px !important;
+            color: var(--text-color, #f8fafc) !important;
+        }
+
+        .stMarkdown h4 {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            margin-top: 10px !important;
+            margin-bottom: 4px !important;
+            color: var(--text-color, #f8fafc) !important;
+        }
+
+        .stMarkdown p, .stMarkdown li {
+            font-size: 15px !important;
+            line-height: 1.55 !important;
         }
 
         /* Accessible Captions: responsive to light and dark themes */
