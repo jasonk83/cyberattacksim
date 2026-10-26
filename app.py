@@ -436,32 +436,36 @@ def main():
         /* Responsive Theme Color Tokens */
         :root {
             --app-text: var(--text-color, #1e293b);
-            --app-muted: #475569;
+            --app-heading: #0f172a;
+            --app-muted: #334155;
             --app-border: rgba(100, 116, 139, 0.35);
-            --app-summary: var(--text-color, #0f172a);
+            --app-summary: #0f172a;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --app-text: var(--text-color, #f8fafc);
+                --app-heading: #f8fafc;
                 --app-muted: #cbd5e1;
                 --app-border: #334155;
-                --app-summary: var(--text-color, #f1f5f9);
+                --app-summary: #f8fafc;
             }
         }
 
-        [data-theme="dark"], .stApp[data-theme="dark"] {
+        [data-theme="dark"], [data-base="dark"], .stApp[data-theme="dark"], .stApp[data-base="dark"] {
             --app-text: var(--text-color, #f8fafc);
+            --app-heading: #f8fafc;
             --app-muted: #cbd5e1;
             --app-border: #334155;
-            --app-summary: var(--text-color, #f1f5f9);
+            --app-summary: #f8fafc;
         }
 
-        [data-theme="light"], .stApp[data-theme="light"] {
+        [data-theme="light"], [data-base="light"], .stApp[data-theme="light"], .stApp[data-base="light"] {
             --app-text: var(--text-color, #1e293b);
-            --app-muted: #475569;
+            --app-heading: #0f172a;
+            --app-muted: #334155;
             --app-border: rgba(100, 116, 139, 0.35);
-            --app-summary: var(--text-color, #0f172a);
+            --app-summary: #0f172a;
         }
 
         /* Responsive Viewport & Max-Width Optimization (Laptops & Tablets) */
@@ -483,6 +487,7 @@ def main():
         html, body, [class*="css"], .stMarkdown {
             font-size: 15px !important;
             line-height: 1.5 !important;
+            color: var(--app-text, var(--text-color, #1e293b));
         }
 
         .stMarkdown h1 {
@@ -490,7 +495,7 @@ def main():
             font-weight: 900 !important;
             margin-top: 14px !important;
             margin-bottom: 8px !important;
-            color: var(--text-color, #f8fafc) !important;
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
         }
 
         .stMarkdown h2 {
@@ -498,7 +503,7 @@ def main():
             font-weight: 800 !important;
             margin-top: 14px !important;
             margin-bottom: 8px !important;
-            color: var(--text-color, #f8fafc) !important;
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
         }
 
         .stMarkdown h3 {
@@ -506,7 +511,7 @@ def main():
             font-weight: 800 !important;
             margin-top: 12px !important;
             margin-bottom: 6px !important;
-            color: var(--text-color, #f8fafc) !important;
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
         }
 
         .stMarkdown h4 {
@@ -514,20 +519,31 @@ def main():
             font-weight: 700 !important;
             margin-top: 10px !important;
             margin-bottom: 4px !important;
-            color: var(--text-color, #f8fafc) !important;
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
         }
 
         .stMarkdown p, .stMarkdown li {
             font-size: 15px !important;
             line-height: 1.55 !important;
+            color: var(--app-text, var(--text-color, #1e293b)) !important;
+        }
+
+        .stMarkdown strong, .stMarkdown b {
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
+            font-weight: 700 !important;
+        }
+
+        .stMarkdown em, .stMarkdown i {
+            color: var(--app-muted, #334155) !important;
+            font-style: italic !important;
         }
 
         /* Accessible Captions: responsive to light and dark themes */
         .stCaption, [data-testid="stCaptionContainer"] {
             font-size: 14px !important;
             line-height: 1.4 !important;
-            color: var(--text-color, var(--app-muted)) !important;
-            opacity: 0.85 !important;
+            color: var(--app-muted, var(--text-color, #334155)) !important;
+            opacity: 0.95 !important;
         }
 
         /* Sidebar Captions & Text */
@@ -535,8 +551,8 @@ def main():
         section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
             font-size: 14px !important;
             line-height: 1.4 !important;
-            color: var(--text-color, var(--app-muted)) !important;
-            opacity: 0.85 !important;
+            color: var(--app-muted, var(--text-color, #334155)) !important;
+            opacity: 0.95 !important;
         }
 
         /* Touch Targets & Button Sizing: 48px minimum touch height */
@@ -557,18 +573,61 @@ def main():
             outline-offset: 2px !important;
         }
 
-        /* Accessible Expanders & Summaries: responsive to theme */
-        [data-testid="stExpander"] details summary {
-            font-size: 15px !important;
-            font-weight: 700 !important;
-            color: var(--text-color, var(--app-summary)) !important;
-            padding-top: 6px !important;
-            padding-bottom: 6px !important;
+        /* Accessible Expanders & Dossier Headers: responsive to theme */
+        [data-testid="stExpander"] details summary,
+        [data-testid="stExpander"] summary,
+        [data-testid="stExpander"] summary p,
+        [data-testid="stExpander"] summary span,
+        [data-testid="stExpander"] details summary p,
+        [data-testid="stExpander"] details summary span,
+        [data-testid="stExpanderDetails"],
+        [data-testid="stExpanderDetails"] p {
+            font-size: 16px !important;
+            font-weight: 800 !important;
+            color: var(--app-summary, var(--text-color, #0f172a)) !important;
+            padding-top: 4px !important;
+            padding-bottom: 4px !important;
+        }
+
+        [data-testid="stExpander"] summary svg,
+        [data-testid="stExpanderToggleIcon"] {
+            fill: var(--app-summary, var(--text-color, #0f172a)) !important;
+            color: var(--app-summary, var(--text-color, #0f172a)) !important;
         }
 
         [data-testid="stExpander"] details {
             border-color: var(--app-border) !important;
             border-radius: 8px !important;
+        }
+
+        /* High-contrast content inside Intelligence Dossiers */
+        [data-testid="stExpander"] h1,
+        [data-testid="stExpander"] h2,
+        [data-testid="stExpander"] h3,
+        [data-testid="stExpander"] h4,
+        [data-testid="stExpander"] .stMarkdown h1,
+        [data-testid="stExpander"] .stMarkdown h2,
+        [data-testid="stExpander"] .stMarkdown h3,
+        [data-testid="stExpander"] .stMarkdown h4 {
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
+            font-weight: 800 !important;
+        }
+
+        [data-testid="stExpander"] strong,
+        [data-testid="stExpander"] b {
+            color: var(--app-heading, var(--text-color, #0f172a)) !important;
+            font-weight: 700 !important;
+        }
+
+        [data-testid="stExpander"] em,
+        [data-testid="stExpander"] i {
+            color: var(--app-muted, #334155) !important;
+            font-style: italic !important;
+        }
+
+        [data-testid="stExpander"] p,
+        [data-testid="stExpander"] li {
+            color: var(--app-text, var(--text-color, #1e293b)) !important;
         }
 
         /* Accessible System Alerts */

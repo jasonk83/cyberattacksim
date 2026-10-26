@@ -93,10 +93,36 @@ def test_theme_responsive_color_tokens():
     print("  ✓ Verified: Theme-responsive color tokens and CSS variables implemented for light/dark adaptability.")
 
 
+def test_dossier_header_high_contrast():
+    """Verify that dossier headers and expander titles do not use washed-out grey or invisible white text."""
+    print("\n--- [TEST 6] Verify Dossier Headers & Expander High-Contrast Typography ---")
+    app_file = ROOT_DIR / "app.py"
+    with open(app_file, "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # 1. Expander summaries must target summary p and span, not just summary tag
+    assert "[data-testid=\"stExpander\"] summary p" in app_content, "Missing expander summary p selector in app.py"
+    assert "[data-testid=\"stExpander\"] summary span" in app_content, "Missing expander summary span selector in app.py"
+    assert "--app-summary" in app_content, "Missing --app-summary token in app.py"
+
+    # 2. Dossier Markdown headings must not fall back to invisible white (#f8fafc) on light mode
+    assert ".stMarkdown h1" in app_content
+    assert "color: var(--app-heading, var(--text-color, #0f172a))" in app_content, (
+        "Headings must use high-contrast dark navy fallback (#0f172a) for light backgrounds"
+    )
+
+    # 3. Dossier internal contents (h1-h4, strong, em) must have explicit high contrast rules
+    assert "[data-testid=\"stExpander\"] h3" in app_content or "[data-testid=\"stExpander\"] .stMarkdown h3" in app_content
+    assert "[data-testid=\"stExpander\"] strong" in app_content
+    assert "[data-testid=\"stExpander\"] em" in app_content
+    print("  ✓ Verified: Dossier headers, expanders, and markdown subheaders enforce high contrast across light/dark themes.")
+
+
 if __name__ == "__main__":
     test_no_sub_micro_font_sizes()
     test_high_contrast_legend_colors()
     test_global_responsive_css_present()
     test_apptest_responsive_views()
     test_theme_responsive_color_tokens()
+    test_dossier_header_high_contrast()
     print("\n🎉 ALL ACCESSIBILITY & THEME-RESPONSIVE VIEWPORT TESTS PASSED!")
