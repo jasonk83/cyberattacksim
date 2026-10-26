@@ -1,8 +1,13 @@
-### 🤖 IT System Impact: AI Prompt Injection
-An unauthorized user is manipulating the corporate LLM. IT must balance the need to patch the AI's guardrails against the business requirement to keep customer-facing chatbots online.
+### 🌊 Technical SOC Briefing: Volumetric DDoS Smokescreen & API Wipe
+Adversaries unleashed a massive multi-terabit Distributed Denial of Service (DDoS) flood against CloudStore edge routers, creating a chaotic diversion while silent scripts attempt to wipe backend API keys and authentication tables.
 
-**Recovery Timelines & Technical Impact by Decision:**
-* **Hard Offline & Revert AI Model:** (RTO: 24 Hours) Completely suspends all AI-driven business tools. Guaranteed to stop the injection, but causes massive service degradation for customers.
-* **Deploy Aggressive Input Sanitization Filter:** (RTO: 4 Hours) Keeps the AI online but routes all prompts through a strict keyword blocker. Fast, but causes high "false positives" that frustrate legitimate users.
-* **Rate-Limit and Alert:** (RTO: 1 Hour) Throttles the number of questions any user can ask the AI, buying IT time to manually review chat logs for the malicious inputs.
-* **Do Nothing:** (RTO: Indefinite) The AI continues to leak data or perform unauthorized backend commands.
+**Containment Strategies & Operational Assessment:**
+* **Option 1: Emergency BGP Anycast Routing & Scrubbing Center Divert**  
+  *Complexity: High &bull; Projected Downtime: Extended (RTO: 24h) &bull; Mitigation Likelihood: High / Guaranteed*  
+  Reroutes all public traffic through global upstream scrubbing centers and enforces strict rate-limits. Incurs high initial latency and storefront disruption, but provides a high likelihood of filtering malicious traffic and uncovering backend wiper activity.
+* **Option 2: Edge CDN Rate Limiting & Geo-Blocking**  
+  *Complexity: Moderate &bull; Projected Downtime: Moderate (RTO: 8h) &bull; Mitigation Likelihood: Moderate / Contingent*  
+  Applies automated connection throttles and blocks non-domestic IP ranges at the edge. Moderate customer checkout friction with moderate mitigation odds: domestic botnets can still bypass geographic filters.
+* **Option 3: Upstream ISP Null-Routing (Blackholing)**  
+  *Complexity: Low &bull; Projected Downtime: None (Zero Downtime) &bull; Mitigation Likelihood: Low / Uncertain*  
+  Relies on passive upstream ISP dropping of flooded IPs without dedicated scrubbing infrastructure. Zero internal engineering disruption, but low likelihood of containment: legitimate customers are dropped alongside attackers and background sabotage continues unimpeded.

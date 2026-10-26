@@ -180,44 +180,37 @@ def render_round_recap_card(game):
     if it_surprise or media_surprise:
         it_line = f'<div style="font-size: 12px; color: #cbd5e1; margin-bottom: 4px;">🛡️ <strong>IT Defense:</strong> {it_surprise}</div>' if it_surprise else ''
         media_line = f'<div style="font-size: 12px; color: #cbd5e1;">📰 <strong>Media Resonance:</strong> {media_surprise}</div>' if media_surprise else ''
-        surprise_html = f"""
-        <div style="background-color: #0f172a; border-radius: 8px; padding: 12px; margin: 12px 0; border: 1px solid #1e293b;">
-            <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
-                🔍 Surprise & Reality Check (Outcome Analysis)
-            </div>
-            {it_line}
-            {media_line}
-        </div>
-        """
+        surprise_html = (
+            f'<div style="background-color: #0f172a; border-radius: 8px; padding: 12px; margin: 12px 0; border: 1px solid #1e293b;">'
+            f'<div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">🔍 Surprise & Reality Check (Outcome Analysis)</div>'
+            f'{it_line}'
+            f'{media_line}'
+            f'</div>'
+        )
 
-    st.markdown(f"""
-    <div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 18px; margin: 16px 0;">
-        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry['round']} INCIDENT DEBRIEF</div>
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-            <span style="font-size: 20px; font-weight: 900; color: #ffffff;">{entry['attack_name']}</span>
-            <span style="font-size: 22px; font-weight: 900; color: {delta_color};">{entry['net_delta']:+g} HP</span>
-        </div>
-        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">
-            Adversary Vector Profile: <em>{attack_meta}</em>
-        </div>
-        <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">
-            Breaking Headline: <em>"{entry['headline']}"</em> ({entry['media_delta']:+g} HP)
-        </div>
-
-        {surprise_html}
-
-        <hr style="border-color: #1e293b; margin: 10px 0;" />
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #cbd5e1;">
-            <div><strong>Threat Exploit:</strong> {entry['attack_damage']:+g} HP</div>
-            <div><strong>IT Defense Mitigated:</strong> +{entry['it_mitigated']:g} HP ({entry.get('it_mit_pct', 60)}%)</div>
-            <div><strong>Operational Disruption:</strong> {entry['disruption_penalty']:+g} HP</div>
-            <div><strong>Governance:</strong> {entry['exec_decision']}</div>
-        </div>
-        <div style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #f8fafc;">
-            Enterprise Health: {entry['health_before']:.1f} → <span style="color: {delta_color};">{entry['health_after']:.1f} / 100.0 HP</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    recap_html = (
+        f'<div style="background-color: #030712; border: 2px solid #38bdf8; border-radius: 14px; padding: 18px; margin: 16px 0;">'
+        f'<div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em;">ROUND {entry["round"]} INCIDENT DEBRIEF</div>'
+        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">'
+        f'<span style="font-size: 20px; font-weight: 900; color: #ffffff;">{entry["attack_name"]}</span>'
+        f'<span style="font-size: 22px; font-weight: 900; color: {delta_color};">{entry["net_delta"]:+g} HP</span>'
+        f'</div>'
+        f'<div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Adversary Vector Profile: <em>{attack_meta}</em></div>'
+        f'<div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">Breaking Headline: <em>"{entry["headline"]}"</em> ({entry["media_delta"]:+g} HP)</div>'
+        f'{surprise_html}'
+        f'<hr style="border-color: #1e293b; margin: 10px 0;" />'
+        f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #cbd5e1;">'
+        f'<div><strong>Threat Exploit:</strong> {entry["attack_damage"]:+g} HP</div>'
+        f'<div><strong>IT Defense Mitigated:</strong> +{entry["it_mitigated"]:g} HP ({entry.get("it_mit_pct", 60)}%)</div>'
+        f'<div><strong>Operational Disruption:</strong> {entry["disruption_penalty"]:+g} HP</div>'
+        f'<div><strong>Governance:</strong> {entry["exec_decision"]}</div>'
+        f'</div>'
+        f'<div style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #f8fafc;">'
+        f'Enterprise Health: {entry["health_before"]:.1f} → <span style="color: {delta_color};">{entry["health_after"]:.1f} / 100.0 HP</span>'
+        f'</div>'
+        f'</div>'
+    )
+    st.markdown(recap_html, unsafe_allow_html=True)
 
 def render_final_hacker_action_card(game):
     """Renders the debrief of the Adversary Final Gambit (Press Attack vs Retreat)."""
@@ -239,19 +232,18 @@ def render_final_hacker_action_card(game):
         card_border = "#64748b"
         badge = "🛑 ADVERSARY RETREATED INTO THE SHADOWS"
 
-    st.markdown(f"""
-    <div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 18px; margin: 16px 0;">
-        <div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-            <span style="font-size: 18px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>
-            <span style="font-size: 20px; font-weight: 900; color: {delta_color};">{delta:+g} HP</span>
-        </div>
-        <div style="color: #f8fafc; font-size: 14px; margin-top: 6px; line-height: 1.4;">{data.get('summary', '')}</div>
-        <div style="margin-top: 8px; font-size: 12px; color: #cbd5e1;">
-            Enterprise Health Shift: {data.get('health_before', 0):.1f} → <strong style="color: {delta_color};">{data.get('health_after', 0):.1f} HP</strong>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    card_html = (
+        f'<div style="background-color: {card_bg}; border: 2px solid {card_border}; border-radius: 14px; padding: 18px; margin: 16px 0;">'
+        f'<div style="font-size: 11px; font-weight: 800; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em;">{badge}</div>'
+        f'<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">'
+        f'<span style="font-size: 18px; font-weight: 900; color: #ffffff;">Final Gambit Outcome</span>'
+        f'<span style="font-size: 20px; font-weight: 900; color: {delta_color};">{delta:+g} HP</span>'
+        f'</div>'
+        f'<div style="color: #f8fafc; font-size: 14px; margin-top: 6px; line-height: 1.4;">{data.get("summary", "")}</div>'
+        f'<div style="margin-top: 8px; font-size: 12px; color: #cbd5e1;">Enterprise Health Shift: {data.get("health_before", 0):.1f} → <strong style="color: {delta_color};">{data.get("health_after", 0):.1f} HP</strong></div>'
+        f'</div>'
+    )
+    st.markdown(card_html, unsafe_allow_html=True)
 
 def render_acronym_glossary():
     """Renders an interactive educational cybersecurity vocabulary & acronym glossary."""

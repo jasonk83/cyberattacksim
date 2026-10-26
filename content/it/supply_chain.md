@@ -1,7 +1,13 @@
-### 💀 IT System Impact: Double Extortion Ransomware
-Systems are encrypted and data has left the building. IT must rebuild the operational environment from scratch while assuming the current network architecture is fundamentally compromised.
+### 🔗 Technical SOC Briefing: Supply Chain Logistics API Poisoning
+Adversaries compromised third-party software updates and logistics vendor API keys, using trusted downstream connections to inject malicious payloads into corporate commerce systems.
 
-**Recovery Timelines & Technical Impact by Decision:**
-* **Burn and Rebuild from Bare Metal:** (RTO: 14 Days) All hardware is wiped. Backups are restored to entirely new, clean servers. Maximum downtime, but guarantees the malware is eradicated.
-* **Pay Ransom and Run Decryptor Tool:** (RTO: 48 Hours) Relies on the hacker's software to unlock the files. Fast recovery, but leaves behind potential backdoors the hackers installed.
-* **Attempt Manual Cryptanalysis:** (RTO: 6+ Months) IT attempts to crack the AES encryption themselves without paying. Incredibly resource-intensive and statistically unlikely to succeed.
+**Containment Strategies & Operational Assessment:**
+* **Option 1: Sever Supplier Feeds & Root Certificate Revocation**  
+  *Complexity: High &bull; Projected Downtime: Extended (RTO: 48h) &bull; Mitigation Likelihood: High / Guaranteed*  
+  Disconnects all external vendor and supplier integration pipelines and rotates root cryptographic certificates. Halts downstream shipping fulfillment, but provides a high likelihood of completely purging untrusted vendor injection vectors.
+* **Option 2: Edge CDN Scrubbing & Rate Limiting**  
+  *Complexity: Moderate &bull; Projected Downtime: Moderate (RTO: 10h) &bull; Mitigation Likelihood: Moderate / Contingent*  
+  Re-routes external partner traffic through edge filtering inspection with strict behavioral limits. Moderate transaction slowdowns with moderate mitigation odds: compromised legitimate credentials may still pass behavioral filters.
+* **Option 3: Maintain Partner Traffic & Rely on Vendor Warranties**  
+  *Complexity: Low &bull; Projected Downtime: None (Zero Downtime) &bull; Mitigation Likelihood: Low / Uncertain*  
+  Avoids penalizing supplier relationships by accepting external vendor self-attestation reports. Zero operational disruption, but low likelihood of containment: leaves known compromised partner routes connected.
